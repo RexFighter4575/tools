@@ -812,13 +812,36 @@ $("noteSave").addEventListener("click",()=>{
   if(addNote($("noteTxt").value,$("noteTopic").value)){$("noteTxt").value="";rToday();rNotes()}
 });
 $("noteSearch").addEventListener("input",e=>{noteQuery=e.target.value;rNotes()});
+function askPushOrPull(remote){
+  const lu=(S.meta&&S.meta.updatedAt)||0,ru=(remote.meta&&remote.meta.updatedAt)||0;
+  const lt=lu?new Date(lu).toLocaleString():"no data yet";
+  const rt=ru?new Date(ru).toLocaleString():"no data yet";
+  openPop(
+    '<h2 style="margin:2px 0 4px">GitHub already has data</h2>'+
+    '<p class="small" style="margin:8px 0 14px">This device and your GitHub repo both have saved data. Pick which one to keep — the other gets overwritten.</p>'+
+    '<div class="card soft-c" style="margin-bottom:10px"><p class="mono">THIS DEVICE</p><p class="small" style="margin-top:4px">Last changed: '+lt+'</p></div>'+
+    '<div class="card soft-c" style="margin-bottom:14px"><p class="mono">GITHUB</p><p class="small" style="margin-top:4px">Last changed: '+rt+'</p></div>'+
+    '<button class="btn wide" id="pickPush" style="margin-bottom:8px">Keep this device — push to GitHub</button>'+
+    '<button class="btn wide ghost" id="pickPull">Use GitHub — pull to this device</button>'
+  );
+  $("pickPush").addEventListener("click",async()=>{closePop();await ghPush()});
+  $("pickPull").addEventListener("click",()=>{
+    closePop();
+    const gh=S.gh;S=Object.assign(blank(),remote);S.gh=gh;S.gh.lastSync=Date.now();store.save(S);
+    rAll();ghMsg("PULLED GITHUB'S DATA "+new Date().toLocaleTimeString());
+  });
+}
 $("ghConnect").addEventListener("click",async()=>{
   const repo=normRepo($("ghRepo").value),tok=$("ghToken").value.trim();
   const parts=repo.split("/");
   if(parts.length!==2||!parts[0]||!parts[1]||!tok){ghMsg("NEED owner/repo (OR A FULL GITHUB URL) AND A TOKEN.");return}
   $("ghRepo").value=repo;
   S.gh.repo=repo;S.gh.token=tok;S.gh.enabled=true;store.save(S);
-  await ghPull(true);
+  ghMsg("CHECKING GITHUB…");
+  let res;try{res=await ghGet()}catch(e){ghMsg(ghExplain(e));return}
+  if(!res.data){ghMsg("NO REMOTE FILE YET — PUSHING FIRST COPY…");await ghPush();return}
+  ghMsg("FOUND EXISTING DATA — CHOOSE BELOW.");
+  askPushOrPull(res.data);
 });
 $("ghPushBtn").addEventListener("click",()=>ghPush());
 $("ghPullBtn").addEventListener("click",()=>ghPull(true));
