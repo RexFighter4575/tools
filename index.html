@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FFFFFF">
+<title>Mono — Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A;
+  --wh:#FFFFFF;
+  --g1:#F4F4F4;
+  --g2:#E2E2E2;
+  --g3:#8A8A8A;
+  --r:14px;
+  --disp:"Familjen Grotesk",-apple-system,"Segoe UI",sans-serif;
+  --body:"Spline Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:var(--body);color:var(--bk);background:var(--wh);line-height:1.5;
+  min-height:100vh;min-height:100dvh}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px}
+header{position:sticky;top:0;z-index:40;background:var(--wh);border-bottom:1.5px solid var(--bk);padding-top:env(safe-area-inset-top)}
+.hbar{max-width:680px;margin:0 auto;padding:12px 18px}
+.wordmark{font-family:var(--disp);font-weight:700;font-size:1.1rem;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.wordmark .blk{background:var(--bk);color:var(--wh);padding:1px 8px;border-radius:6px}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(1.7rem,6.5vw,2.3rem);line-height:1.12;letter-spacing:-.01em;margin:22px 0 4px}
+.sub{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3);margin-bottom:22px}
+main{padding-top:6px;padding-bottom:40px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.card{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--wh);border:1.5px solid var(--bk);border-radius:var(--r);padding:18px;
+  text-decoration:none;color:var(--bk)}
+.card:active{background:var(--g1)}
+.card h3{font-family:var(--disp);font-weight:700;font-size:1.05rem;margin-bottom:2px}
+.card p{font-size:.82rem;color:var(--g3)}
+.chev{font-family:var(--mono);font-size:1.1rem;color:var(--g3);flex:0 0 auto}
+.addnote{font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;color:var(--g3);text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hbar">
+    <div class="wordmark"><span class="blk">MONO</span> hub</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Your tools</h1>
+  <div class="sub">Tap one to open</div>
+
+  <div class="stack">
+    <a class="card" href="mono-budget-tracker.html">
+      <div>
+        <h3>Budget</h3>
+        <p>Track spending, synced to your private repo</p>
+      </div>
+      <span class="chev">→</span>
+    </a>
+
+    <a class="card" href="mono-mind-trainer.html">
+      <div>
+        <h3>Mind</h3>
+        <p>Attention &amp; memory training</p>
+      </div>
+      <span class="chev">→</span>
+    </a>
+
+    <!-- New tool? Add another card here, same shape, pointing at its .html file. -->
+  </div>
+
+  <div class="addnote">ADD-TO-HOME-SCREEN FROM THIS PAGE FOR ONE HUB ICON</div>
+</main>
+
+</body>
+</html>
