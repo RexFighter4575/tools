@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FFFFFF">
+<title>Mono Mind — Attention & Memory Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A; --wh:#FFFFFF; --g1:#F4F4F4; --g2:#E2E2E2; --g3:#8A8A8A; --r:14px;
+  --disp:"Familjen Grotesk",-apple-system,"Segoe UI",sans-serif;
+  --body:"Spline Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:var(--body);color:var(--bk);background:var(--wh);line-height:1.5;
+  min-height:100vh;min-height:100dvh;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px}
+
+header{position:sticky;top:0;z-index:40;background:var(--wh);border-bottom:1.5px solid var(--bk);padding-top:env(safe-area-inset-top)}
+.hbar{max-width:680px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.wordmark{font-family:var(--disp);font-weight:700;font-size:1.1rem;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.wordmark .blk{background:var(--bk);color:var(--wh);padding:1px 8px;border-radius:6px}
+.gear{background:none;border:1.5px solid var(--bk);border-radius:8px;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;padding:7px 11px;color:var(--bk);cursor:pointer}
+.gear:active{background:var(--g1)}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--wh);border-top:1.5px solid var(--bk);padding-bottom:env(safe-area-inset-bottom)}
+.tabs{max-width:680px;margin:0 auto;display:flex}
+.tab{flex:1;background:none;border:none;padding:13px 2px 12px;font-family:var(--mono);font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;color:var(--g3);cursor:pointer;position:relative}
+.tab.on{color:var(--wh)}
+.tab.on::before{content:"";position:absolute;left:8%;right:8%;top:7px;bottom:7px;background:var(--bk);border-radius:99px;z-index:-1}
+.tab span{position:relative}
+
+h1,h2,h3{font-family:var(--disp);font-weight:700;line-height:1.12;letter-spacing:-.01em}
+h1{font-size:clamp(1.7rem,6.5vw,2.3rem)}
+h2{font-size:1.3rem}
+h3{font-size:1.02rem}
+.mono{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3)}
+.mono.dark{color:var(--bk)}
+.soft{color:var(--g3)}
+.small{font-size:.85rem}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.big{font-family:var(--disp);font-weight:700;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
+p{font-size:.94rem}
+
+main{padding-top:22px}
+section.view{display:none}
+section.view.on{display:block;animation:fadeUp .3s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--wh);border:1.5px solid var(--bk);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card.soft-c{border-color:var(--g2)}
+.card.inv{background:var(--bk);color:var(--wh)}
+.card.inv .mono{color:rgba(255,255,255,.6)}
+.rowline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.divider{border:none;border-top:1.5px solid var(--g2);margin:14px 0}
+.stack{display:flex;flex-direction:column;gap:10px}
+
+.bar{position:relative;height:10px;background:var(--g1);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--bk);border-radius:99px;transition:width .7s cubic-bezier(.22,1,.36,1)}
+.bar.timer .bar-fill{transition:width 1s linear}
+.chart{display:flex;align-items:flex-end;gap:8px;height:110px;padding-top:22px}
+.cb{flex:1;position:relative;background:var(--bk);border-radius:6px 6px 0 0;min-height:4px;transition:height .7s ease}
+.cb span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.6rem;white-space:nowrap}
+
+.chip{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;border:1.5px solid var(--bk);border-radius:99px;padding:6px 12px;cursor:pointer;background:var(--wh);color:var(--bk)}
+.chip.on{background:var(--bk);color:var(--wh)}
+.chip.mini{font-size:.6rem;padding:4px 9px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.badge{font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;border:1.5px solid var(--bk);border-radius:99px;padding:2px 9px}
+.badge.inv{background:var(--bk);color:var(--wh)}
+
+.srow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 2px;border-bottom:1.5px solid var(--g1)}
+.srow:last-child{border-bottom:none}
+.srow .main-tap{flex:1;cursor:pointer;min-width:0}
+.markrow{display:flex;gap:6px;flex:0 0 auto}
+.itemrow{padding:11px 2px;border-bottom:1.5px solid var(--g1)}
+.itemrow:last-child{border-bottom:none}
+.noterow{padding:12px 2px;border-bottom:1.5px solid var(--g1)}
+.noterow:last-child{border-bottom:none}
+
+.btn{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;background:var(--bk);color:var(--wh);border:1.5px solid var(--bk);border-radius:10px;padding:12px 16px;cursor:pointer;text-align:center}
+.btn.ghost{background:var(--wh);color:var(--bk)}
+.btn.wide{width:100%}
+.btn.danger{background:var(--wh);color:var(--bk);text-decoration:line-through}
+.btn:active{opacity:.8}
+.linkbtn{background:none;border:none;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:underline;text-underline-offset:3px;color:var(--bk);cursor:pointer;padding:4px 0}
+label.fl{display:block;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3);margin:12px 0 5px}
+input[type=text],input[type=password],select,textarea{width:100%;font-family:var(--body);font-size:16px;border:1.5px solid var(--bk);border-radius:10px;padding:12px;background:var(--wh);color:var(--bk);appearance:none;-webkit-appearance:none}
+textarea{min-height:90px}
+textarea.exportbox{font-family:var(--mono);font-size:.78rem;min-height:100px}
+
+.sheet{position:fixed;inset:0;z-index:60;background:var(--wh);overflow-y:auto;display:none;padding-bottom:40px}
+.sheet.on{display:block;animation:slideUp .28s ease both}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.sheet .hbar{border-bottom:1.5px solid var(--bk);position:sticky;top:0;background:var(--wh);padding-top:calc(12px + env(safe-area-inset-top));z-index:5}
+.back{background:none;border:none;font-family:var(--mono);font-size:.72rem;letter-spacing:.09em;color:var(--bk);cursor:pointer;padding:6px 0;text-transform:uppercase}
+.sheet-body{max-width:680px;margin:0 auto;padding:20px 18px}
+
+.popwrap{position:fixed;inset:0;z-index:70;background:rgba(10,10,10,.45);display:none;align-items:center;justify-content:center;padding:20px}
+.popwrap.on{display:flex}
+.popcard{background:var(--wh);border:1.5px solid var(--bk);border-radius:16px;width:100%;max-width:480px;max-height:80vh;max-height:80dvh;overflow-y:auto;padding:18px;animation:popIn .22s ease both}
+@keyframes popIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+.popx{float:right;background:none;border:1.5px solid var(--bk);border-radius:8px;font-family:var(--mono);font-size:.7rem;padding:5px 10px;cursor:pointer;color:var(--bk)}
+.popcard ul{padding-left:20px;font-size:.92rem;display:flex;flex-direction:column;gap:7px;margin:10px 0}
+
+.steps{display:flex;gap:6px;margin:10px 0 18px}
+.stepdot{flex:1;height:5px;border-radius:99px;background:var(--g2)}
+.stepdot.on{background:var(--bk)}
+.passage{font-size:1.02rem;line-height:1.65;padding:14px;background:var(--g1);border-radius:10px;margin:10px 0}
+.words{display:flex;flex-wrap:wrap;gap:8px;padding:10px 0}
+.word{font-family:var(--disp);font-weight:700;font-size:1.05rem;border:1.5px solid var(--bk);border-radius:8px;padding:5px 12px;background:var(--wh)}
+.newdot{display:inline-block;width:9px;height:9px;background:var(--bk);border-radius:50%;margin-right:7px;vertical-align:1px}
+.quiz-opt{display:block;width:100%;text-align:left;font-family:var(--body);font-size:.94rem;border:1.5px solid var(--bk);border-radius:10px;background:var(--wh);color:var(--bk);padding:12px;margin-top:8px;cursor:pointer}
+.quiz-opt.right{background:var(--bk);color:var(--wh)}
+.quiz-opt.wrong{text-decoration:line-through;color:var(--g3);border-color:var(--g2)}
+
+:focus-visible{outline:2.5px solid var(--bk);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hbar">
+    <div class="wordmark"><span class="blk">MONO</span> mind</div>
+    <div style="display:flex;gap:8px">
+      <button class="gear" id="guideBtn">GUIDE</button>
+      <button class="gear" id="gearBtn">SETTINGS</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ TODAY ============ -->
+  <section class="view on" id="view-today">
+    <p class="mono" id="todayDate"></p>
+    <h1 style="margin:2px 0 16px">Pay attention<br><span style="border-bottom:4px solid var(--bk)">on purpose</span>.</h1>
+
+    <div class="card inv">
+      <div class="rowline"><span class="mono">Daily practice · ~6 min</span><span class="mono" id="lastPractice"></span></div>
+      <p class="small" style="margin:8px 0 12px;opacity:.85">Four stages: attend → encode → recall → reflect. The material doubles as general knowledge.</p>
+      <button class="btn ghost wide" data-goview="practice" id="startFromToday">Start today's session</button>
+    </div>
+
+    <div class="card" id="reviewCard"></div>
+
+    <div class="card soft-c">
+      <div class="rowline">
+        <h3>Fresh from your sources</h3>
+        <button class="linkbtn" id="checkNow">Check now</button>
+      </div>
+      <p class="mono" id="freshStatus" style="margin-top:4px">NOT CHECKED YET</p>
+      <div id="freshList"></div>
+      <button class="linkbtn" id="caughtUp" style="margin-top:6px;display:none">Mark all caught up</button>
+    </div>
+
+    <div class="card soft-c" id="pinnedCard"></div>
+
+    <div class="grid2">
+      <div class="card soft-c"><div class="big" id="stSessions">0</div><span class="mono">Sessions done</span></div>
+      <div class="card soft-c"><div class="big" id="stNotes">0</div><span class="mono">Notes captured</span></div>
+    </div>
+  </section>
+
+  <!-- ============ PRACTICE ============ -->
+  <section class="view" id="view-practice">
+    <h1 style="margin-bottom:4px">Practice</h1>
+    <p class="soft small" style="margin-bottom:14px">Memory training that also feeds you general knowledge — every passage is about your topics.</p>
+    <div class="card" id="sessionCard"></div>
+    <div class="card soft-c">
+      <div class="rowline"><h3>Session scores</h3><span class="mono" id="scoreAvg"></span></div>
+      <div id="scoreHist"><p class="small soft" style="padding:6px 0">Finish a session to start the chart.</p></div>
+    </div>
+    <div class="card soft-c">
+      <h3 style="margin-bottom:2px">Lessons · attention at encoding</h3>
+      <p class="small soft">Eight short lessons on why things don't stick and how to make them. Each ends with one question.</p>
+      <div id="lessonList"></div>
+    </div>
+  </section>
+
+  <!-- ============ TOPICS ============ -->
+  <section class="view" id="view-topics">
+    <h1 style="margin-bottom:4px">Topics</h1>
+    <p class="soft small" style="margin-bottom:12px">Curated sources per subject. Tap a source for details; PIN favorites, FLAG follow-ups, SAVE for later.</p>
+    <div class="chips" id="topicChips"></div>
+    <div id="topicBody"></div>
+  </section>
+
+  <!-- ============ LATER ============ -->
+  <section class="view" id="view-later">
+    <h1 style="margin-bottom:4px">Later</h1>
+    <p class="soft small" style="margin-bottom:12px">Everything you've pinned, flagged, or saved — sources and episodes.</p>
+    <div class="chips">
+      <button class="chip on" data-latefilter="all">All</button>
+      <button class="chip" data-latefilter="pin">Pinned</button>
+      <button class="chip" data-latefilter="flag">Flagged</button>
+      <button class="chip" data-latefilter="save">Saved</button>
+    </div>
+    <div id="laterBody"></div>
+  </section>
+
+  <!-- ============ NOTES ============ -->
+  <section class="view" id="view-notes">
+    <h1 style="margin-bottom:4px">Notes</h1>
+    <p class="soft small" style="margin-bottom:12px">Write it in your own words — that's the retention trick. Notes come back for review on a spaced schedule (1 → 3 → 7 → 21 days).</p>
+    <div class="card">
+      <label class="fl">New note</label>
+      <textarea id="noteTxt" placeholder="Explain it like you'd tell a friend…"></textarea>
+      <label class="fl">Topic (optional)</label>
+      <select id="noteTopic"><option value="">—</option></select>
+      <button class="btn wide" id="noteSave" style="margin-top:12px">Save note</button>
+    </div>
+    <div class="card soft-c">
+      <div class="rowline"><h3>All notes</h3><span class="mono" id="noteCount"></span></div>
+      <input type="text" id="noteSearch" placeholder="Search notes…" style="margin-top:10px">
+      <div id="noteList"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- popout -->
+<div class="popwrap" id="popWrap"><div class="popcard" id="popCard"></div></div>
+
+<!-- guide -->
+<div class="sheet" id="guideSheet">
+  <div class="hbar"><button class="back" data-close="guideSheet">← Close guide</button></div>
+  <div class="sheet-body">
+    <h1>How Mono Mind works</h1>
+    <p class="soft small" style="margin:6px 0 16px">The idea in one line: your memory mostly fails at the moment of <i>encoding</i> — so this app trains attention first, then retrieval, and keeps you fed with things worth knowing.</p>
+    <div class="card soft-c"><h3>Today</h3><p class="small" style="margin-top:6px">Your dashboard: start the daily session, review notes that are due, and see what's new from your sources since last time. The freshness check runs automatically when the app opens (needs internet, and works when the file is opened in a normal browser — Claude's preview sandbox blocks outside connections).</p></div>
+    <div class="card soft-c"><h3>Practice · the four stages</h3><p class="small" style="margin-top:6px"><b>1 · Attend</b> — read a short passage under a gentle timer, fully single-tasked. <b>2 · Check</b> — two questions on it, self-graded honestly. <b>3 · Encode</b> — memorize 8 words using a named technique (linking, story, absurd imagery). <b>4 · Recall & reflect</b> — type the words back, then write one line about what you learned. That line becomes a note and enters the review cycle. Passages are drawn from your topics, so the reps build general knowledge too.</p></div>
+    <div class="card soft-c"><h3>Lessons</h3><p class="small" style="margin-top:6px">Eight short reads on the science: encoding vs retrieval, divided attention, depth of processing, the 10-second rule, retrieval practice, spacing, chunking, and sleep. One question each to make it stick.</p></div>
+    <div class="card soft-c"><h3>Topics & Later</h3><p class="small" style="margin-top:6px">Ten subjects — design, cars, music, fashion, science (home of <i>Ologies</i>), film, tech, food, history, news — each with a few long-running sources. PIN what you follow, FLAG what needs action, SAVE items to a reading list. Everything lands in Later.</p></div>
+    <div class="card soft-c"><h3>Notes & spaced review</h3><p class="small" style="margin-top:6px">Anything worth keeping goes in as a note in your own words. It resurfaces after 1, 3, 7, then 21 days — tap "Got it" to advance, "Again" to reset. This is spaced repetition applied to your own thoughts.</p></div>
+    <div class="card"><h3>GitHub sync</h3><p class="small" style="margin-top:6px">Same repo as the budget tracker, separate file (<span class="num">data/mono-mind.json</span>). Your existing fine-grained token works here too — paste the same repo and token in Settings. The token stays on this device and is never uploaded or exported.</p></div>
+  </div>
+</div>
+
+<!-- settings -->
+<div class="sheet" id="setSheet">
+  <div class="hbar"><button class="back" data-close="setSheet">← Close settings</button></div>
+  <div class="sheet-body">
+    <h2>Settings</h2>
+    <hr class="divider">
+    <h3>GitHub sync</h3>
+    <p class="small soft" style="margin:6px 0 4px">Use the same private repo and token as the budget tracker — this app writes its own file inside it. Setup steps are in the tracker's guide.</p>
+    <label class="fl">Repo (owner/name)</label><input type="text" id="ghRepo" autocapitalize="none" placeholder="yourname/life-improvement-tools">
+    <label class="fl">Fine-grained access token</label><input type="password" id="ghToken" autocapitalize="none" placeholder="github_pat_…">
+    <div class="stack" style="margin-top:12px">
+      <button class="btn wide" id="ghConnect">Connect & sync now</button>
+      <div class="grid2">
+        <button class="btn ghost" id="ghPushBtn">Push now</button>
+        <button class="btn ghost" id="ghPullBtn">Pull now</button>
+      </div>
+      <button class="chip" id="ghAuto">Auto-sync ✓ on</button>
+      <button class="linkbtn" id="ghOff">Disconnect sync</button>
+    </div>
+    <p class="mono" id="ghStatus" style="margin-top:8px">NOT CONNECTED</p>
+    <hr class="divider">
+    <h3>Put it on your iPhone</h3>
+    <p class="small soft" style="margin:6px 0">Open this file in Safari → Share → <b>Add to Home Screen</b>. On Windows, open in any browser and bookmark it.</p>
+    <hr class="divider">
+    <h3>Your data</h3>
+    <p class="small soft" style="margin:6px 0 10px">Saves on-device automatically. Export/import to move manually (sync token always excluded).</p>
+    <div class="stack">
+      <button class="btn wide ghost" id="exportBtn">Export my data</button>
+      <textarea class="exportbox" id="dataBox" placeholder="Exported data appears here — copy it. Or paste a backup and tap Import."></textarea>
+      <button class="btn wide ghost" id="copyBtn">Copy to clipboard</button>
+      <button class="btn wide" id="importBtn">Import pasted data</button>
+      <button class="btn wide danger" id="resetBtn">Reset everything</button>
+    </div>
+    <p class="mono" id="setMsg" style="margin-top:10px"></p>
+  </div>
+</div>
+
+<nav>
+  <div class="tabs">
+    <button class="tab on" data-goview="today"><span>Today</span></button>
+    <button class="tab" data-goview="practice"><span>Practice</span></button>
+    <button class="tab" data-goview="topics"><span>Topics</span></button>
+    <button class="tab" data-goview="later"><span>Later</span></button>
+    <button class="tab" data-goview="notes"><span>Notes</span></button>
+  </div>
+</nav>
+<script>
+/* ================= DATA: TOPICS & SOURCES ================= */
+const TOPICS=[
+{id:"design",n:"Design",srcs:[
+ {id:"d1",n:"99% Invisible",by:"Roman Mars",kind:"pod",term:"99% Invisible",d:"The design of everything you don't notice — flags, curbs, buildings, sounds. The single best gateway into caring about the made world."},
+ {id:"d2",n:"Design Matters",by:"Debbie Millman",kind:"pod",term:"Design Matters with Debbie Millman",d:"One of the longest-running design podcasts: deep interviews with designers, artists, and writers about how they think."},
+ {id:"d3",n:"Dezeen",by:"dezeen.com",kind:"site",url:"https://www.dezeen.com",d:"Daily architecture and design news. Skimming headlines twice a week keeps you current on names and movements."},
+ {id:"d4",n:"Great Art Explained",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@GreatArtExplained",d:"One masterpiece per 15-minute video, explained without pretension. Instant art-history literacy."}]},
+{id:"cars",n:"Cars",srcs:[
+ {id:"c1",n:"The Smoking Tire",by:"Matt Farah",kind:"pod",term:"The Smoking Tire",d:"Car-industry talk and reviews from someone who drives everything. Good ear for how enthusiasts actually speak."},
+ {id:"c2",n:"Donut",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@Donut",d:"Car culture with jokes — history, engineering, and why certain cars matter. The fun way in."},
+ {id:"c3",n:"Doug DeMuro",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@DougDeMuro",d:"Quirks-and-features reviews that teach you what to notice about any car."},
+ {id:"c4",n:"Car and Driver",by:"caranddriver.com",kind:"site",url:"https://www.caranddriver.com",d:"The reference site for reviews, comparisons, and what's coming out."}]},
+{id:"music",n:"Music",srcs:[
+ {id:"m1",n:"Song Exploder",by:"Hrishikesh Hirway",kind:"pod",term:"Song Exploder",d:"Artists take one song apart piece by piece. Twenty minutes per episode, and you'll never hear production the same way."},
+ {id:"m2",n:"Switched on Pop",by:"Vulture",kind:"pod",term:"Switched on Pop",d:"A musicologist and a songwriter explain why hits work. Pop fluency plus real music theory, painlessly."},
+ {id:"m3",n:"Pitchfork",by:"pitchfork.com",kind:"site",url:"https://pitchfork.com",d:"Reviews and features that set a lot of the conversation. Skim the 'Best New Music' tag."},
+ {id:"m4",n:"Genius",by:"genius.com",kind:"site",url:"https://genius.com",d:"Lyrics with annotations — the fix for never knowing the words."}]},
+{id:"fashion",n:"Fashion",srcs:[
+ {id:"f1",n:"Articles of Interest",by:"Avery Trufelman",kind:"pod",term:"Articles of Interest",d:"A 99% Invisible spinoff about what we wear — pockets, plaid, sneakers, suits. Fashion as design history; ideal starting point."},
+ {id:"f2",n:"The BoF Podcast",by:"Business of Fashion",kind:"pod",term:"The Business of Fashion Podcast",d:"The industry talking to itself — designers, CEOs, critics. How fashion actually works as a business."},
+ {id:"f3",n:"Bliss Foster",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@BlissFoster",d:"Thoughtful breakdowns of designers and collections. Turns runway shows into something you can read."},
+ {id:"f4",n:"Vogue Runway",by:"vogue.com",kind:"site",url:"https://www.vogue.com/fashion-shows",d:"Every major collection, photographed and reviewed. Ten minutes a season keeps you conversant."}]},
+{id:"sci",n:"Science & everything",srcs:[
+ {id:"s1",n:"Ologies",by:"Alie Ward",kind:"pod",term:"Ologies with Alie Ward",d:"The one you found — and it's perfect for this project. Each episode is a different -ology with an expert who loves it. Funny, curious, endlessly quotable at parties."},
+ {id:"s2",n:"Radiolab",by:"WNYC",kind:"pod",term:"Radiolab",d:"Sound-rich stories where science meets philosophy. The archive is a general-knowledge goldmine."},
+ {id:"s3",n:"Veritasium",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@veritasium",d:"Science videos built around misconceptions — you remember them because they surprise you."},
+ {id:"s4",n:"Quanta Magazine",by:"quantamagazine.org",kind:"site",url:"https://www.quantamagazine.org",d:"Serious science journalism made readable. One article a week compounds fast."}]},
+{id:"film",n:"Film & TV",srcs:[
+ {id:"v1",n:"The Big Picture",by:"The Ringer",kind:"pod",term:"The Big Picture The Ringer",d:"Movie news, drafts, and reviews. Listening semi-regularly means you always know what's out and what's good."},
+ {id:"v2",n:"The Rewatchables",by:"The Ringer",kind:"pod",term:"The Rewatchables",d:"Deep, funny dives on rewatchable classics — a canon-builder disguised as hangout comedy."},
+ {id:"v3",n:"Every Frame a Painting",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@everyframeapainting",d:"Short video essays on film craft. Watch all of them; there aren't many and each is a lens."},
+ {id:"v4",n:"Letterboxd Journal",by:"letterboxd.com",kind:"site",url:"https://letterboxd.com/journal/",d:"Interviews and lists from the film-diary site — good for what to watch next."}]},
+{id:"tech",n:"Tech",srcs:[
+ {id:"t1",n:"The Vergecast",by:"The Verge",kind:"pod",term:"The Vergecast",d:"The week in tech, argued out loud. Keeps gadget and platform news ambient."},
+ {id:"t2",n:"Waveform",by:"MKBHD",kind:"pod",term:"Waveform MKBHD",d:"Marques Brownlee's podcast — products and the ideas behind them, from people who test everything."},
+ {id:"t3",n:"The Verge",by:"theverge.com",kind:"site",url:"https://www.theverge.com",d:"The default tech-news homepage; headlines alone keep you current."},
+ {id:"t4",n:"Marques Brownlee",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@mkbhd",d:"The reference reviewer. Watching occasionally = knowing what phones/cars/gadgets people mean."}]},
+{id:"food",n:"Food",srcs:[
+ {id:"o1",n:"The Sporkful",by:"Dan Pashman",kind:"pod",term:"The Sporkful",d:"'It's not for foodies, it's for eaters' — food as culture, science, and obsession."},
+ {id:"o2",n:"J. Kenji López-Alt",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@JKenjiLopezAlt",d:"POV cooking from the food-science writer. You absorb technique just by watching."},
+ {id:"o3",n:"Serious Eats",by:"seriouseats.com",kind:"site",url:"https://www.seriouseats.com",d:"Tested recipes with the why explained. The reference when you want to actually understand a dish."}]},
+{id:"hist",n:"History",srcs:[
+ {id:"h1",n:"The Rest Is History",by:"Holland & Sandbrook",kind:"pod",term:"The Rest Is History",d:"Two historians who are genuinely funny cover everything from Caesar to the Cold War. Addictive general knowledge."},
+ {id:"h2",n:"Hardcore History",by:"Dan Carlin",kind:"pod",term:"Dan Carlin's Hardcore History",d:"Epic multi-hour deep dives. Rare releases, but each one permanently installs an era in your head."},
+ {id:"h3",n:"Crash Course",by:"YouTube",kind:"yt",url:"https://www.youtube.com/@crashcourse",d:"Fast, structured overviews — the scaffolding to hang podcast detail on."}]},
+{id:"news",n:"News & culture",srcs:[
+ {id:"n1",n:"Up First",by:"NPR",kind:"pod",term:"Up First NPR",d:"The day's three biggest stories in ~15 minutes. The cheapest possible way to never be out of the loop."},
+ {id:"n2",n:"Today, Explained",by:"Vox",kind:"pod",term:"Today Explained",d:"One story per day, actually explained. Pairs with Up First: one tells you what, this tells you why."},
+ {id:"n3",n:"1440",by:"join1440.com",kind:"site",url:"https://join1440.com",d:"A neutral daily news email — five minutes, no takes. The reading alternative to the podcasts above."}]}
+];
+
+/* ================= DATA: LESSONS ================= */
+const LESSONS=[
+{id:"L1",t:"Encoding vs retrieval",body:"Memory has three moments: encoding (getting it in), storage, and retrieval (getting it out). Most everyday 'forgetting' — names, where you parked, what someone just said — is an encoding failure: the memory was never formed, so there's nothing to retrieve. That's good news. You can't do much about storage, but attention at the moment of encoding is completely trainable.",q:"You forget someone's name 10 seconds after hearing it. Where did memory most likely fail?",opts:["Retrieval — it's on the tip of your tongue","Encoding — it was never really stored","Storage — the memory decayed"],a:1},
+{id:"L2",t:"Divided attention is the enemy",body:"Attention is the gate to encoding, and it doesn't split — it switches. Every switch costs you the seconds around it. Studies consistently show people remember dramatically less of what they read, hear, or watch while a second stream is running. Even a phone face-down on the table measurably taxes attention. One input at a time isn't a virtue; it's how encoding physically works.",q:"Half-listening to a friend while a video plays, you'll most likely…",opts:["Encode both, slightly compressed","Encode the more interesting one fully","Encode neither well — switching taxes both"],a:2},
+{id:"L3",t:"Depth beats repetition",body:"Hearing a song 500 times doesn't teach you the lyrics, because shallow exposure isn't encoding. What sticks is depth of processing: meaning, connection, imagery. Asking 'what does this mean? what does it remind me of?' encodes something in one pass better than passive repetition does in a hundred. This is why you remember stories and forget bullet points.",q:"The strongest single question to ask while learning something new:",opts:["'How many times have I seen this?'","'What does this connect to that I already know?'","'Will this be on the test?'"],a:1},
+{id:"L4",t:"The 10-second rule",body:"Most encoding failures happen in moments you didn't flag as mattering. The fix is a deliberate snapshot: when a name, a fact, or a location matters, stop for ten seconds and attend on purpose — repeat the name, form an image, say where you parked out loud. It feels almost too simple. It works because it converts an ambient moment into an encoding event.",q:"You just met someone important. Best immediate move?",opts:["Nod and hope it sticks","Use their name once and form a quick image for it","Write it down later tonight"],a:1},
+{id:"L5",t:"Retrieval practice",body:"Testing yourself isn't how you measure learning — it IS the learning. The 'testing effect' is one of the most replicated findings in psychology: pulling something out of memory strengthens it far more than re-reading it. This whole app is built on that: recall stages, note reviews, self-quizzes. Struggle is the point; easy review is mostly decoration.",q:"Which strengthens a memory most?",opts:["Re-reading your notes twice","Highlighting the key sentence","Closing the notes and recalling it cold"],a:2},
+{id:"L6",t:"Spacing",body:"Reviews work best right before you'd forget — that's spaced repetition. Cramming five reviews into one night is dramatically weaker than the same five spread over weeks, because each spaced retrieval happens against a little forgetting, and effortful retrieval is what strengthens the trace. Your notes here resurface at 1, 3, 7, and 21 days for exactly this reason.",q:"Five reviews of the same fact stick best when they're…",opts:["Back-to-back in one sitting","Spread out with growing gaps","Done only when you feel like it"],a:1},
+{id:"L7",t:"Chunk & connect",body:"Working memory holds only a few items — but a 'chunk' counts as one item no matter how big it is. Experts aren't holding more; they're holding bigger chunks. Learn the skeleton of a subject first (how a league works, the eras of design), then every new fact has a hook. Random facts fall out; connected ones stay.",q:"The fastest way to make a new subject stick:",opts:["Memorize facts as you meet them","Learn its structure first, then attach facts to it","Focus only on the interesting trivia"],a:1},
+{id:"L8",t:"Sleep does the filing",body:"Encoding happens while you're awake; consolidation — the filing of memories into long-term storage — happens mostly during sleep. Learning on chronic short sleep is pouring water into a cracked cup, and screens-in-bed is the classic thief. A consistent wake time is the highest-leverage memory habit that doesn't feel like a memory habit.",q:"You learned a lot today. What most helps it stick tonight?",opts:["A long scroll to unwind","Reviewing everything at 1am","An actual full night of sleep"],a:2}
+];
+
+/* ================= DATA: PASSAGES (attend + general knowledge) ================= */
+const PASSAGES=[
+{id:"p1",topic:"Cars",txt:"A gasoline engine is an air pump with explosions. Each cylinder repeats four strokes: intake pulls in air and fuel, compression squeezes it, the spark fires the power stroke, and exhaust pushes out the burnt gas. Horsepower describes how fast work gets done at speed; torque is the twisting force you feel off the line. That's why trucks brag about torque and sports cars brag about horsepower.",qs:[["What are the four strokes, in order?","Intake, compression, power, exhaust"],["Which figure matters more for pulling from a stop?","Torque"]]},
+{id:"p2",topic:"Design",txt:"The Bauhaus was a German design school, open from 1919 to 1933, built on one idea: form follows function. It merged art with industrial craft — furniture, typography, architecture — and stripped away ornament in favor of clean geometry. The Nazis closed it, which accidentally spread it: its teachers scattered worldwide, seeding modern design everywhere. Most 'minimalist' objects around you are its grandchildren.",qs:[["What was the Bauhaus's core principle?","Form follows function"],["Why did its influence spread globally?","It was closed and its teachers scattered/emigrated"]]},
+{id:"p3",topic:"Music",txt:"Sampling is quotation with a beat: taking a slice of an existing recording and building a new song around it. Hip-hop turned it into an art form — a James Brown drum break called 'Funky Drummer' became one of the most sampled recordings ever. It's why new songs can feel instantly familiar, and why music lawyers stay busy: samples must usually be cleared and paid for.",qs:[["What is sampling?","Reusing a piece of an existing recording in a new song"],["Which drummer's break became legendarily sampled?","James Brown's (Funky Drummer)"]]},
+{id:"p4",topic:"Fashion",txt:"Fashion runs on a seasonal clock. Designers show collections months ahead — spring/summer shows happen in fall, fall/winter shows in spring — across the 'big four' fashion weeks: New York, London, Milan, Paris. What walks the runway trickles down: high-end houses set silhouettes and colors, fast fashion copies them within weeks. Knowing the calendar is half of sounding fluent.",qs:[["Name the big four fashion week cities.","New York, London, Milan, Paris"],["When are spring/summer collections shown?","In the fall (months ahead)"]]},
+{id:"p5",topic:"Science",txt:"Vaccines are a wanted poster for your immune system. They present a harmless piece or imitation of a pathogen so your body can build antibodies and memory cells in advance. When the real thing arrives, the response starts in hours instead of weeks. Side effects like soreness or a day of fatigue are usually the training session itself — your immune system doing reps.",qs:[["What does a vaccine show the immune system?","A harmless piece/imitation of the pathogen"],["Why does immunity respond faster after vaccination?","Memory cells/antibodies were built in advance"]]},
+{id:"p6",topic:"Tech",txt:"Wi-Fi is radio. Your router converts internet data into radio waves, mostly on two bands: 2.4 GHz travels farther but slower and fights with microwaves and neighbors; 5 GHz is faster but fades through walls. Your device and router constantly negotiate speeds based on signal. That's why the same connection feels different across the house — physics, not your provider's mood.",qs:[["What's the tradeoff between 2.4 GHz and 5 GHz?","2.4 = range but slower/crowded; 5 = faster but shorter range"],["What actually carries Wi-Fi data?","Radio waves"]]},
+{id:"p7",topic:"History",txt:"The printing press, around 1440, didn't just make books cheaper — it broke a monopoly on information. Before Gutenberg, copying was slow, manual, and controlled by institutions. Within fifty years, millions of books existed, literacy climbed, and ideas like the Reformation spread faster than authorities could suppress them. Nearly every 'the internet changed everything' argument was rehearsed first with movable type.",qs:[["Roughly when did Gutenberg's press appear?","Around 1440"],["What movement famously spread via cheap printing?","The Reformation"]]},
+{id:"p8",topic:"Food",txt:"Most 'it needs something' moments in cooking are solved by salt or acid, not more cooking. Salt doesn't just make food salty — it amplifies other flavors and suppresses bitterness. Acid (lemon, vinegar) adds brightness and balances fat. Professional cooking leans on the framework salt, fat, acid, heat: four levers that explain most of why restaurant food tastes finished and home food sometimes doesn't.",qs:[["A dish tastes flat. The two most likely fixes?","Salt or acid"],["Name the four-lever framework.","Salt, fat, acid, heat"]]},
+{id:"p9",topic:"Film",txt:"A film's director is its author — the person whose choices you're watching, shot by shot. 'Auteur theory,' pushed by French critics in the 1950s, argued you can read a director's signature across their films the way you read a novelist's voice. It's why people say 'a Spielberg movie' or 'very Wes Anderson.' Learning directors, not just titles, is the fastest upgrade to film fluency.",qs:[["What does auteur theory claim?","The director is the author; their signature runs across their films"],["Where and when did the idea take hold?","French critics, 1950s"]]},
+{id:"p10",topic:"Music",txt:"An octave is a doubling: play a note, double its frequency, and you get the 'same' note higher — A at 440 Hz becomes A at 880. Western music slices that doubling into twelve equal steps, the semitones on a piano. Chords are just selected steps sounding together; a major chord and a minor chord differ by moving one note a single semitone. Enormous emotional range, tiny mechanical difference.",qs:[["What is an octave, physically?","A doubling of frequency"],["How many semitones divide an octave in Western music?","Twelve"]]},
+{id:"p11",topic:"Design",txt:"Typography has two big families: serifs, with small feet on the letterforms, and sans-serifs, without. Serifs read as traditional and bookish — they dominated print for centuries. Sans-serifs read as modern and clean; Helvetica, from 1957, became the default voice of corporations and signage. Most brands you recognize are recognizable partly because they never change their typeface.",qs:[["What visually separates serif from sans-serif?","Serifs have small strokes/'feet'; sans-serifs don't"],["Which 1957 typeface became the corporate default?","Helvetica"]]},
+{id:"p12",topic:"Science",txt:"Correlation is two things moving together; causation is one driving the other. Ice-cream sales and drownings rise together — summer causes both. Confusing the two is the most common reasoning error in headlines. The scientist's fix is the controlled experiment: change one thing, hold the rest steady, and compare. When you can't experiment, honest researchers say 'linked to,' not 'causes.'",qs:[["Why do ice-cream sales correlate with drownings?","A third factor — summer — drives both"],["What's the classic tool for establishing causation?","A controlled experiment"]]}
+];
+
+/* ================= DATA: WORD SETS + TECHNIQUES ================= */
+const WORDSETS=[
+{tech:"Story link",tip:"Chain the words into one ridiculous running story — each word hands off to the next.",w:["anchor","violin","copper","meadow","lantern","biscuit","harbor","pencil"]},
+{tech:"Absurd imagery",tip:"Make each image impossible — a THUNDERING marble, a cactus in a jacket. Weird sticks.",w:["thunder","marble","cactus","ribbon","engine","falcon","garlic","mirror"]},
+{tech:"Memory palace",tip:"Walk your home: front door, hallway, kitchen… drop one word at each stop.",w:["pocket","saddle","tunnel","walnut","candle","dolphin","hammer","island"]},
+{tech:"Pairs & chunks",tip:"Weld them into four pairs — 'jacket-kettle', 'ladder-magnet' — four chunks beat eight items.",w:["jacket","kettle","ladder","magnet","needle","orchid","planet","quartz"]},
+{tech:"Story link",tip:"One story, in order. The sillier the connective tissue, the stronger the chain.",w:["rocket","spider","ticket","umbrella","velvet","window","yogurt","zipper"]},
+{tech:"Absurd imagery",tip:"Exaggerate size and motion — a glacier-sized trumpet, a sprinting cabbage.",w:["trumpet","cabbage","glacier","helmet","sapphire","wagon","feather","canyon"]},
+{tech:"Memory palace",tip:"Same route as before, new objects at each stop — routes are reusable.",w:["compass","pretzel","antler","bucket","lighthouse","satin","pepper","drum"]},
+{tech:"Pairs & chunks",tip:"Four vivid pairs. Say each pair out loud once — sound adds a second hook.",w:["mustard","piano","tundra","goggles","chimney","raven","noodle","fountain"]}
+];
+
+/* ================= HELPERS / STORAGE ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>(typeof crypto!=="undefined"&&crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2));
+const dstr=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const DAY=864e5;
+const KEY="mono-mind-v1";
+let mem=null;
+const store={
+  async load(){
+    if(window.storage){try{const r=await window.storage.get(KEY);return r&&r.value?JSON.parse(r.value):null}catch(e){return null}}
+    try{const v=localStorage.getItem(KEY);return v?JSON.parse(v):null}catch(e){return mem}
+  },
+  async save(s){
+    mem=s;
+    if(window.storage){try{await window.storage.set(KEY,JSON.stringify(s))}catch(e){}return}
+    try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
+  }
+};
+function blank(){return{seen:{},freshCache:[],freshChecked:0,marks:{},savedItems:[],notes:[],
+  sessions:[],lessons:{},pRot:0,wRot:0,meta:{updatedAt:0},
+  gh:{enabled:false,repo:"",token:"",auto:true,lastSync:0}}}
+let S=blank(),saveTimer=null;
+function save(){S.meta=S.meta||{updatedAt:0};S.meta.updatedAt=Date.now();
+  clearTimeout(saveTimer);saveTimer=setTimeout(()=>store.save(S),250);
+  if(typeof ghSchedule==="function")ghSchedule()}
+const allSrcs=()=>TOPICS.flatMap(t=>t.srcs.map(s=>Object.assign({topic:t.n,topicId:t.id},s)));
+const srcById=id=>allSrcs().find(s=>s.id===id);
+function mark(id){return S.marks[id]||{}}
+function setMark(id,kind){const m=S.marks[id]||(S.marks[id]={});m[kind]=!m[kind];
+  if(!m.pin&&!m.flag&&!m.save)delete S.marks[id];save()}
+
+/* ================= NOTES: SPACED REVIEW ================= */
+const INTERVALS=[1,3,7,21];
+function nextReview(stage){return Date.now()+INTERVALS[Math.min(stage,INTERVALS.length-1)]*DAY}
+function addNote(txt,topic){if(!txt||!txt.trim())return null;
+  const n={id:uid(),txt:txt.trim(),topic:topic||"",ts:Date.now(),stage:0,next:nextReview(0)};
+  S.notes.unshift(n);save();return n}
+function noteGot(id){const n=S.notes.find(x=>x.id===id);if(!n)return;
+  n.stage=Math.min(n.stage+1,INTERVALS.length-1);n.next=nextReview(n.stage);save()}
+function noteAgain(id){const n=S.notes.find(x=>x.id===id);if(!n)return;
+  n.stage=0;n.next=nextReview(0);save()}
+function dueNotes(){const now=Date.now();return S.notes.filter(n=>n.next<=now)}
+
+/* ================= FRESHNESS (iTunes JSONP + optional RSS) ================= */
+let jpN=0;
+function jsonp(url,timeoutMs){
+  return new Promise((res,rej)=>{
+    const cb="__mmjp"+(jpN++);
+    const s=document.createElement("script");
+    let done=false;
+    function cleanup(){if(done)return;done=true;try{delete window[cb]}catch(e){window[cb]=undefined}
+      if(s.parentNode)s.parentNode.removeChild(s);clearTimeout(t)}
+    window[cb]=d=>{cleanup();res(d)};
+    const t=setTimeout(()=>{cleanup();rej(new Error("timeout"))},timeoutMs||8000);
+    s.onerror=()=>{cleanup();rej(new Error("script error"))};
+    s.src=url+(url.indexOf("?")>-1?"&":"?")+"callback="+cb;
+    document.body.appendChild(s);
+  });
+}
+async function latestEpisodeTitle(feedUrl){
+  try{
+    const r=await fetch(feedUrl);if(!r.ok)return null;
+    const xml=new DOMParser().parseFromString(await r.text(),"text/xml");
+    const it=xml.querySelector("item > title");
+    return it?it.textContent.trim().slice(0,90):null;
+  }catch(e){return null}
+}
+let checking=false;
+async function checkFresh(manual){
+  if(checking)return;checking=true;
+  const pods=allSrcs().filter(s=>s.kind==="pod");
+  const st=$("freshStatus");if(st)st.textContent="CHECKING "+pods.length+" PODCAST SOURCES…";
+  let okCount=0,failCount=0;const found=[];
+  await Promise.all(pods.map(async p=>{
+    try{
+      const d=await jsonp("https://itunes.apple.com/search?media=podcast&entity=podcast&limit=1&term="+encodeURIComponent(p.term));
+      const r=d&&d.results&&d.results[0];
+      if(!r||!r.releaseDate)throw new Error("no result");
+      okCount++;
+      const rel=new Date(r.releaseDate).getTime();
+      if(rel>(S.seen[p.id]||0)){
+        const item={srcId:p.id,date:rel,title:null};
+        if(r.feedUrl)item.title=await latestEpisodeTitle(r.feedUrl);
+        found.push(item);
+      }
+    }catch(e){failCount++}
+  }));
+  found.sort((a,b)=>b.date-a.date);
+  S.freshCache=found;S.freshChecked=Date.now();save();
+  checking=false;
+  if(st)st.textContent=(found.length?found.length+" NEW":"NOTHING NEW")+" · "+okCount+" CHECKED"+(failCount?" · "+failCount+" UNREACHABLE":"")+(okCount===0?" — OPEN THE FILE OUTSIDE CLAUDE'S PREVIEW FOR LIVE CHECKS":"");
+  rToday();
+}
+function markSeen(srcId,date){S.seen[srcId]=Math.max(S.seen[srcId]||0,date||Date.now());
+  S.freshCache=S.freshCache.filter(f=>f.srcId!==srcId);save()}
+
+/* ================= RENDER: TODAY ================= */
+function fmtAgo(ts){if(!ts)return"—";const d=Math.floor((Date.now()-ts)/DAY);
+  return d<=0?"TODAY":d===1?"1D AGO":d+"D AGO"}
+function rToday(){
+  $("todayDate").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}).toUpperCase();
+  const last=S.sessions.length?S.sessions[S.sessions.length-1]:null;
+  $("lastPractice").textContent=last?("LAST: "+fmtAgo(new Date(last.d+"T12:00:00").getTime())):"FIRST ONE TODAY?";
+  $("stSessions").textContent=S.sessions.length;
+  $("stNotes").textContent=S.notes.length;
+  /* review queue */
+  const due=dueNotes();
+  $("reviewCard").innerHTML='<div class="rowline"><h3>Note review</h3><span class="mono">'+due.length+' DUE</span></div>'+
+    (due.length?due.slice(0,3).map(n=>
+      '<div class="noterow"><p class="small">'+esc(n.txt)+'</p>'+
+      '<div class="rowline" style="margin-top:8px"><span class="mono">'+(n.topic?esc(n.topic)+" · ":"")+'STAGE '+(n.stage+1)+'</span>'+
+      '<span><button class="chip mini" data-notegot="'+n.id+'">Got it</button> <button class="chip mini" data-noteagain="'+n.id+'">Again</button></span></div></div>').join("")+
+      (due.length>3?'<p class="mono" style="margin-top:8px">+'+(due.length-3)+' MORE IN NOTES</p>':"")
+    :'<p class="small soft" style="padding:8px 0">Nothing due. Notes resurface at 1, 3, 7, then 21 days.</p>');
+  /* fresh list */
+  const fl=$("freshList");
+  if(S.freshCache.length){
+    fl.innerHTML=S.freshCache.map(f=>{const s=srcById(f.srcId);if(!s)return"";
+      return '<div class="itemrow"><b class="small"><span class="newdot"></span>'+esc(s.n)+'</b>'+
+      '<p class="small soft" style="margin:2px 0 6px">'+(f.title?esc(f.title):"New episode")+' · '+new Date(f.date).toLocaleDateString()+'</p>'+
+      '<span><button class="chip mini" data-saveitem="'+f.srcId+'">Save</button> <button class="chip mini" data-seen="'+f.srcId+'">Seen</button></span></div>'}).join("");
+    $("caughtUp").style.display="";
+  }else{fl.innerHTML="";$("caughtUp").style.display="none"}
+  if(S.freshChecked&&!checking&&!S.freshCache.length)$("freshStatus").textContent="NOTHING NEW · LAST CHECK "+new Date(S.freshChecked).toLocaleString();
+  /* pinned strip */
+  const pinned=allSrcs().filter(s=>mark(s.id).pin);
+  $("pinnedCard").innerHTML=pinned.length?'<h3 style="margin-bottom:6px">Pinned</h3><div class="chips" style="margin:6px 0 0">'+
+    pinned.map(s=>'<button class="chip mini" data-src="'+s.id+'">'+esc(s.n)+'</button>').join("")+'</div>':
+    '<h3>Pinned</h3><p class="small soft" style="margin-top:6px">Pin sources in Topics and they\'ll live here for one-tap access.</p>';
+}
+
+/* ================= RENDER: PRACTICE ================= */
+let sess=null,sTimer=null;
+function stopTimer(){clearInterval(sTimer);sTimer=null}
+function startTimer(secs,onEnd){
+  stopTimer();let left=secs;
+  const fill=$("sessTimer");if(fill)fill.style.width="100%";
+  const lbl=$("sessLeft");if(lbl)lbl.textContent=left+"S";
+  sTimer=setInterval(()=>{left--;
+    if(lbl)lbl.textContent=Math.max(0,left)+"S";
+    if(fill)fill.style.width=Math.max(0,left/secs*100)+"%";
+    if(left<=0){stopTimer();onEnd()}
+  },1000);
+}
+function gradeWords(set,input){
+  const got=String(input||"").toLowerCase().split(/[\s,]+/).filter(Boolean);
+  return set.w.filter(w=>got.includes(w)).length;
+}
+const dots=n=>'<div class="steps">'+[1,2,3,4].map(i=>'<div class="stepdot'+(n>=i?" on":"")+'"></div>').join("")+'</div>';
+function rSession(){
+  const el=$("sessionCard");if(!el)return;
+  if(!sess){
+    el.innerHTML='<h3>Today\'s session</h3><p class="small soft" style="margin:6px 0 12px">Four stages, about six minutes. Phone notifications off — the attend stage only counts if it\'s single-tasked.</p>'+
+    '<div class="rowline"><span class="badge">1 · Attend</span><span class="badge">2 · Check</span><span class="badge">3 · Encode</span><span class="badge">4 · Recall</span></div>'+
+    '<button class="btn wide" id="sessStart" style="margin-top:14px">Begin</button>';
+    return;
+  }
+  const P=PASSAGES[sess.pIdx],W=WORDSETS[sess.wIdx];
+  if(sess.stage===1){
+    el.innerHTML=dots(1)+'<div class="rowline"><span class="mono dark">STAGE 1 · ATTEND — '+esc(P.topic).toUpperCase()+'</span><span class="mono" id="sessLeft"></span></div>'+
+    '<p class="small soft" style="margin-top:4px">Read once, fully. Notice specifics — you\'ll be asked two things.</p>'+
+    '<div class="passage">'+P.txt+'</div>'+
+    '<div class="bar timer"><div class="bar-fill" id="sessTimer" style="width:100%"></div></div>'+
+    '<button class="btn wide ghost" id="sessNext" style="margin-top:10px">I\'ve read it — continue</button>';
+    startTimer(45,()=>toStage(2));
+    $("sessNext").onclick=()=>toStage(2);
+  }else if(sess.stage===2){
+    const qi=sess.qi,q=P.qs[qi];
+    el.innerHTML=dots(2)+'<span class="mono dark">STAGE 2 · CHECK — '+(qi+1)+'/2</span>'+
+    '<h3 style="margin:10px 0 6px">'+q[0]+'</h3>'+
+    (sess.revealed?
+      '<div class="passage" style="font-size:.95rem"><b>Answer:</b> '+q[1]+'</div>'+
+      '<p class="small soft">Grade yourself honestly — the honesty is the training.</p>'+
+      '<div class="grid2" style="margin-top:10px"><button class="btn" id="qRight">I had it</button><button class="btn ghost" id="qWrong">Missed it</button></div>'
+      :'<p class="small soft">Say your answer out loud or in your head first.</p><button class="btn wide" id="qReveal" style="margin-top:10px">Reveal answer</button>');
+    if(sess.revealed){
+      $("qRight").onclick=()=>{sess.passScore++;nextQ()};
+      $("qWrong").onclick=()=>nextQ();
+    }else $("qReveal").onclick=()=>{sess.revealed=true;rSession()};
+  }else if(sess.stage===3){
+    el.innerHTML=dots(3)+'<div class="rowline"><span class="mono dark">STAGE 3 · ENCODE — '+W.tech.toUpperCase()+'</span><span class="mono" id="sessLeft"></span></div>'+
+    '<p class="small soft" style="margin-top:4px">'+W.tip+'</p>'+
+    '<div class="words">'+W.w.map(w=>'<span class="word">'+w+'</span>').join("")+'</div>'+
+    '<div class="bar timer"><div class="bar-fill" id="sessTimer" style="width:100%"></div></div>'+
+    '<button class="btn wide ghost" id="sessNext" style="margin-top:10px">Ready — hide them</button>';
+    startTimer(40,()=>toStage(4));
+    $("sessNext").onclick=()=>toStage(4);
+  }else if(sess.stage===4){
+    el.innerHTML=dots(4)+'<span class="mono dark">STAGE 4 · RECALL</span>'+
+    '<p class="small soft" style="margin:6px 0">Type every word you remember, any order.</p>'+
+    '<input type="text" id="recallIn" autocomplete="off" autocapitalize="none" placeholder="anchor, violin…">'+
+    '<button class="btn wide" id="sessGrade" style="margin-top:10px">Check</button>';
+    $("recallIn").focus();
+    $("sessGrade").onclick=()=>{sess.wordScore=gradeWords(W,$("recallIn").value);toStage(5)};
+  }else{
+    const total=sess.passScore+sess.wordScore;
+    el.innerHTML='<span class="mono dark">SESSION COMPLETE</span>'+
+    '<div class="rowline" style="margin:10px 0"><div><div class="big">'+sess.passScore+'/2</div><span class="mono">Attend & check</span></div>'+
+    '<div><div class="big">'+sess.wordScore+'/8</div><span class="mono">Encode & recall</span></div>'+
+    '<div><div class="big">'+total+'/10</div><span class="mono">Total</span></div></div>'+
+    '<p class="small soft">'+(total>=8?"Sharp. Same time tomorrow.":total>=5?"Solid — recall scores climb fast with the techniques.":"Honest baseline. The lessons below are exactly for this.")+'</p>'+
+    '<label class="fl">One line on what you learned ('+esc(P.topic)+')</label>'+
+    '<textarea id="sessNote" placeholder="In your own words — it becomes a review note."></textarea>'+
+    '<div class="grid2" style="margin-top:10px"><button class="btn" id="sessSaveNote">Save note & finish</button><button class="btn ghost" id="sessSkip">Finish</button></div>';
+    $("sessSaveNote").onclick=()=>{addNote($("sessNote").value,P.topic);finishSession()};
+    $("sessSkip").onclick=finishSession;
+  }
+}
+function toStage(n){stopTimer();sess.stage=n;sess.revealed=false;if(n===2)sess.qi=0;rSession()}
+function nextQ(){if(sess.qi===0){sess.qi=1;sess.revealed=false;rSession()}else toStage(3)}
+function startSession(){
+  sess={stage:1,pIdx:S.pRot%PASSAGES.length,wIdx:S.wRot%WORDSETS.length,qi:0,revealed:false,passScore:0,wordScore:0};
+  rSession();
+}
+function finishSession(){
+  S.sessions.push({d:dstr(new Date()),p:sess.passScore,w:sess.wordScore});
+  S.pRot++;S.wRot++;save();sess=null;stopTimer();rAll();
+}
+function rPractice(){
+  rSession();
+  const el=$("scoreHist");
+  if(S.sessions.length){
+    const last=S.sessions.slice(-8);
+    el.innerHTML='<div class="chart">'+last.map(s=>{const t=s.p+s.w;
+      return '<div class="cb" style="height:'+Math.max(5,t/10*100)+'%"><span>'+t+'</span></div>'}).join("")+'</div>';
+    const avg=(S.sessions.reduce((a,s)=>a+s.p+s.w,0)/S.sessions.length).toFixed(1);
+    $("scoreAvg").textContent="AVG "+avg+"/10";
+  }else{el.innerHTML='<p class="small soft" style="padding:6px 0">Finish a session to start the chart.</p>';$("scoreAvg").textContent=""}
+  $("lessonList").innerHTML=LESSONS.map(L=>
+    '<div class="srow"><div class="main-tap" data-lesson="'+L.id+'"><b class="small">'+L.t+'</b></div>'+
+    '<span class="badge'+(S.lessons[L.id]?" inv":"")+'">'+(S.lessons[L.id]?"DONE":"OPEN")+'</span></div>').join("");
+}
+
+/* ================= RENDER: TOPICS / LATER ================= */
+let curTopic=TOPICS[0].id;
+function markChips(id){const m=mark(id);
+  return '<div class="markrow">'+["pin","flag","save"].map(k=>
+    '<button class="chip mini'+(m[k]?" on":"")+'" data-mark="'+k+':'+id+'">'+k.toUpperCase()+'</button>').join("")+'</div>'}
+function srcRow(s){
+  const isFresh=S.freshCache.some(f=>f.srcId===s.id);
+  return '<div class="srow"><div class="main-tap" data-src="'+s.id+'">'+
+  '<b class="small">'+(isFresh?'<span class="newdot"></span>':"")+esc(s.n)+'</b>'+
+  '<div class="mono">'+esc(s.by)+' · '+(s.kind==="pod"?"PODCAST":s.kind==="yt"?"YOUTUBE":"SITE")+'</div></div>'+markChips(s.id)+'</div>'}
+function rTopics(){
+  $("topicChips").innerHTML=TOPICS.map(t=>'<button class="chip'+(t.id===curTopic?" on":"")+'" data-topic="'+t.id+'">'+t.n+'</button>').join("");
+  const t=TOPICS.find(x=>x.id===curTopic);
+  const srcs=[...t.srcs].sort((a,b)=>(mark(b.id).pin?1:0)-(mark(a.id).pin?1:0));
+  $("topicBody").innerHTML='<div class="card soft-c">'+srcs.map(srcRow).join("")+'</div>';
+}
+let lateFilter="all";
+function rLater(){
+  document.querySelectorAll("[data-latefilter]").forEach(c=>c.classList.toggle("on",c.dataset.latefilter===lateFilter));
+  const srcs=allSrcs().filter(s=>{const m=mark(s.id);
+    return lateFilter==="all"?(m.pin||m.flag||m.save):m[lateFilter]});
+  const items=(lateFilter==="all"||lateFilter==="save")?S.savedItems:[];
+  let html="";
+  if(srcs.length)html+='<div class="card soft-c"><h3 style="margin-bottom:4px">Sources</h3>'+srcs.map(srcRow).join("")+'</div>';
+  if(items.length)html+='<div class="card soft-c"><h3 style="margin-bottom:4px">Saved episodes</h3>'+
+    items.map(it=>{const s=srcById(it.srcId);
+      return '<div class="itemrow"><b class="small">'+esc(s?s.n:"?")+'</b><p class="small soft" style="margin:2px 0 6px">'+
+      (it.title?esc(it.title):"Episode")+' · '+new Date(it.date).toLocaleDateString()+'</p>'+
+      '<button class="chip mini" data-unsaveitem="'+it.id+'">Remove</button></div>'}).join("")+'</div>';
+  $("laterBody").innerHTML=html||'<div class="card soft-c"><p class="small soft">Nothing here yet — PIN, FLAG, or SAVE things from Topics and Today.</p></div>';
+}
+
+/* ================= RENDER: NOTES ================= */
+let noteQuery="";
+function rNotes(){
+  const sel=$("noteTopic");
+  if(sel&&sel.options.length<=1)TOPICS.forEach(t=>{const o=document.createElement("option");o.value=t.n;o.textContent=t.n;sel.appendChild(o)});
+  $("noteCount").textContent=S.notes.length+" TOTAL";
+  const q=noteQuery.toLowerCase();
+  const list=S.notes.filter(n=>!q||n.txt.toLowerCase().includes(q)||(n.topic||"").toLowerCase().includes(q));
+  $("noteList").innerHTML=list.length?list.map(n=>{
+    const due=n.next<=Date.now();
+    return '<div class="noterow"><p class="small">'+esc(n.txt)+'</p>'+
+    '<div class="rowline" style="margin-top:6px"><span class="mono">'+(n.topic?esc(n.topic)+" · ":"")+new Date(n.ts).toLocaleDateString()+' · '+(due?"DUE NOW":"NEXT "+new Date(n.next).toLocaleDateString())+'</span>'+
+    '<span>'+(due?'<button class="chip mini" data-notegot="'+n.id+'">Got it</button> <button class="chip mini" data-noteagain="'+n.id+'">Again</button> ':"")+
+    '<button class="chip mini" data-notedel="'+n.id+'">✕</button></span></div></div>'}).join("")
+  :'<p class="small soft" style="padding:8px 0">'+(q?"No matches.":"No notes yet.")+'</p>';
+}
+
+/* ================= POPOUTS ================= */
+function openPop(html){$("popCard").innerHTML='<button class="popx" data-closepop="1">✕</button>'+html;$("popWrap").classList.add("on")}
+function closePop(){$("popWrap").classList.remove("on")}
+function popSrc(id){
+  const s=srcById(id);if(!s)return;
+  const fresh=S.freshCache.find(f=>f.srcId===id);
+  openPop('<span class="mono">'+esc(s.topic)+' · '+(s.kind==="pod"?"PODCAST":s.kind==="yt"?"YOUTUBE":"SITE")+'</span>'+
+  '<h2 style="margin:2px 0 8px">'+esc(s.n)+'</h2><p class="mono" style="margin-bottom:8px">'+esc(s.by)+'</p>'+
+  '<p class="small">'+esc(s.d)+'</p>'+
+  (fresh?'<div class="passage" style="font-size:.9rem;margin-top:10px"><span class="newdot"></span><b>New:</b> '+(fresh.title?esc(fresh.title):"episode")+' · '+new Date(fresh.date).toLocaleDateString()+'</div>':"")+
+  '<div style="margin-top:12px">'+markChips(id)+'</div>'+
+  (s.url?'<a class="btn wide ghost" style="margin-top:12px;text-decoration:none" href="'+s.url+'" target="_blank" rel="noopener">Open site ↗</a>'
+        :'<p class="mono" style="margin-top:12px">SEARCH "'+esc(s.n)+'" IN ANY PODCAST APP</p>')+
+  '<label class="fl">Quick note about this</label><textarea id="popNote" placeholder="What\'s worth remembering?"></textarea>'+
+  '<button class="btn wide" id="popNoteSave" style="margin-top:10px">Save note</button>');
+  $("popNoteSave").onclick=()=>{if(addNote($("popNote").value,s.topic)){closePop();rAll()}};
+}
+function popLesson(id){
+  const L=LESSONS.find(x=>x.id===id);if(!L)return;
+  openPop('<span class="mono">LESSON '+esc(id)+'</span><h2 style="margin:2px 0 8px">'+L.t+'</h2>'+
+  '<p class="small">'+L.body+'</p><hr class="divider"><h3 style="font-size:.95rem">'+L.q+'</h3>'+
+  L.opts.map((o,i)=>'<button class="quiz-opt" data-quiz="'+id+':'+i+'">'+o+'</button>').join("")+
+  '<p class="mono" id="quizMsg" style="margin-top:10px"></p>');
+}
+function answerQuiz(id,i){
+  const L=LESSONS.find(x=>x.id===id);if(!L)return;
+  document.querySelectorAll(".quiz-opt").forEach((b,bi)=>{
+    b.classList.add(bi===L.a?"right":(bi===i?"wrong":"wrong"));
+    if(bi!==L.a&&bi!==i)b.classList.remove("wrong");b.disabled=true});
+  const right=i===L.a;
+  if(right){S.lessons[id]=true;save()}
+  $("quizMsg").textContent=right?"CORRECT — MARKED DONE.":"NOT QUITE — THE ANSWER IS HIGHLIGHTED.";
+  rPractice();
+}
+
+/* ================= GITHUB SYNC ================= */
+const b64e=s=>btoa(unescape(encodeURIComponent(s)));
+const b64d=s=>decodeURIComponent(escape(atob(String(s).replace(/\s/g,""))));
+function ghPayload(){const p=JSON.parse(JSON.stringify(S));delete p.gh;return p}
+function ghApi(){const parts=normRepo(S.gh.repo).split("/");
+  return "https://api.github.com/repos/"+parts[0]+"/"+parts[1]+"/contents/data/mono-mind.json"}
+function ghHdr(){return{"Authorization":"Bearer "+S.gh.token,"Accept":"application/vnd.github+json"}}
+function ghMsg(m){const el=$("ghStatus");if(el)el.textContent=m}
+const normRepo=v=>String(v||"").trim().replace(/^(https?:\/\/)?(www\.)?github\.com\//i,"").replace(/\.git$/i,"").replace(/\/+$/,"").split("/").slice(0,2).join("/");
+function ghExplain(e){
+  const m=String(e&&e.message||"");
+  if(/401/.test(m))return"TOKEN REJECTED (401) — RE-PASTE IT. FINE-GRAINED TOKENS START WITH github_pat_";
+  if(/403/.test(m))return"FORBIDDEN (403) — THE TOKEN NEEDS CONTENTS: READ & WRITE ON THIS REPO";
+  if(/404/.test(m))return"NOT FOUND (404) — CHECK owner/name, AND THAT THE TOKEN IS SCOPED TO THIS EXACT REPO";
+  if(/409|422/.test(m))return"SYNC CONFLICT — TAP PUSH NOW ONCE MORE";
+  return"NO CONNECTION TO GITHUB — OFFLINE, OR THIS VIEWER BLOCKS WEB REQUESTS (CLAUDE'S PREVIEW AND IPHONE FILE PREVIEWS BOTH DO). OPEN THE APP FROM AN https:// ADDRESS";
+}
+async function ghGet(){
+  const r=await fetch(ghApi(),{headers:ghHdr()});
+  if(r.status===404)return{sha:null,data:null};
+  if(!r.ok)throw new Error("GET "+r.status);
+  const j=await r.json();
+  return{sha:j.sha,data:JSON.parse(b64d(j.content))};
+}
+async function ghPush(){
+  if(!S.gh.enabled)return;
+  try{
+    ghMsg("PUSHING…");
+    let sha=null;try{sha=(await ghGet()).sha}catch(e){}
+    const body={message:"mono-mind sync "+new Date().toISOString(),content:b64e(JSON.stringify(ghPayload()))};
+    if(sha)body.sha=sha;
+    const r=await fetch(ghApi(),{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},ghHdr()),body:JSON.stringify(body)});
+    if(!r.ok)throw new Error("PUT "+r.status);
+    S.gh.lastSync=Date.now();store.save(S);
+    ghMsg("SYNCED "+new Date().toLocaleTimeString());
+  }catch(e){ghMsg(ghExplain(e))}
+}
+function applyRemoteIfNewer(remote){
+  const r=(remote&&remote.meta&&remote.meta.updatedAt)||0,l=(S.meta&&S.meta.updatedAt)||0;
+  if(remote&&r>l){const gh=S.gh;S=Object.assign(blank(),remote);S.gh=gh;store.save(S);return true}
+  return false;
+}
+async function ghPull(manual){
+  if(!S.gh.enabled)return;
+  try{
+    ghMsg("CHECKING GITHUB…");
+    const res=await ghGet();
+    if(res.data){
+      const adopted=applyRemoteIfNewer(res.data);
+      if(adopted){rAll();ghMsg("PULLED NEWER DATA "+new Date().toLocaleTimeString())}
+      else{ghMsg(manual?"ALREADY UP TO DATE.":"UP TO DATE.");if(((S.meta&&S.meta.updatedAt)||0)>((res.data.meta&&res.data.meta.updatedAt)||0))ghPush()}
+    }else{ghMsg("NO REMOTE FILE YET — PUSHING FIRST COPY…");await ghPush()}
+    S.gh.lastSync=Date.now();store.save(S);
+  }catch(e){ghMsg(ghExplain(e))}
+}
+let ghTimer=null;
+function ghSchedule(){if(!S.gh||!S.gh.enabled||!S.gh.auto)return;clearTimeout(ghTimer);ghTimer=setTimeout(ghPush,2500)}
+
+/* ================= NAV / EVENTS ================= */
+function switchView(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.remove("on"));
+  $("view-"+v).classList.add("on");
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.goview===v));
+  window.scrollTo({top:0});
+}
+function rAll(){rToday();rPractice();rTopics();rLater();rNotes()}
+document.addEventListener("click",e=>{
+  if(e.target.id==="popWrap"){closePop();return}
+  if(e.target.id==="sessStart"){startSession();return}
+  const el=e.target.closest("[data-goview],[data-topic],[data-src],[data-mark],[data-latefilter],[data-lesson],[data-quiz],[data-notegot],[data-noteagain],[data-notedel],[data-seen],[data-saveitem],[data-unsaveitem],[data-closepop],[data-close]");
+  if(!el)return;
+  const d=el.dataset;
+  if(d.goview)switchView(d.goview);
+  else if(d.topic){curTopic=d.topic;rTopics()}
+  else if(d.mark){const p=d.mark.split(":");setMark(p[1],p[0]);
+    rTopics();rLater();rToday();
+    if($("popWrap").classList.contains("on"))popSrc(p[1]);}
+  else if(d.src)popSrc(d.src);
+  else if(d.latefilter){lateFilter=d.latefilter;rLater()}
+  else if(d.lesson)popLesson(d.lesson);
+  else if(d.quiz){const p=d.quiz.split(":");answerQuiz(p[0],+p[1])}
+  else if(d.notegot){noteGot(d.notegot);rToday();rNotes()}
+  else if(d.noteagain){noteAgain(d.noteagain);rToday();rNotes()}
+  else if(d.notedel){S.notes=S.notes.filter(n=>n.id!==d.notedel);save();rToday();rNotes()}
+  else if(d.seen){const f=S.freshCache.find(x=>x.srcId===d.seen);markSeen(d.seen,f?f.date:Date.now());rToday();rTopics()}
+  else if(d.saveitem){const f=S.freshCache.find(x=>x.srcId===d.saveitem);
+    if(f){S.savedItems.unshift({id:uid(),srcId:f.srcId,title:f.title,date:f.date,ts:Date.now()});markSeen(f.srcId,f.date)}
+    save();rToday();rLater()}
+  else if(d.unsaveitem){S.savedItems=S.savedItems.filter(x=>x.id!==d.unsaveitem);save();rLater()}
+  else if(d.closepop)closePop();
+  else if(d.close)document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"));
+});
+$("guideBtn").addEventListener("click",()=>$("guideSheet").classList.add("on"));
+$("gearBtn").addEventListener("click",()=>{
+  $("ghRepo").value=S.gh.repo||"";$("ghToken").value=S.gh.token||"";
+  $("ghAuto").textContent=S.gh.auto?"Auto-sync ✓ on":"Auto-sync off";
+  $("ghAuto").classList.toggle("on",!!S.gh.auto);
+  ghMsg(S.gh.enabled?("CONNECTED"+(S.gh.lastSync?" · LAST SYNC "+new Date(S.gh.lastSync).toLocaleString():"")):"NOT CONNECTED");
+  $("setSheet").classList.add("on");
+});
+$("checkNow").addEventListener("click",()=>checkFresh(true));
+$("caughtUp").addEventListener("click",()=>{
+  S.freshCache.forEach(f=>{S.seen[f.srcId]=Math.max(S.seen[f.srcId]||0,f.date)});
+  S.freshCache=[];save();rToday();rTopics();
+});
+$("noteSave").addEventListener("click",()=>{
+  if(addNote($("noteTxt").value,$("noteTopic").value)){$("noteTxt").value="";rToday();rNotes()}
+});
+$("noteSearch").addEventListener("input",e=>{noteQuery=e.target.value;rNotes()});
+$("ghConnect").addEventListener("click",async()=>{
+  const repo=normRepo($("ghRepo").value),tok=$("ghToken").value.trim();
+  const parts=repo.split("/");
+  if(parts.length!==2||!parts[0]||!parts[1]||!tok){ghMsg("NEED owner/repo (OR A FULL GITHUB URL) AND A TOKEN.");return}
+  $("ghRepo").value=repo;
+  S.gh.repo=repo;S.gh.token=tok;S.gh.enabled=true;store.save(S);
+  await ghPull(true);
+});
+$("ghPushBtn").addEventListener("click",()=>ghPush());
+$("ghPullBtn").addEventListener("click",()=>ghPull(true));
+$("ghAuto").addEventListener("click",()=>{S.gh.auto=!S.gh.auto;store.save(S);
+  $("ghAuto").textContent=S.gh.auto?"Auto-sync ✓ on":"Auto-sync off";$("ghAuto").classList.toggle("on",S.gh.auto)});
+$("ghOff").addEventListener("click",()=>{S.gh.enabled=false;S.gh.token="";store.save(S);ghMsg("DISCONNECTED — TOKEN CLEARED FROM THIS DEVICE.")});
+$("exportBtn").addEventListener("click",()=>{$("dataBox").value=JSON.stringify(ghPayload());$("setMsg").textContent="EXPORTED (SYNC TOKEN EXCLUDED) — COPY THE TEXT ABOVE."});
+$("copyBtn").addEventListener("click",async()=>{
+  $("dataBox").select();
+  try{await navigator.clipboard.writeText($("dataBox").value);$("setMsg").textContent="COPIED."}
+  catch(e){document.execCommand("copy");$("setMsg").textContent="COPIED."}
+});
+$("importBtn").addEventListener("click",()=>{
+  try{const d=JSON.parse($("dataBox").value);
+    if(!d||typeof d!=="object"||!Array.isArray(d.notes))throw 0;
+    S=Object.assign(blank(),d);save();rAll();$("setMsg").textContent="IMPORTED."}
+  catch(e){$("setMsg").textContent="THAT DIDN'T PARSE — PASTE THE FULL EXPORTED TEXT."}
+});
+$("resetBtn").addEventListener("click",()=>{
+  if(confirm("Reset everything? This can't be undone.")){S=blank();save();rAll();$("setMsg").textContent="RESET DONE."}
+});
+
+/* ================= INIT ================= */
+(async function(){
+  const loaded=await store.load();
+  if(loaded&&loaded.meta)S=Object.assign(blank(),loaded);
+  if(S.gh&&S.gh.enabled)await ghPull(false);
+  rAll();
+  checkFresh(false);
+})();
+</script>
+</body>
+</html>
