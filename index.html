@@ -147,8 +147,14 @@ async function syncApp(app){
 $("syncAllBtn").addEventListener("click",async()=>{
   const btn=$("syncAllBtn");
   btn.disabled=true;btn.textContent="Syncing…";
-  const results=await Promise.all(APPS.map(syncApp));
-  results.forEach(r=>{const el=$("status-"+r.name);if(el)el.textContent=r.status});
+  // Run one at a time — all tools share one GitHub repo, and firing
+  // simultaneous commits at it makes the second one land as a 409 conflict.
+  for(const app of APPS){
+    const el=$("status-"+app.name);
+    if(el)el.textContent="syncing…";
+    const r=await syncApp(app);
+    if(el)el.textContent=r.status;
+  }
   btn.disabled=false;btn.textContent="Sync all now";
 });
 </script>
