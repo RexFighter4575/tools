@@ -94,6 +94,10 @@ main{padding-top:6px;padding-bottom:40px}
 
 <script>
 const $=id=>document.getElementById(id);
+// Sync-all runs this list one at a time (see the loop below) — never in
+// parallel, since all tools share one GitHub repo and simultaneous commits
+// to it race and 409. Just add new tools here; the one-at-a-time order
+// covers them automatically.
 const APPS=[
   {name:"Budget",key:"mono-budget-v1",path:"data/mono-budget.json"},
   {name:"Mind",key:"mono-mind-v1",path:"data/mono-mind.json"}
