@@ -44,6 +44,11 @@ main{padding-top:6px;padding-bottom:40px}
 .card p{font-size:.82rem;color:var(--g3)}
 .chev{font-family:var(--mono);font-size:1.1rem;color:var(--g3);flex:0 0 auto}
 .addnote{font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;color:var(--g3);text-align:center;margin-top:26px}
+.btn{width:100%;border:1.5px solid var(--bk);background:var(--bk);color:var(--wh);border-radius:var(--r);
+  padding:15px;font-family:var(--body);font-weight:600;font-size:.95rem;cursor:pointer}
+.btn:active{opacity:.8}
+.btn:disabled{opacity:.5}
+.status{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;color:var(--g3);margin-top:4px}
 </style>
 </head>
 <body>
@@ -66,6 +71,7 @@ main{padding-top:6px;padding-bottom:40px}
       </div>
       <span class="chev">→</span>
     </a>
+    <div class="status" id="status-Budget">&nbsp;</div>
 
     <a class="card" href="mono-mind-trainer.html">
       <div>
@@ -74,12 +80,77 @@ main{padding-top:6px;padding-bottom:40px}
       </div>
       <span class="chev">→</span>
     </a>
+    <div class="status" id="status-Mind">&nbsp;</div>
 
-    <!-- New tool? Add another card here, same shape, pointing at its .html file. -->
+    <!-- New tool? Add another card here, same shape, pointing at its .html file,
+         plus a matching <div class="status" id="status-NAME"> line, and add it
+         to the APPS list in the script below. -->
   </div>
+
+  <button class="btn" id="syncAllBtn" style="margin-top:22px">Sync all now</button>
 
   <div class="addnote">ADD-TO-HOME-SCREEN FROM THIS PAGE FOR ONE HUB ICON</div>
 </main>
 
+<script>
+const $=id=>document.getElementById(id);
+const APPS=[
+  {name:"Budget",key:"mono-budget-v1",path:"data/mono-budget.json"},
+  {name:"Mind",key:"mono-mind-v1",path:"data/mono-mind.json"}
+];
+const b64e=s=>btoa(unescape(encodeURIComponent(s)));
+const b64d=s=>decodeURIComponent(escape(atob(String(s).replace(/\s/g,""))));
+const normRepo=v=>String(v||"").trim().replace(/^(https?:\/\/)?(www\.)?github\.com\//i,"").replace(/\.git$/i,"").replace(/\/+$/,"").split("/").slice(0,2).join("/");
+function ghExplain(e){
+  const m=String(e&&e.message||"");
+  if(/401/.test(m))return"token rejected (401) — reconnect in the app";
+  if(/403/.test(m))return"forbidden (403) — token needs contents: read & write";
+  if(/404/.test(m))return"repo not found (404) — check owner/repo in the app";
+  if(/409|422/.test(m))return"sync conflict — tap sync again";
+  return"no connection to github";
+}
+async function syncApp(app){
+  const raw=localStorage.getItem(app.key);
+  if(!raw)return{name:app.name,status:"nothing on this device yet"};
+  let S;try{S=JSON.parse(raw)}catch(e){return{name:app.name,status:"couldn't read local data"}}
+  if(!S.gh||!S.gh.enabled||!S.gh.repo||!S.gh.token)return{name:app.name,status:"not connected — open the app once to connect"};
+  const parts=normRepo(S.gh.repo).split("/");
+  if(parts.length!==2)return{name:app.name,status:"bad repo setting — reconnect in the app"};
+  const api="https://api.github.com/repos/"+parts[0]+"/"+parts[1]+"/contents/"+app.path;
+  const hdr={"Authorization":"Bearer "+S.gh.token,"Accept":"application/vnd.github+json"};
+  try{
+    const r=await fetch(api,{headers:hdr});
+    let sha=null,remote=null;
+    if(r.status===404){/* no remote file yet — first push */}
+    else if(!r.ok)throw new Error("GET "+r.status);
+    else{const j=await r.json();sha=j.sha;remote=JSON.parse(b64d(j.content))}
+    const localUpdated=(S.meta&&S.meta.updatedAt)||0;
+    const remoteUpdated=(remote&&remote.meta&&remote.meta.updatedAt)||0;
+    if(remote&&remoteUpdated>localUpdated){
+      const gh=Object.assign({},S.gh,{lastSync:Date.now()});
+      const merged=Object.assign({},remote,{gh});
+      localStorage.setItem(app.key,JSON.stringify(merged));
+      return{name:app.name,status:"pulled newer data from GitHub"};
+    }
+    const payload=JSON.parse(JSON.stringify(S));delete payload.gh;
+    const body={message:"mono sync (hub) "+new Date().toISOString(),content:b64e(JSON.stringify(payload))};
+    if(sha)body.sha=sha;
+    const pr=await fetch(api,{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},hdr),body:JSON.stringify(body)});
+    if(!pr.ok)throw new Error("PUT "+pr.status);
+    S.gh.lastSync=Date.now();
+    localStorage.setItem(app.key,JSON.stringify(S));
+    return{name:app.name,status:"synced "+new Date().toLocaleTimeString()};
+  }catch(e){
+    return{name:app.name,status:ghExplain(e)};
+  }
+}
+$("syncAllBtn").addEventListener("click",async()=>{
+  const btn=$("syncAllBtn");
+  btn.disabled=true;btn.textContent="Syncing…";
+  const results=await Promise.all(APPS.map(syncApp));
+  results.forEach(r=>{const el=$("status-"+r.name);if(el)el.textContent=r.status});
+  btn.disabled=false;btn.textContent="Sync all now";
+});
+</script>
 </body>
 </html>
