@@ -5,111 +5,223 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FFFFFF">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>Mono — Tool Center</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>MONO — Tool Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  color-scheme:light;
-  --bk:#0A0A0A;
-  --wh:#FFFFFF;
-  --g1:#F4F4F4;
-  --g2:#E2E2E2;
-  --g3:#8A8A8A;
-  --r:14px;
-  --disp:"Familjen Grotesk",-apple-system,"Segoe UI",sans-serif;
-  --body:"Spline Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-}
+html,body{background:#FFFFFF}
+:root{color-scheme:light;--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;--r:14px;
+  --disp:"Familjen Grotesk",-apple-system,sans-serif;--body:"Spline Sans",-apple-system,sans-serif;
+  --mono:"Spline Sans Mono",ui-monospace,Menlo,monospace}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:16px;background:#FFFFFF}
-body{font-family:var(--body);color:#0A0A0A;background:#FFFFFF;line-height:1.5;
-  min-height:100vh;min-height:100dvh}
-.wrap{max-width:680px;margin:0 auto;padding:0 18px}
-header{position:sticky;top:0;z-index:40;background:var(--wh);border-bottom:1.5px solid var(--bk);padding-top:env(safe-area-inset-top)}
-.hbar{max-width:680px;margin:0 auto;padding:12px 18px}
-.wordmark{font-family:var(--disp);font-weight:700;font-size:1.1rem;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
-.wordmark .blk{background:var(--bk);color:var(--wh);padding:1px 8px;border-radius:6px}
-h1{font-family:var(--disp);font-weight:700;font-size:clamp(1.7rem,6.5vw,2.3rem);line-height:1.12;letter-spacing:-.01em;margin:22px 0 4px}
-.sub{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3);margin-bottom:22px}
-main{padding-top:6px;padding-bottom:40px}
-.stack{display:flex;flex-direction:column;gap:12px}
-.card{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:var(--wh);border:1.5px solid var(--bk);border-radius:var(--r);padding:18px;
-  text-decoration:none;color:var(--bk)}
-.card:active{background:var(--g1)}
-.card h3{font-family:var(--disp);font-weight:700;font-size:1.05rem;margin-bottom:2px}
-.card p{font-size:.82rem;color:var(--g3)}
-.chev{font-family:var(--mono);font-size:1.1rem;color:var(--g3);flex:0 0 auto}
-.addnote{font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;color:var(--g3);text-align:center;margin-top:26px}
+body{font-family:var(--body);background:#FFFFFF;color:#0A0A0A;min-height:100vh;min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.mono{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3)}
+.mono.dark{color:var(--bk)}
+.stage{width:100%;max-width:420px;text-align:center}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(1.6rem,7vw,2.2rem);letter-spacing:-.01em}
+.linkbtn{background:none;border:none;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;
+  text-transform:uppercase;text-decoration:underline;text-underline-offset:3px;color:var(--g3);cursor:pointer;padding:8px}
+
+/* ---- sliding puzzle ---- */
+#board{position:relative;width:min(84vw,320px);aspect-ratio:1;margin:24px auto 14px;
+  background:var(--g1);border:2.5px solid var(--bk);border-radius:18px;overflow:hidden}
+.tileS{position:absolute;width:33.333%;height:33.333%;border:1.5px solid var(--bk);border-radius:12px;
+  background:var(--wh);cursor:pointer;overflow:hidden;
+  transition:transform .16s cubic-bezier(.22,1,.36,1);user-select:none}
+.tileS .art{position:absolute;width:300%;height:300%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--disp);font-weight:700;letter-spacing:-.02em;color:var(--bk);
+  font-size:min(31vw,118px);pointer-events:none}
+.tileS .cnr{position:absolute;top:4px;left:7px;font-family:var(--mono);font-size:.55rem;color:var(--g3)}
+.tileS:active{filter:brightness(.94)}
+#board.won .tileS{border-color:transparent;transition:transform .16s ease,border-color .4s ease}
+#board.won{background:var(--wh)}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+#board.won{animation:pulse .5s ease}
+
+/* ---- hub ---- */
+#hub{display:none;text-align:left}
+.apptile{display:block;border:2px solid var(--bk);border-radius:16px;padding:18px;margin-top:14px;
+  text-decoration:none;color:var(--bk);background:var(--wh);transition:transform .12s ease}
+.apptile:active{transform:scale(.98)}
+.apptile h2{font-family:var(--disp);font-weight:700;font-size:1.35rem;display:flex;align-items:center;gap:10px}
+.apptile .blk{background:var(--bk);color:var(--wh);padding:1px 9px;border-radius:7px;font-size:1.05rem}
+.apptile p{font-size:.88rem;color:var(--g3);margin-top:4px}
+.hubfoot{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+
+/* ---- shared sync panel ---- */
+.sync{border:2px solid var(--bk);border-radius:16px;padding:18px;margin-top:20px;background:var(--wh)}
+.sync h2{font-family:var(--disp);font-weight:700;font-size:1.15rem;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sync .lead{font-size:.86rem;color:var(--g3);margin:6px 0 12px}
+label.fl{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3);margin:12px 0 5px}
+input[type=text],input[type=password]{width:100%;font-family:var(--body);font-size:16px;border:1.5px solid var(--bk);
+  border-radius:10px;padding:12px;background:var(--wh);color:var(--bk);appearance:none;-webkit-appearance:none}
 .btn{width:100%;border:1.5px solid var(--bk);background:var(--bk);color:var(--wh);border-radius:var(--r);
-  padding:15px;font-family:var(--body);font-weight:600;font-size:.95rem;cursor:pointer}
+  padding:14px;font-family:var(--body);font-weight:600;font-size:.95rem;cursor:pointer;margin-top:12px}
+.btn.ghost{background:var(--wh);color:var(--bk)}
 .btn:active{opacity:.8}
 .btn:disabled{opacity:.5}
-.status{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;color:var(--g3);margin-top:4px}
+.chip{display:inline-block;font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;border:1.5px solid var(--bk);
+  border-radius:99px;padding:8px 13px;cursor:pointer;background:var(--wh);color:var(--bk);margin-top:12px}
+.chip.on{background:var(--bk);color:var(--wh)}
+.statusbig{font-family:var(--mono);font-size:.68rem;letter-spacing:.04em;color:var(--g3);margin-top:12px;line-height:1.5}
+.approw{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1.5px solid var(--g1)}
+.approw:last-child{border-bottom:none}
+.approw b{font-family:var(--disp);font-size:.95rem}
+.approw .st{font-family:var(--mono);font-size:.62rem;letter-spacing:.03em;color:var(--g3);text-align:right;flex:1}
+.subtle{font-size:.72rem;color:var(--g3);margin-top:12px;line-height:1.5}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#hub.show{display:block;animation:rise .4s ease both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 /*WHITELOCK*/@media (prefers-color-scheme: dark){:root{--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;color-scheme:light}html,body{background:#FFFFFF !important;color:#0A0A0A !important}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="hbar">
-    <div class="wordmark"><span class="blk">MONO</span> tool center</div>
+<div class="stage" id="lock">
+  <p class="mono">MONO · TOOL CENTER</p>
+  <h1 style="margin-top:4px">Slide it <span style="border-bottom:4px solid var(--bk)">together</span>.</h1>
+  <p class="mono" id="moveLbl" style="margin-top:10px">MOVES: 0</p>
+  <div id="board"></div>
+  <p class="mono" id="bestLbl"></p>
+  <div><button class="linkbtn" id="shufBtn">reshuffle</button><button class="linkbtn" id="skipBtn">skip</button></div>
+</div>
+
+<div class="stage" id="hub">
+  <p class="mono" id="hubDate"></p>
+  <h1><span style="background:var(--bk);color:var(--wh);padding:1px 10px;border-radius:8px">MONO</span> tools</h1>
+  <a class="apptile" href="mono-budget-tracker.html"><h2><span class="blk">M</span>Budget</h2><p>Savings-first money tracker · safe-to-spend, goals, finance learning library</p></a>
+  <a class="apptile" href="mono-mind-trainer.html"><h2><span class="blk">M</span>Mind</h2><p>Attention &amp; memory trainer · daily practice, topic sources, spaced notes</p></a>
+  <a class="apptile" href="mono-base-knowledge.html"><h2><span class="blk">M</span>Base</h2><p>Basic-knowledge library · vehicles, design &amp; materials, history, sports — with faces</p></a>
+
+  <!-- One shared GitHub login for all tools. Enter it once here; every tool reads
+       it automatically (same-origin localStorage). Tokens stay on this device and
+       are never written into the synced data or this repo. -->
+  <div class="sync">
+    <h2>Sync <span class="mono" id="syncBadge">NOT CONNECTED</span></h2>
+    <p class="lead">Connect once here and all three tools use the same repo &amp; token — no need to enter it in each app. You can still Push/Pull inside any tool individually.</p>
+
+    <label class="fl">Private data repo (owner/name)</label>
+    <input type="text" id="ghRepo" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="yourname/life-improvement-tools">
+    <label class="fl">Fine-grained access token</label>
+    <input type="password" id="ghToken" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="github_pat_…">
+
+    <button class="btn" id="verifyBtn">Connect &amp; verify</button>
+    <button class="btn ghost" id="syncAllBtn">Sync all now</button>
+    <span class="chip" id="autoChip">Auto-sync ✓ on</span>
+
+    <p class="statusbig" id="syncStatus">Paste the repo and token, then tap Connect &amp; verify.</p>
+
+    <div id="appStatuses" style="margin-top:12px">
+      <div class="approw"><b>Budget</b><span class="st" id="st-Budget">—</span></div>
+      <div class="approw"><b>Mind</b><span class="st" id="st-Mind">—</span></div>
+      <div class="approw"><b>Base</b><span class="st" id="st-Base">—</span></div>
+    </div>
+
+    <button class="linkbtn" id="disconnectBtn" style="margin-top:10px">disconnect &amp; forget token</button>
+    <p class="subtle">The token lives only in this browser. It is never uploaded, never exported, and never committed to the public <b>tools</b> repo. Give it access to your private data repo only, with <b>Contents: Read and write</b>.</p>
   </div>
-</header>
 
-<main class="wrap">
-  <h1>Your tools</h1>
-  <div class="sub">Tap one to open</div>
-
-  <div class="stack">
-    <a class="card" href="mono-budget-tracker.html">
-      <div>
-        <h3>Budget</h3>
-        <p>Track spending, synced to your private repo</p>
-      </div>
-      <span class="chev">→</span>
-    </a>
-    <div class="status" id="status-Budget">&nbsp;</div>
-
-    <a class="card" href="mono-mind-trainer.html">
-      <div>
-        <h3>Mind</h3>
-        <p>Attention &amp; memory training</p>
-      </div>
-      <span class="chev">→</span>
-    </a>
-    <div class="status" id="status-Mind">&nbsp;</div>
-
-    <a class="card" href="mono-base-knowledge.html">
-      <div>
-        <h3>Base</h3>
-        <p>Basic-knowledge library &amp; faces</p>
-      </div>
-      <span class="chev">→</span>
-    </a>
-    <div class="status" id="status-Base">&nbsp;</div>
-
-    <!-- New tool? Add another card here, same shape, pointing at its .html file,
-         plus a matching <div class="status" id="status-NAME"> line, and add it
-         to the APPS list in the script below. -->
+  <div class="hubfoot">
+    <span class="mono" id="statLbl"></span>
+    <button class="linkbtn" id="replayBtn">replay puzzle</button>
   </div>
-
-  <button class="btn" id="syncAllBtn" style="margin-top:22px">Sync all now</button>
-
-  <div class="addnote">ADD-TO-HOME-SCREEN FROM THIS PAGE FOR ONE TOOL CENTER ICON</div>
-</main>
+</div>
 
 <script>
 const $=id=>document.getElementById(id);
-// Sync-all runs this list one at a time (see the loop below) — never in
-// parallel, since all tools share one GitHub repo and simultaneous commits
-// to it race and 409. Just add new tools here; the one-at-a-time order
-// covers them automatically.
+
+/* ================= PUZZLE STATE ================= */
+const KEY="mono-hub-v1";
+let H={solves:0,bestMoves:0,last:0};
+try{const v=localStorage.getItem(KEY);if(v)H=Object.assign(H,JSON.parse(v))}catch(e){}
+function saveH(){try{localStorage.setItem(KEY,JSON.stringify(H))}catch(e){}}
+
+/* board: array of 9 slots holding values 1..8 and 0 (blank) */
+const SOLVED=[1,2,3,4,5,6,7,8,0];
+let board=SOLVED.slice(),moves=0,playing=false;
+const rc=i=>[Math.floor(i/3),i%3];
+function neighbors(i){const [r,c]=rc(i),out=[];
+  if(r>0)out.push(i-3);if(r<2)out.push(i+3);if(c>0)out.push(i-1);if(c<2)out.push(i+1);return out}
+function isSolved(b){return b.every((v,i)=>v===SOLVED[i])}
+function blankIdx(b){return b.indexOf(0)}
+function applyMove(b,slot){ /* slide tile at `slot` into the blank if adjacent; returns true if moved */
+  const bi=blankIdx(b);
+  if(!neighbors(bi).includes(slot))return false;
+  b[bi]=b[slot];b[slot]=0;return true}
+function shuffle(n){
+  const b=SOLVED.slice();let prev=-1;
+  for(let k=0;k<n;k++){
+    const bi=blankIdx(b);
+    const opts=neighbors(bi).filter(s=>s!==prev);
+    const pick=opts[Math.floor(Math.random()*opts.length)];
+    prev=bi;applyMove(b,pick);
+  }
+  if(isSolved(b))applyMove(b,neighbors(blankIdx(b))[0]);
+  return b;
+}
+function buildTiles(){
+  const bd=$("board");bd.innerHTML="";
+  for(let v=1;v<=8;v++){
+    const home=v-1,[hr,hc]=rc(home);
+    const t=document.createElement("div");
+    t.className="tileS";t.dataset.v=v;
+    t.innerHTML='<div class="art" style="left:'+(-hc*100)+'%;top:'+(-hr*100)+'%">MONO</div><span class="cnr">'+v+'</span>';
+    t.addEventListener("click",()=>tap(v));
+    bd.appendChild(t);
+  }
+  layout();
+}
+function layout(){
+  board.forEach((v,slot)=>{
+    if(v===0)return;
+    const t=document.querySelector('.tileS[data-v="'+v+'"]'),[r,c]=rc(slot);
+    t.style.transform="translate("+(c*100)+"%,"+(r*100)+"%)";
+  });
+}
+function tap(v){
+  if(!playing)return;
+  const slot=board.indexOf(v);
+  if(applyMove(board,slot)){
+    moves++;$("moveLbl").textContent="MOVES: "+moves;
+    layout();
+    if(isSolved(board))win();
+  }
+}
+function win(){
+  playing=false;
+  $("board").classList.add("won");
+  H.solves++;H.bestMoves=H.bestMoves?Math.min(H.bestMoves,moves):moves;H.last=Date.now();saveH();
+  setTimeout(()=>unlock(),650);
+}
+function startPuzzle(){
+  board=shuffle(22);moves=0;playing=true;
+  $("board").classList.remove("won");
+  $("moveLbl").textContent="MOVES: 0";
+  $("bestLbl").textContent=H.solves?("SOLVES: "+H.solves+" · BEST: "+H.bestMoves+" MOVES"):"TAP A TILE NEXT TO THE GAP TO SLIDE IT.";
+  layout();
+}
+function unlock(){
+  H.last=Date.now();saveH();
+  $("lock").style.display="none";
+  $("hubDate").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}).toUpperCase();
+  $("statLbl").textContent=H.solves?("SOLVES: "+H.solves+(H.bestMoves?" · BEST: "+H.bestMoves+" MOVES":"")):"";
+  $("hub").classList.add("show");
+  refreshSyncUI();
+}
+$("skipBtn").addEventListener("click",unlock);
+$("shufBtn").addEventListener("click",startPuzzle);
+$("replayBtn").addEventListener("click",()=>{
+  H.last=0;saveH();
+  $("hub").classList.remove("show");$("hub").style.display="none";
+  $("lock").style.display="";startPuzzle();
+});
+
+/* ================= SHARED GITHUB SYNC ================= */
+/* One credential store shared by every tool on this origin. Each tool reads this
+   key on load, so the repo + token only ever get typed once (here). */
+const SHAREDGH="mono-sync-v1";
 const APPS=[
   {name:"Budget",key:"mono-budget-v1",path:"data/mono-budget.json"},
   {name:"Mind",key:"mono-mind-v1",path:"data/mono-mind.json"},
@@ -120,60 +232,128 @@ const b64d=s=>decodeURIComponent(escape(atob(String(s).replace(/\s/g,""))));
 const normRepo=v=>String(v||"").trim().replace(/^(https?:\/\/)?(www\.)?github\.com\//i,"").replace(/\.git$/i,"").replace(/\/+$/,"").split("/").slice(0,2).join("/");
 function ghExplain(e){
   const m=String(e&&e.message||"");
-  if(/401/.test(m))return"token rejected (401) — reconnect in the app";
-  if(/403/.test(m))return"forbidden (403) — token needs contents: read & write";
-  if(/404/.test(m))return"repo not found (404) — check owner/repo in the app";
-  if(/409|422/.test(m))return"sync conflict — tap sync again";
-  return"no connection to github";
+  if(/401/.test(m))return"TOKEN REJECTED (401) — RE-PASTE IT. FINE-GRAINED TOKENS START WITH github_pat_";
+  if(/403/.test(m))return"FORBIDDEN (403) — TOKEN NEEDS CONTENTS: READ & WRITE ON THIS REPO";
+  if(/404/.test(m))return"NOT FOUND (404) — CHECK owner/name AND THAT THE TOKEN IS SCOPED TO THIS EXACT REPO";
+  if(/409|422/.test(m))return"SYNC CONFLICT — TAP SYNC ALL ONCE MORE";
+  return"NO CONNECTION TO GITHUB — OFFLINE, OR OPENED FROM A FILE PREVIEW. USE THE https:// PAGES ADDRESS";
 }
+function loadCreds(){try{return JSON.parse(localStorage.getItem(SHAREDGH)||"null")}catch(e){return null}}
+function saveCreds(c){try{localStorage.setItem(SHAREDGH,JSON.stringify(c))}catch(e){}}
+function creds(){const c=loadCreds();return (c&&c.repo&&c.token)?c:null}
+function autoOn(){const c=loadCreds();return !c||c.auto!==false}
+
+function syncMsg(m){const el=$("syncStatus");if(el)el.textContent=m}
+function appMsg(name,m){const el=$("st-"+name);if(el)el.textContent=m}
+
+function refreshSyncUI(){
+  const c=loadCreds();
+  if(c&&c.repo)$("ghRepo").value=c.repo;
+  $("autoChip").textContent=autoOn()?"Auto-sync ✓ on":"Auto-sync off";
+  $("autoChip").classList.toggle("on",autoOn());
+  if(creds()){
+    $("syncBadge").textContent="CONNECTED";
+    $("syncBadge").classList.add("dark");
+    const last=c.lastSync?" · LAST SYNC "+new Date(c.lastSync).toLocaleString():"";
+    syncMsg("CONNECTED TO "+c.repo+last);
+  }else{
+    $("syncBadge").textContent="NOT CONNECTED";
+    $("syncBadge").classList.remove("dark");
+    syncMsg("Paste the repo and token, then tap Connect & verify.");
+  }
+  APPS.forEach(a=>{
+    const has=!!localStorage.getItem(a.key);
+    appMsg(a.name,has?"data on this device":"not opened yet");
+  });
+}
+
+/* verify: normalize + store creds, then confirm the token can see the repo */
+async function verify(){
+  const repo=normRepo($("ghRepo").value),token=$("ghToken").value.trim();
+  const parts=repo.split("/");
+  if(parts.length!==2||!parts[0]||!parts[1]||!token){syncMsg("NEED owner/repo (OR A FULL GITHUB URL) AND A TOKEN.");return}
+  $("ghRepo").value=repo;
+  const c=Object.assign({},loadCreds()||{},{repo:repo,token:token});
+  if(c.auto===undefined)c.auto=true;
+  saveCreds(c);
+  refreshSyncUI();
+  syncMsg("VERIFYING…");
+  try{
+    const r=await fetch("https://api.github.com/repos/"+parts[0]+"/"+parts[1],
+      {headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json"}});
+    if(!r.ok)throw new Error("GET "+r.status);
+    syncMsg("CONNECTED ✓ — "+repo+" REACHABLE. TAP SYNC ALL NOW.");
+    $("syncBadge").textContent="CONNECTED";$("syncBadge").classList.add("dark");
+  }catch(e){syncMsg(ghExplain(e))}
+}
+
+/* sync a single tool's data file using the shared creds */
 async function syncApp(app){
-  const raw=localStorage.getItem(app.key);
-  if(!raw)return{name:app.name,status:"nothing on this device yet"};
-  let S;try{S=JSON.parse(raw)}catch(e){return{name:app.name,status:"couldn't read local data"}}
-  if(!S.gh||!S.gh.enabled||!S.gh.repo||!S.gh.token)return{name:app.name,status:"not connected — open the app once to connect"};
-  const parts=normRepo(S.gh.repo).split("/");
-  if(parts.length!==2)return{name:app.name,status:"bad repo setting — reconnect in the app"};
+  const c=creds();
+  if(!c)return{name:app.name,status:"not connected"};
+  const parts=normRepo(c.repo).split("/");
+  if(parts.length!==2)return{name:app.name,status:"bad repo setting"};
   const api="https://api.github.com/repos/"+parts[0]+"/"+parts[1]+"/contents/"+app.path;
-  const hdr={"Authorization":"Bearer "+S.gh.token,"Accept":"application/vnd.github+json"};
+  const hdr={"Authorization":"Bearer "+c.token,"Accept":"application/vnd.github+json"};
+  let S=null;const raw=localStorage.getItem(app.key);
+  if(raw){try{S=JSON.parse(raw)}catch(e){return{name:app.name,status:"couldn't read local data"}}}
   try{
     const r=await fetch(api,{headers:hdr});
     let sha=null,remote=null;
     if(r.status===404){/* no remote file yet — first push */}
     else if(!r.ok)throw new Error("GET "+r.status);
     else{const j=await r.json();sha=j.sha;remote=JSON.parse(b64d(j.content))}
-    const localUpdated=(S.meta&&S.meta.updatedAt)||0;
+    const localUpdated=(S&&S.meta&&S.meta.updatedAt)||0;
     const remoteUpdated=(remote&&remote.meta&&remote.meta.updatedAt)||0;
-    if(remote&&remoteUpdated>localUpdated){
-      const gh=Object.assign({},S.gh,{lastSync:Date.now()});
-      const merged=Object.assign({},remote,{gh});
+    /* remote wins if it's newer, or if this device has no local copy yet */
+    if(remote&&(remoteUpdated>localUpdated||!S)){
+      const merged=Object.assign({},remote);
+      if(S&&S.gh)merged.gh=S.gh;            /* preserve a tool's own settings block */
       localStorage.setItem(app.key,JSON.stringify(merged));
-      return{name:app.name,status:"pulled newer data from GitHub"};
+      return{name:app.name,status:"pulled newer data"};
     }
-    const payload=JSON.parse(JSON.stringify(S));delete payload.gh;
+    if(!S)return{name:app.name,status:"nothing on this device yet"};
+    const payload=JSON.parse(JSON.stringify(S));delete payload.gh;   /* never sync the token */
     const body={message:"mono sync (hub) "+new Date().toISOString(),content:b64e(JSON.stringify(payload))};
     if(sha)body.sha=sha;
     const pr=await fetch(api,{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},hdr),body:JSON.stringify(body)});
     if(!pr.ok)throw new Error("PUT "+pr.status);
-    S.gh.lastSync=Date.now();
-    localStorage.setItem(app.key,JSON.stringify(S));
     return{name:app.name,status:"synced "+new Date().toLocaleTimeString()};
-  }catch(e){
-    return{name:app.name,status:ghExplain(e)};
-  }
+  }catch(e){return{name:app.name,status:ghExplain(e)}}
 }
-$("syncAllBtn").addEventListener("click",async()=>{
-  const btn=$("syncAllBtn");
-  btn.disabled=true;btn.textContent="Syncing…";
-  // Run one at a time — all tools share one GitHub repo, and firing
-  // simultaneous commits at it makes the second one land as a 409 conflict.
+
+async function syncAll(){
+  if(!creds()){syncMsg("CONNECT FIRST — PASTE REPO + TOKEN ABOVE.");return}
+  const btn=$("syncAllBtn");btn.disabled=true;btn.textContent="Syncing…";
+  syncMsg("SYNCING ALL TOOLS…");
+  /* one at a time — all tools share one repo, and simultaneous commits 409 */
+  let ok=0,bad=0;
   for(const app of APPS){
-    const el=$("status-"+app.name);
-    if(el)el.textContent="syncing…";
+    appMsg(app.name,"syncing…");
     const r=await syncApp(app);
-    if(el)el.textContent=r.status;
+    appMsg(app.name,r.status);
+    if(/synced|pulled|nothing/.test(r.status))ok++;else bad++;
   }
+  const c=loadCreds();if(c){c.lastSync=Date.now();saveCreds(c)}
   btn.disabled=false;btn.textContent="Sync all now";
+  syncMsg("DONE — "+ok+" OK"+(bad?" · "+bad+" NEED A LOOK":"")+" · "+new Date().toLocaleTimeString());
+}
+
+$("verifyBtn").addEventListener("click",verify);
+$("syncAllBtn").addEventListener("click",syncAll);
+$("autoChip").addEventListener("click",()=>{
+  const c=Object.assign({},loadCreds()||{});c.auto=!autoOn();saveCreds(c);refreshSyncUI();
 });
+$("disconnectBtn").addEventListener("click",()=>{
+  try{localStorage.removeItem(SHAREDGH)}catch(e){}
+  $("ghToken").value="";
+  refreshSyncUI();
+  syncMsg("DISCONNECTED — SHARED TOKEN CLEARED FROM THIS DEVICE.");
+});
+
+/* ================= BOOT ================= */
+buildTiles();
+if(Date.now()-H.last<15*60*1000){unlock()}else{startPuzzle()}
 </script>
 </body>
 </html>

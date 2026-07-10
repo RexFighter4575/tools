@@ -715,6 +715,12 @@ function answerQuiz(id,i){
 /* ================= GITHUB SYNC ================= */
 const b64e=s=>btoa(unescape(encodeURIComponent(s)));
 const b64d=s=>decodeURIComponent(escape(atob(String(s).replace(/\s/g,""))));
+/* ---- shared credentials: one login set once in the Tool Center hub, read by every tool ---- */
+const SHAREDGH="mono-sync-v1";
+function loadSharedGH(){try{return JSON.parse(localStorage.getItem(SHAREDGH)||"null")}catch(e){return null}}
+function saveSharedGH(){try{localStorage.setItem(SHAREDGH,JSON.stringify({repo:S.gh.repo,token:S.gh.token,auto:S.gh.auto,lastSync:S.gh.lastSync||0}))}catch(e){}}
+function clearSharedGH(){try{localStorage.removeItem(SHAREDGH)}catch(e){}}
+function adoptSharedGH(){const c=loadSharedGH();if(c&&c.repo&&c.token){S.gh.repo=c.repo;S.gh.token=c.token;S.gh.enabled=true;if(typeof c.auto==="boolean")S.gh.auto=c.auto;return true}return false}
 function ghPayload(){const p=JSON.parse(JSON.stringify(S));delete p.gh;return p}
 function ghApi(){const parts=normRepo(S.gh.repo).split("/");
   return "https://api.github.com/repos/"+parts[0]+"/"+parts[1]+"/contents/data/mono-mind.json"}
@@ -846,7 +852,7 @@ $("ghConnect").addEventListener("click",async()=>{
   const parts=repo.split("/");
   if(parts.length!==2||!parts[0]||!parts[1]||!tok){ghMsg("NEED owner/repo (OR A FULL GITHUB URL) AND A TOKEN.");return}
   $("ghRepo").value=repo;
-  S.gh.repo=repo;S.gh.token=tok;S.gh.enabled=true;store.save(S);
+  S.gh.repo=repo;S.gh.token=tok;S.gh.enabled=true;store.save(S);saveSharedGH();
   ghMsg("CHECKING GITHUB…");
   let res;try{res=await ghGet()}catch(e){ghMsg(ghExplain(e));return}
   if(!res.data){ghMsg("NO REMOTE FILE YET — PUSHING FIRST COPY…");await ghPush();return}
@@ -855,9 +861,9 @@ $("ghConnect").addEventListener("click",async()=>{
 });
 $("ghPushBtn").addEventListener("click",()=>ghPush());
 $("ghPullBtn").addEventListener("click",()=>ghPull(true));
-$("ghAuto").addEventListener("click",()=>{S.gh.auto=!S.gh.auto;store.save(S);
+$("ghAuto").addEventListener("click",()=>{S.gh.auto=!S.gh.auto;store.save(S);saveSharedGH();
   $("ghAuto").textContent=S.gh.auto?"Auto-sync ✓ on":"Auto-sync off";$("ghAuto").classList.toggle("on",S.gh.auto)});
-$("ghOff").addEventListener("click",()=>{S.gh.enabled=false;S.gh.token="";store.save(S);ghMsg("DISCONNECTED — TOKEN CLEARED FROM THIS DEVICE.")});
+$("ghOff").addEventListener("click",()=>{S.gh.enabled=false;S.gh.token="";store.save(S);clearSharedGH();ghMsg("DISCONNECTED — SHARED TOKEN CLEARED FROM THIS DEVICE.")});
 $("exportBtn").addEventListener("click",()=>{$("dataBox").value=JSON.stringify(ghPayload());$("setMsg").textContent="EXPORTED (SYNC TOKEN EXCLUDED) — COPY THE TEXT ABOVE."});
 $("copyBtn").addEventListener("click",async()=>{
   $("dataBox").select();
@@ -878,6 +884,7 @@ $("resetBtn").addEventListener("click",()=>{
 (async function(){
   const loaded=await store.load();
   if(loaded&&loaded.meta)S=Object.assign(blank(),loaded);
+  adoptSharedGH();
   if(S.gh&&S.gh.enabled)await ghPull(false);
   rAll();
   checkFresh(false);
