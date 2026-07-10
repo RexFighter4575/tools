@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FFFFFF">
+<title>Mono Base — Basic Knowledge Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;--r:14px;
+  --disp:"Familjen Grotesk",-apple-system,"Segoe UI",sans-serif;
+  --body:"Spline Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:var(--body);color:var(--bk);background:var(--wh);line-height:1.5;
+  min-height:100vh;min-height:100dvh;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px}
+header{position:sticky;top:0;z-index:40;background:var(--wh);border-bottom:1.5px solid var(--bk);padding-top:env(safe-area-inset-top)}
+.hbar{max-width:680px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.wordmark{font-family:var(--disp);font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+.wordmark .blk{background:var(--bk);color:var(--wh);padding:1px 8px;border-radius:6px}
+.gear{background:none;border:1.5px solid var(--bk);border-radius:8px;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;padding:7px 11px;color:var(--bk);cursor:pointer}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--wh);border-top:1.5px solid var(--bk);padding-bottom:env(safe-area-inset-bottom)}
+.tabs{max-width:680px;margin:0 auto;display:flex}
+.tab{flex:1;background:none;border:none;padding:13px 4px 12px;font-family:var(--mono);font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;color:var(--g3);cursor:pointer;position:relative}
+.tab.on{color:var(--wh)}
+.tab.on::before{content:"";position:absolute;left:14%;right:14%;top:7px;bottom:7px;background:var(--bk);border-radius:99px;z-index:-1}
+.tab span{position:relative}
+h1,h2,h3{font-family:var(--disp);font-weight:700;line-height:1.12;letter-spacing:-.01em}
+h1{font-size:clamp(1.7rem,6.5vw,2.3rem)} h2{font-size:1.3rem} h3{font-size:1.02rem}
+.mono{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3)}
+.mono.dark{color:var(--bk)}
+.soft{color:var(--g3)} .small{font-size:.85rem}
+.big{font-family:var(--disp);font-weight:700;font-size:2rem;line-height:1}
+p{font-size:.94rem}
+main{padding-top:22px}
+section.view{display:none}
+section.view.on{display:block;animation:fadeUp .3s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--wh);border:1.5px solid var(--bk);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card.soft-c{border-color:var(--g2)}
+.card.inv{background:var(--bk);color:var(--wh)}
+.card.inv .mono{color:rgba(255,255,255,.6)}
+.rowline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.divider{border:none;border-top:1.5px solid var(--g2);margin:14px 0}
+.chip{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;border:1.5px solid var(--bk);border-radius:99px;padding:6px 12px;cursor:pointer;background:var(--wh);color:var(--bk)}
+.chip.on{background:var(--bk);color:var(--wh)}
+.chip.mini{font-size:.6rem;padding:4px 9px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.bar{position:relative;height:10px;background:var(--g1);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--bk);border-radius:99px;transition:width .7s cubic-bezier(.22,1,.36,1)}
+.entry{padding:14px 2px;border-bottom:1.5px solid var(--g1)}
+.entry:last-child{border-bottom:none}
+.entry.known .etitle{color:var(--g3)}
+.etitle{font-family:var(--disp);font-weight:700;font-size:1.02rem}
+.ebody{font-size:.9rem;margin-top:4px}
+.peoplerow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.person{display:flex;align-items:center;gap:7px;border:1.5px solid var(--bk);border-radius:99px;padding:4px 12px 4px 4px;cursor:pointer;background:var(--wh)}
+.face{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--bk);object-fit:cover;background:var(--g1);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.62rem;color:var(--bk);flex:0 0 auto;overflow:hidden}
+img.face{display:block}
+.face.lg{width:96px;height:96px;font-size:1.1rem;margin:0 auto}
+.pname{font-family:var(--mono);font-size:.66rem;letter-spacing:.05em}
+.actrow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.pcell{border:1.5px solid var(--g2);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;background:var(--wh)}
+.pcell .face{margin:0 auto 6px;width:52px;height:52px}
+.pcell .pname{display:block}
+.btn{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;background:var(--bk);color:var(--wh);border:1.5px solid var(--bk);border-radius:10px;padding:12px 16px;cursor:pointer;text-align:center;text-decoration:none}
+.btn.ghost{background:var(--wh);color:var(--bk)}
+.btn.wide{width:100%}
+.btn.danger{background:var(--wh);color:var(--bk);text-decoration:line-through}
+.linkbtn{background:none;border:none;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:underline;text-underline-offset:3px;color:var(--bk);cursor:pointer;padding:4px 0}
+label.fl{display:block;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3);margin:12px 0 5px}
+input[type=text],input[type=password],textarea{width:100%;font-family:var(--body);font-size:16px;border:1.5px solid var(--bk);border-radius:10px;padding:12px;background:var(--wh);color:var(--bk);appearance:none;-webkit-appearance:none}
+textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
+.sheet{position:fixed;inset:0;z-index:60;background:var(--wh);overflow-y:auto;display:none;padding-bottom:40px}
+.sheet.on{display:block;animation:slideUp .28s ease both}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.sheet .hbar{border-bottom:1.5px solid var(--bk);position:sticky;top:0;background:var(--wh);padding-top:calc(12px + env(safe-area-inset-top));z-index:5}
+.back{background:none;border:none;font-family:var(--mono);font-size:.72rem;letter-spacing:.09em;color:var(--bk);cursor:pointer;padding:6px 0;text-transform:uppercase}
+.sheet-body{max-width:680px;margin:0 auto;padding:20px 18px}
+.popwrap{position:fixed;inset:0;z-index:70;background:rgba(10,10,10,.45);display:none;align-items:center;justify-content:center;padding:20px}
+.popwrap.on{display:flex}
+.popcard{background:var(--wh);border:1.5px solid var(--bk);border-radius:16px;width:100%;max-width:440px;max-height:80vh;max-height:80dvh;overflow-y:auto;padding:18px;animation:popIn .22s ease both;text-align:center}
+@keyframes popIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+.popx{float:right;background:none;border:1.5px solid var(--bk);border-radius:8px;font-family:var(--mono);font-size:.7rem;padding:5px 10px;cursor:pointer;color:var(--bk)}
+.quiz-opt{display:block;width:100%;text-align:left;font-family:var(--body);font-size:.94rem;border:1.5px solid var(--bk);border-radius:10px;background:var(--wh);color:var(--bk);padding:12px;margin-top:8px;cursor:pointer}
+.quiz-opt.right{background:var(--bk);color:var(--wh)}
+.quiz-opt.wrong{text-decoration:line-through;color:var(--g3);border-color:var(--g2)}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+  background:var(--bk);color:var(--wh);font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;padding:11px 16px;border-radius:99px;
+  opacity:0;pointer-events:none;transition:all .25s ease;z-index:80;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+:focus-visible{outline:2.5px solid var(--bk);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header><div class="hbar">
+  <a class="wordmark" href="./" style="text-decoration:none;color:inherit"><span class="blk">MONO</span> base</a>
+  <div style="display:flex;gap:8px">
+    <button class="gear" id="guideBtn">GUIDE</button>
+    <button class="gear" id="gearBtn">SETTINGS</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+
+  <a class="linkbtn" href="./" style="display:inline-block;margin-top:14px">← Tool Center</a>
+
+  <section class="view on" id="view-lib">
+    <h1 style="margin-bottom:4px">The basics,<br><span style="border-bottom:4px solid var(--bk)">finally</span>.</h1>
+    <p class="soft small" style="margin:6px 0 12px">The everyday knowledge people assume you have — in cards. Mark what you know; send keepers to Mono Mind.</p>
+    <input type="text" id="libSearch" placeholder="Search everything…">
+    <div class="chips" id="secChips"></div>
+    <div class="card soft-c" id="progCard"></div>
+    <div id="libBody"></div>
+  </section>
+
+  <section class="view" id="view-people">
+    <h1 style="margin-bottom:4px">Faces & names</h1>
+    <p class="soft small" style="margin-bottom:12px">Every person in the library. Faces load from Wikipedia when you're online; the mnemonic hook works either way.</p>
+    <div class="card inv">
+      <div class="rowline"><div><h3>Face quiz</h3><p class="small" style="opacity:.75">Who is this? Streaks build the name–face link.</p></div>
+      <button class="btn ghost" id="quizBtn">Play</button></div>
+      <p class="mono" id="quizStat" style="margin-top:8px"></p>
+    </div>
+    <div class="card soft-c"><div class="pgrid" id="peopleGrid"></div></div>
+  </section>
+
+</main>
+
+<div class="popwrap" id="popWrap"><div class="popcard" id="popCard"></div></div>
+<div id="toast"></div>
+
+<div class="sheet" id="guideSheet">
+  <div class="hbar"><button class="back" data-close="guideSheet">← Close guide</button></div>
+  <div class="sheet-body" style="text-align:left">
+    <h1>How Mono Base works</h1>
+    <p class="soft small" style="margin:6px 0 16px">A browsable library of the "basic" knowledge that's easy to have missed — deepest on vehicles, design & materials, history, and sports.</p>
+    <div class="card soft-c"><h3>Library</h3><p class="small" style="margin-top:6px">Cards per section, searchable across everything. <b>KNOWN</b> marks a card learned (tracked in the progress bar). <b>→ MIND</b> saves the card as a note in Mono Mind, where it enters the 1/3/7/21-day review cycle — that's your "remember this later" button.</p></div>
+    <div class="card soft-c"><h3>Faces</h3><p class="small" style="margin-top:6px">Every name gets a face chip. Photos load live from Wikipedia (needs internet and a real browser — on the hosted site they just work). Offline you get initials plus the mnemonic hook, which is honestly the part that makes names stick. Tap any person for the full card and a link to read more.</p></div>
+    <div class="card soft-c"><h3>Face quiz</h3><p class="small" style="margin-top:6px">Shows a loaded face, you pick the name from three. Pure name–face encoding reps. Browse the library online once first so faces are cached.</p></div>
+    <div class="card"><h3>Send to Mind — the fine print</h3><p class="small" style="margin-top:6px">Both apps must run from the same place for the handoff to work: the hosted tools site (best), or the same browser on your PC. It writes the note locally and bumps the sync clock so Mind pushes it to GitHub next time it opens.</p></div>
+    <div class="card soft-c"><h3>GitHub sync</h3><p class="small" style="margin-top:6px">Same repo and token as the other apps; this one writes <span style="font-family:var(--mono)">data/mono-base.json</span>. Token stays on-device, never uploaded or exported.</p></div>
+  </div>
+</div>
+
+<div class="sheet" id="setSheet">
+  <div class="hbar"><button class="back" data-close="setSheet">← Close settings</button></div>
+  <div class="sheet-body" style="text-align:left">
+    <h2>Settings</h2>
+    <hr class="divider">
+    <h3>GitHub sync</h3>
+    <p class="small soft" style="margin:6px 0 4px">Same private repo + token as the other Mono apps.</p>
+    <label class="fl">Repo (owner/name)</label><input type="text" id="ghRepo" autocapitalize="none" placeholder="yourname/life-improvement-tools">
+    <label class="fl">Fine-grained access token</label><input type="password" id="ghToken" autocapitalize="none" placeholder="github_pat_…">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+      <button class="btn wide" id="ghConnect">Connect & sync now</button>
+      <div class="grid2"><button class="btn ghost" id="ghPushBtn">Push now</button><button class="btn ghost" id="ghPullBtn">Pull now</button></div>
+      <button class="chip" id="ghAuto">Auto-sync ✓ on</button>
+      <button class="linkbtn" id="ghOff">Disconnect sync</button>
+    </div>
+    <p class="mono" id="ghStatus" style="margin-top:8px">NOT CONNECTED</p>
+    <hr class="divider">
+    <h3>Your data</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+      <button class="btn wide ghost" id="exportBtn">Export my data</button>
+      <textarea id="dataBox" placeholder="Exported data appears here — copy it. Or paste a backup and tap Import."></textarea>
+      <button class="btn wide ghost" id="copyBtn">Copy to clipboard</button>
+      <button class="btn wide" id="importBtn">Import pasted data</button>
+      <button class="btn wide danger" id="resetBtn">Reset everything</button>
+    </div>
+    <p class="mono" id="setMsg" style="margin-top:10px"></p>
+  </div>
+</div>
+
+<nav><div class="tabs">
+  <button class="tab on" data-goview="lib"><span>Library</span></button>
+  <button class="tab" data-goview="people"><span>Faces & Names</span></button>
+</div></nav>
+<script>
+/* ================= DATA ================= */
+const P=(n,role,hook)=>({n:n,role:role,hook:hook});
+const SECTIONS=[
+{id:"veh",n:"Vehicles",entries:[
+{id:"v1",t:"The four-stroke engine",b:"Intake pulls in air and fuel, compression squeezes it, the spark fires the power stroke, exhaust pushes out the burnt gas. Every gas engine you'll ever discuss is this loop, thousands of times a minute."},
+{id:"v2",t:"Horsepower vs torque",b:"Torque is twisting force — the shove off the line; horsepower is how fast work gets done at speed. Trucks sell torque, sports cars sell horsepower, and now you know why."},
+{id:"v3",t:"Manual vs automatic",b:"A manual makes you match engine speed to wheel speed with a clutch; an automatic (or CVT/dual-clutch) does the matching for you. Enthusiasts love manuals for control, not efficiency — modern autos shift faster."},
+{id:"v4",t:"How EVs are different",b:"Electric motors make full torque instantly and have almost no moving parts — no oil changes, no gears to speak of, braking that recharges the battery. Range anxiety is mostly a charging-network story, not a motor story."},
+{id:"v5",t:"FWD, RWD, AWD",b:"Front-wheel drive is cheap and stable, rear-wheel drive balances the car for handling (why sports cars use it), all-wheel drive adds grip in weather. It's about which wheels the engine pushes."},
+{id:"v6",t:"Why oil changes matter",b:"Oil lubricates and cools metal parts moving thousands of times a minute; it breaks down and collects grit. Skipping changes is how cheap maintenance becomes an engine replacement."},
+{id:"v7",t:"The badge families",b:"Toyota owns Lexus, Honda owns Acura, Nissan owns Infiniti, VW owns Audi and Porsche, BMW owns Mini. Luxury brands are often the same engineering in a nicer suit — great trivia, better negotiating fact.",people:[P("Ferdinand Porsche","Founded Porsche; engineered the original VW Beetle","Porsche = 'the Beetle guy went fast' — picture a Beetle stretched into a 911.")]},
+{id:"v8",t:"The people who built car culture",b:"Benz built the first true automobile (1885); Ford didn't invent the car but the moving assembly line that made it affordable; Honda went from motorcycles to reliability legend; Ferrari made speed a religion.",people:[P("Karl Benz","Built the first practical automobile, 1885","Benz = 'began' — the beginning of cars."),P("Henry Ford","Assembly line; the Model T","Picture Ford handing you the same sandwich every 10 seconds — an assembly line of lunches."),P("Soichiro Honda","Founded Honda from a piston workshop","A tiny piston growing into a million reliable engines."),P("Enzo Ferrari","Founded Ferrari; racing first, road cars to fund it","A man in sunglasses who only ever painted things red.")]},
+{id:"v9",t:"The 20/3/8 car rule",b:"A sanity check for buying: 20% down, loan no longer than 3 years, all car costs under 8% of gross income. Break it knowingly or the car quietly owns you."}]},
+{id:"des",n:"Design & Materials",entries:[
+{id:"d1",t:"Form follows function",b:"The founding phrase of modern design — a thing's shape should come from what it does, not decoration. Coined in architecture, adopted everywhere from chairs to iPhones.",people:[P("Louis Sullivan","Architect; coined 'form follows function'","Sullivan = a skyscraper shaped exactly like its job.")]},
+{id:"d2",t:"Bauhaus in one breath",b:"German school (1919–1933) that fused art with industrial craft and stripped ornament for geometry. Closed by the Nazis, its teachers scattered — which is why the whole modern world looks a bit Bauhaus.",people:[P("Walter Gropius","Founded the Bauhaus","Gropius = 'group house' — art and industry living together.")]},
+{id:"d3",t:"Dieter Rams' ten principles",b:"The Braun designer's list — good design is honest, useful, unobtrusive, long-lasting, and 'as little design as possible' — is the DNA Apple openly borrowed. If a product feels calm, Rams is why.",people:[P("Dieter Rams","Braun's design chief; the ten principles","Rams = the calm white radio Apple grew out of.")]},
+{id:"d4",t:"The Eames legacy",b:"Charles and Ray Eames bent plywood into furniture that's still in production 70 years later — proof that mass-produced could be beautiful. The Eames Lounge Chair is design's most recognizable armchair.",people:[P("Charles and Ray Eames","Husband-wife team; molded plywood and the Lounge Chair","Two people bending one sheet of plywood into a smile.")]},
+{id:"d5",t:"MAYA: most advanced yet acceptable",b:"Raymond Loewy's rule: push design as far as people can accept, no further. It's why radical products flop and slightly-futuristic ones sell — and why every car grille changes gradually.",people:[P("Raymond Loewy","'Father of industrial design'; Coke bottle, locomotives, logos","Loewy = a streamlined train pulling a Coke bottle.")]},
+{id:"d6",t:"Why aluminum vs steel",b:"Steel is stronger and cheap; aluminum is a third the weight and doesn't rust, but costs more and is harder to repair. Cars, laptops, and bikes are all just this tradeoff wearing different clothes."},
+{id:"d7",t:"Plastics: thermo vs thermoset",b:"Thermoplastics melt and reshape (bottles, LEGO — recyclable); thermosets cure once forever (epoxy, pan handles — heatproof but unrecyclable). One word tells you how a plastic lives and dies."},
+{id:"d8",t:"Injection molding",b:"Molten plastic squirted into a steel mold, ejected seconds later — the process behind almost every plastic object you own. Molds cost a fortune; each part costs pennies. That economy shapes what gets made."},
+{id:"d9",t:"Anodizing & finishes",b:"Anodizing grows a hard, dyed oxide layer on aluminum — the colorfast matte skin on phones and water bottles. It's why the color doesn't chip like paint: it's not on the metal, it IS the metal.",people:[P("Jony Ive","Apple's design chief through iMac–iPhone era","Ive = a single aluminum slab slowly becoming a phone.")]}]},
+{id:"hist",n:"History",entries:[
+{id:"h1",t:"The printing press, ~1440",b:"Gutenberg's movable type broke the monopoly on information — millions of books within fifty years, literacy up, ideas outrunning authorities. Every 'internet changed everything' take was rehearsed here first.",people:[P("Johannes Gutenberg","Movable-type printing press","A man stamping the same page a thousand times, grinning.")]},
+{id:"h2",t:"The Renaissance",b:"Europe's 14th–17th century reboot: rediscovered classical knowledge, art and science exploding out of Italy. Its poster child painted the Mona Lisa and sketched helicopters in the margins.",people:[P("Leonardo da Vinci","Painter, engineer, the 'Renaissance man'","Leonardo = Mona Lisa holding a helicopter blueprint.")]},
+{id:"h3",t:"The French Revolution → Napoleon",b:"1789: France overthrows its monarchy for 'liberty, equality, fraternity' — then the chaos gets captured by a short general who crowns himself emperor and rewrites Europe's map and laws.",people:[P("Napoleon","Revolutionary general turned emperor of France","A small man placing a crown on his own head.")]},
+{id:"h4",t:"The Industrial Revolution",b:"Late 1700s Britain: steam power moves work from muscle to machine. Cities balloon, goods get cheap, the modern job is invented — and every debate about tech taking jobs starts here."},
+{id:"h5",t:"The American Civil War",b:"1861–65: eleven Southern states seceded over slavery's future; the Union's victory ended slavery and redefined the country as one nation rather than a club of states.",people:[P("Abraham Lincoln","President through the Civil War; Emancipation Proclamation","The tall hat that held a country together.")]},
+{id:"h6",t:"WWI's trigger",b:"One assassination in Sarajevo (1914) yanked a web of alliances into total war. The lesson people cite forever: entangled commitments can turn a local spark into a global fire."},
+{id:"h7",t:"The Cold War",b:"1947–1991: the US and USSR competing everywhere except direct battle — proxy wars, spies, the space race. The moon landing was as much a Cold War move as a science one.",people:[P("Neil Armstrong","First human on the Moon, 1969","One boot print on gray dust.")]},
+{id:"h8",t:"The Silk Road",b:"Not one road but a web of trade routes linking China to the Mediterranean for 1,500 years — silk and spices one way, gold, glass, ideas, and plagues the other. Globalization, version 1.0."},
+{id:"h9",t:"The Civil Rights Movement",b:"1950s–60s America: nonviolent mass protest — boycotts, marches, sit-ins — forced the end of legal segregation. Its centerpiece speech imagined children judged by character, not color.",people:[P("Martin Luther King Jr.","Led the movement; 'I Have a Dream'","A dream spoken from marble steps.")]}]},
+{id:"sport",n:"Sports",entries:[
+{id:"s1",t:"The sports calendar",b:"NFL owns fall, NBA and NHL run winter into spring, MLB owns summer, and European soccer runs August–May. Know the season, and half of sports small talk decodes itself."},
+{id:"s2",t:"How playoffs work",b:"The regular season mostly just decides seeding; the playoffs are a bracket where seeds meet and one loss (or lost series) ends you. 'They clinched' = they're in the bracket."},
+{id:"s3",t:"Offside, simply",b:"In soccer: you can't hang behind the last defender waiting for the ball. A pass to someone nearer the goal than both ball and second-last defender = offside. That's 90% of the arguments."},
+{id:"s4",t:"The salary cap",b:"Most US leagues cap total team payroll so rich teams can't simply buy titles — it's why stars get traded and 'cap space' is discussed like weather. Baseball's soft cap is why the Yankees exist."},
+{id:"s5",t:"Basketball's reference point",b:"Six titles with the Bulls, the shrug, the flu game — Jordan is the bar every 'greatest ever' debate measures against. LeBron-vs-MJ is sports talk's eternal campfire.",people:[P("Michael Jordan","Six-time NBA champion, Chicago Bulls","A silhouette mid-air, tongue out.")]},
+{id:"s6",t:"Boxing's icon",b:"Heavyweight champion, poet of trash talk, and a conscientious objector who lost his prime years on principle. 'Float like a butterfly, sting like a bee' is his.",people:[P("Muhammad Ali","Heavyweight champion and cultural icon","A butterfly wearing boxing gloves.")]},
+{id:"s7",t:"Tennis royalty",b:"23 Grand Slam singles titles, multiple while ranked #1 across three decades of dominance — Serena is the default answer to 'greatest women's athlete' conversations.",people:[P("Serena Williams","23 Grand Slam singles titles","A racket swung so hard it blurs.")]},
+{id:"s8",t:"Soccer's saint & baseball's myth",b:"Pelé won three World Cups and made Brazil synonymous with beautiful soccer; Babe Ruth hit home runs so far ahead of his era that his name still means 'outlier legend' in any field.",people:[P("Pelé","Three-time World Cup winner, Brazil","The number 10 glowing on a yellow shirt."),P("Babe Ruth","Baseball's original superstar, 714 home runs","A bat pointed at the fences before the swing.")]},
+{id:"s9",t:"Modern outliers",b:"Brady: seven Super Bowls, drafted 199th — the patron saint of being underestimated. Bolt: 9.58 seconds for 100m, a record untouched since 2009 — the fastest human, full stop.",people:[P("Tom Brady","Seven Super Bowl wins","Pick #199 holding seven rings."),P("Usain Bolt","100m world record, 9.58s","A lightning bolt in running spikes.")]}]},
+{id:"mus",n:"Music",entries:[
+{id:"m1",t:"The Beatles' gravity",b:"Eight years of releases (1962–70) that rewired pop: the album as art, the studio as instrument, the band that writes its own songs. Most 'firsts' in pop trace back here.",people:[P("The Beatles","The defining pop/rock band","Four heads crossing a striped road.")]},
+{id:"m2",t:"Beethoven's pivot",b:"He bridged classical order into romantic emotion — and wrote his most famous works, including the Ninth Symphony, while going deaf. The 'da-da-da-DUM' is his Fifth.",people:[P("Ludwig van Beethoven","Composer; bridged Classical and Romantic","Wild hair conducting music he can't hear.")]},
+{id:"m3",t:"What a producer actually does",b:"The director of a recording: shapes the sound, picks takes, guides arrangement. When a song 'sounds expensive,' that's production. It's why producer names now headline credits."},
+{id:"m4",t:"Genres are family trees",b:"Blues fathered rock; rock split into punk and metal; funk and disco raised hip-hop and house. Hearing music as lineage makes every new song a relative you can place."},
+{id:"m5",t:"Why songs sound familiar",b:"Sampling (reusing recordings) and interpolation (re-recording a melody) stitch pop history together — legally licensed, usually. That déjà vu in a new hit is often a 40-year-old bassline."}]},
+{id:"food",n:"Food",entries:[
+{id:"f1",t:"The Maillard reaction",b:"The browning of seared steak, toast, and roasted coffee — heat making hundreds of new flavor compounds from proteins and sugars. Browning IS flavor; steaming can't fake it."},
+{id:"f2",t:"Umami, the fifth taste",b:"Savory depth from glutamates — parmesan, soy sauce, mushrooms, tomatoes. When a dish tastes 'meaty' without meat, that's umami doing the lifting."},
+{id:"f3",t:"Salt and acid fix everything",b:"A flat dish is almost never underspiced — it's under-salted or needs brightness (lemon, vinegar). Fixing food is usually those two levers, not more cooking time."},
+{id:"f4",t:"Knife skills = one grip",b:"Pinch the blade between thumb and forefinger, knuckles guide the cut, rock the blade. One grip, ten minutes' practice, and every recipe gets faster and safer."},
+{id:"f5",t:"Mise en place",b:"'Everything in its place' — prep and measure before heat touches the pan. It's the single habit separating calm cooks from chaotic ones."}]},
+{id:"sci",n:"Science",entries:[
+{id:"c1",t:"Newton's three laws, gist",b:"Things keep doing what they're doing unless pushed; force = mass × acceleration; every push gets an equal push back. Cars, rockets, and seatbelts all live in these three sentences.",people:[P("Isaac Newton","Laws of motion and gravity","An apple bonking a powdered wig.")]},
+{id:"c2",t:"Evolution in one line",b:"Small heritable variations + selection pressure + deep time = every living thing. Darwin's dangerous idea isn't that we came from apes; it's that design needs no designer.",people:[P("Charles Darwin","Theory of evolution by natural selection","A beard slowly turning into a finch.")]},
+{id:"c3",t:"Relativity, the headline",b:"Space and time are one flexible fabric; mass bends it (gravity), and the speed of light is the universe's speed limit. GPS satellites literally correct for it daily.",people:[P("Albert Einstein","Relativity; E=mc²","The tongue-out photo doing math.")]},
+{id:"c4",t:"Radioactivity's pioneer",b:"Curie coined 'radioactivity,' discovered two elements, and remains the only person with Nobel Prizes in two sciences. Her notebooks are still too radioactive to handle freely.",people:[P("Marie Curie","Discovered radium and polonium; two Nobel Prizes","A glowing notebook no one may touch.")]},
+{id:"c5",t:"Correlation ≠ causation",b:"Ice cream sales and drownings rise together — summer causes both. The most useful sentence in science literacy, and the flaw in half of all headlines."},
+{id:"c6",t:"The scientific method",b:"Guess, predict, test, and try hard to prove yourself wrong. Science isn't a pile of facts; it's the error-correcting loop that produced them."}]},
+{id:"mon",n:"Money",entries:[
+{id:"y1",t:"Compound interest",b:"Growth on growth: money earning returns on its previous returns. Time in matters more than amount in — the reason 'start now with $50' beats 'start later with $500.'"},
+{id:"y2",t:"Index funds",b:"Instead of picking winning stocks, buy a tiny slice of the whole market for near-zero fees. Boring by design, and it outperforms most professionals over time."},
+{id:"y3",t:"Credit utilization",b:"The share of your card limits you're using — keep it under ~30% (under 10% is better) and never miss minimums. Those two habits are most of a good score."},
+{id:"y4",t:"Marginal tax brackets",b:"Only dollars above each threshold get the higher rate — a raise can never shrink your take-home. The most financially useful fact most people were never taught."}]},
+{id:"geo",n:"Geography",entries:[
+{id:"g1",t:"The population giants",b:"India and China each hold over 1.4 billion people — more than the next eight countries combined. Then the US (~340M), Indonesia, Pakistan. Scale explains a lot of news."},
+{id:"g2",t:"Time zones, roughly",b:"Earth spins 15° per hour, so zones step one hour per 15° of longitude — then politics redraws the lines. That's why China spans five 'natural' zones but uses one clock."},
+{id:"g3",t:"Continents & oceans, locked",b:"Seven continents, five oceans (Pacific biggest by far — larger than all land combined). Placing every news story on this frame doubles what you retain from it."},
+{id:"g4",t:"Why capitals aren't the big city",b:"Many capitals were chosen for politics, not size: DC, Canberra, Ottawa, Brasília were compromises or built fresh. 'Biggest city = capital' fails about half the time — great quiz trap."}]}
+];
+const ALLP=(()=>{const seen={},out=[];SECTIONS.forEach(s=>s.entries.forEach(e=>(e.people||[]).forEach(p=>{if(!seen[p.n]){seen[p.n]=1;out.push(Object.assign({sec:s.n},p))}})));return out})();
+
+/* ================= HELPERS / STATE ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>(typeof crypto!=="undefined"&&crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2));
+const KEY="mono-base-v1";
+let mem=null;
+const store={
+  async load(){
+    if(window.storage){try{const r=await window.storage.get(KEY);return r&&r.value?JSON.parse(r.value):null}catch(e){return null}}
+    try{const v=localStorage.getItem(KEY);return v?JSON.parse(v):null}catch(e){return mem}
+  },
+  async save(s){mem=s;
+    if(window.storage){try{await window.storage.set(KEY,JSON.stringify(s))}catch(e){}return}
+    try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
+  }
+};
+function blank(){return{known:{},faces:{},quiz:{plays:0,best:0,streak:0},sent:{},meta:{updatedAt:0},
+  gh:{enabled:false,repo:"",token:"",auto:true,lastSync:0}}}
+let S=blank(),saveTimer=null;
+function save(){S.meta=S.meta||{updatedAt:0};S.meta.updatedAt=Date.now();
+  clearTimeout(saveTimer);saveTimer=setTimeout(()=>store.save(S),250);
+  if(typeof ghSchedule==="function")ghSchedule()}
+let toastT=null;
+function toast(m){const t=$("toast");if(!t)return;t.textContent=m;t.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2600)}
+const initials=n=>n.split(/\s+/).map(w=>w[0]).join("").slice(0,3).toUpperCase();
+const wikiTitle=n=>encodeURIComponent(n.replace(/ /g,"_"));
+
+/* ================= FACES (Wikipedia thumbnails) ================= */
+async function fetchFace(name){
+  if(S.faces[name]!==undefined)return;
+  try{
+    const r=await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/"+wikiTitle(name));
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    S.faces[name]=(j.thumbnail&&j.thumbnail.source)?j.thumbnail.source:"0";
+  }catch(e){S.faces[name]="0"}
+  save();
+}
+function faceHtml(name,lg){
+  const u=S.faces[name];
+  if(u&&u!=="0")return '<img class="face'+(lg?" lg":"")+'" src="'+esc(u)+'" alt="'+esc(name)+'">';
+  return '<span class="face'+(lg?" lg":"")+'">'+initials(name)+'</span>';
+}
+let facesBusy=false;
+async function loadFaces(names){
+  if(facesBusy)return;facesBusy=true;
+  const miss=names.filter(n=>S.faces[n]===undefined);
+  if(miss.length){await Promise.all(miss.map(fetchFace));rCur()}
+  facesBusy=false;
+}
+
+/* ================= SEND TO MIND ================= */
+const MINDKEY="mono-mind-v1";
+function sendToMind(txt,topic){
+  try{
+    if(window.storage)throw new Error("artifact");
+    const raw=localStorage.getItem(MINDKEY);
+    let M=raw?JSON.parse(raw):null;
+    if(!M||typeof M!=="object")M={};
+    if(!Array.isArray(M.notes))M.notes=[];
+    M.notes.unshift({id:uid(),txt:txt,topic:topic||"",ts:Date.now(),stage:0,next:Date.now()+864e5});
+    M.meta=M.meta||{};M.meta.updatedAt=Date.now();
+    localStorage.setItem(MINDKEY,JSON.stringify(M));
+    return true;
+  }catch(e){return false}
+}
+
+/* ================= RENDER: LIBRARY ================= */
+let curSec=SECTIONS[0].id,query="",curView="lib";
+function entryHtml(e,secName){
+  const known=!!S.known[e.id];
+  return '<div class="entry'+(known?" known":"")+'">'+
+  '<div class="etitle">'+esc(e.t)+'</div><p class="ebody">'+esc(e.b)+'</p>'+
+  ((e.people&&e.people.length)?'<div class="peoplerow">'+e.people.map(p=>
+    '<span class="person" data-person="'+esc(p.n)+'">'+faceHtml(p.n)+'<span class="pname">'+esc(p.n)+'</span></span>').join("")+'</div>':"")+
+  '<div class="actrow"><button class="chip mini'+(known?" on":"")+'" data-known="'+e.id+'">'+(known?"✓ KNOWN":"KNOWN?")+'</button>'+
+  '<button class="chip mini'+(S.sent[e.id]?" on":"")+'" data-send="'+e.id+'">'+(S.sent[e.id]?"✓ IN MIND":"→ MIND")+'</button></div></div>';
+}
+function findEntry(id){for(const s of SECTIONS){const e=s.entries.find(x=>x.id===id);if(e)return{e:e,sec:s}}return null}
+function rLib(){
+  $("secChips").innerHTML=SECTIONS.map(s=>'<button class="chip'+(s.id===curSec&&!query?" on":"")+'" data-sec="'+s.id+'">'+s.n+'</button>').join("");
+  const total=SECTIONS.reduce((a,s)=>a+s.entries.length,0);
+  const knownN=Object.keys(S.known).filter(k=>S.known[k]).length;
+  $("progCard").innerHTML='<div class="rowline"><span class="mono dark">Marked known</span><span class="mono dark">'+knownN+'/'+total+'</span></div>'+
+    '<div class="bar"><div class="bar-fill" style="width:'+(knownN/total*100)+'%"></div></div>';
+  let html="",names=[];
+  if(query){
+    const q=query.toLowerCase();
+    SECTIONS.forEach(s=>{
+      const hits=s.entries.filter(e=>e.t.toLowerCase().includes(q)||e.b.toLowerCase().includes(q)||(e.people||[]).some(p=>p.n.toLowerCase().includes(q)));
+      if(hits.length){html+='<div class="card soft-c"><h3 style="margin-bottom:4px">'+s.n+'</h3>'+hits.map(e=>{ (e.people||[]).forEach(p=>names.push(p.n));return entryHtml(e,s.n)}).join("")+'</div>'}
+    });
+    if(!html)html='<div class="card soft-c"><p class="small soft">No matches.</p></div>';
+  }else{
+    const s=SECTIONS.find(x=>x.id===curSec);
+    s.entries.forEach(e=>(e.people||[]).forEach(p=>names.push(p.n)));
+    html='<div class="card soft-c">'+s.entries.map(e=>entryHtml(e,s.n)).join("")+'</div>';
+  }
+  $("libBody").innerHTML=html;
+  if(names.length)loadFaces([...new Set(names)]);
+}
+
+/* ================= RENDER: PEOPLE + QUIZ ================= */
+function rPeople(){
+  $("peopleGrid").innerHTML=ALLP.map(p=>'<div class="pcell" data-person="'+esc(p.n)+'">'+faceHtml(p.n)+'<span class="pname">'+esc(p.n)+'</span></div>').join("");
+  $("quizStat").textContent="PLAYS: "+S.quiz.plays+" · BEST STREAK: "+S.quiz.best;
+  loadFaces(ALLP.map(p=>p.n));
+}
+function quizPool(){return ALLP.filter(p=>S.faces[p.n]&&S.faces[p.n]!=="0")}
+function quizOptions(pool,answer){
+  const others=pool.filter(p=>p.n!==answer.n).sort(()=>Math.random()-.5).slice(0,2);
+  return [answer,...others].sort(()=>Math.random()-.5);
+}
+let quizAnswer=null;
+function playQuiz(){
+  const pool=quizPool();
+  if(pool.length<4){openPop('<h2>Not enough faces yet</h2><p class="small soft" style="margin-top:8px">Browse the Library while online so portraits can load from Wikipedia — then the quiz unlocks.</p>');return}
+  quizAnswer=pool[Math.floor(Math.random()*pool.length)];
+  const opts=quizOptions(pool,quizAnswer);
+  openPop('<span class="mono">WHO IS THIS?</span><div style="margin:14px 0">'+faceHtml(quizAnswer.n,true)+'</div>'+
+    opts.map(o=>'<button class="quiz-opt" data-qa="'+esc(o.n)+'">'+esc(o.n)+'</button>').join("")+
+    '<p class="mono" id="quizMsg" style="margin-top:10px">STREAK: '+S.quiz.streak+'</p>');
+}
+function answerQuiz(name){
+  const right=name===quizAnswer.n;
+  document.querySelectorAll(".quiz-opt").forEach(b=>{
+    if(b.dataset.qa===quizAnswer.n)b.classList.add("right");
+    else if(b.dataset.qa===name)b.classList.add("wrong");
+    b.disabled=true;});
+  S.quiz.plays++;
+  if(right){S.quiz.streak++;S.quiz.best=Math.max(S.quiz.best,S.quiz.streak)}else S.quiz.streak=0;
+  save();
+  $("quizMsg").textContent=(right?"✓ "+quizAnswer.role.toUpperCase().slice(0,60):"✗ THAT'S "+quizAnswer.n.toUpperCase())+" · STREAK "+S.quiz.streak;
+  setTimeout(()=>{if($("popWrap").classList.contains("on"))playQuiz()},1400);
+  rPeople();
+}
+
+/* ================= POPOUTS ================= */
+function openPop(html){$("popCard").innerHTML='<button class="popx" data-closepop="1">✕</button>'+html;$("popWrap").classList.add("on")}
+function closePop(){$("popWrap").classList.remove("on")}
+function popPerson(name){
+  const p=ALLP.find(x=>x.n===name);if(!p)return;
+  openPop('<div style="margin-top:6px">'+faceHtml(p.n,true)+'</div>'+
+  '<h2 style="margin:10px 0 2px">'+esc(p.n)+'</h2><p class="mono">'+esc(p.sec)+'</p>'+
+  '<p class="small" style="margin-top:8px">'+esc(p.role)+'</p>'+
+  '<div style="background:var(--g1);border-radius:10px;padding:10px;margin-top:10px"><span class="mono dark">ENCODING HOOK</span><p class="small" style="margin-top:4px">'+esc(p.hook)+'</p></div>'+
+  '<a class="btn wide ghost" style="margin-top:12px" href="https://en.wikipedia.org/wiki/'+wikiTitle(p.n)+'" target="_blank" rel="noopener">Read more ↗</a>');
+}
+
+/* ================= GITHUB SYNC ================= */
+const b64e=s=>btoa(unescape(encodeURIComponent(s)));
+const b64d=s=>decodeURIComponent(escape(atob(String(s).replace(/\s/g,""))));
+const normRepo=v=>String(v||"").trim().replace(/^(https?:\/\/)?(www\.)?github\.com\//i,"").replace(/\.git$/i,"").replace(/\/+$/,"").split("/").slice(0,2).join("/");
+function ghExplain(e){
+  const m=String(e&&e.message||"");
+  if(/401/.test(m))return"TOKEN REJECTED (401) — RE-PASTE IT. FINE-GRAINED TOKENS START WITH github_pat_";
+  if(/403/.test(m))return"FORBIDDEN (403) — THE TOKEN NEEDS CONTENTS: READ & WRITE ON THIS REPO";
+  if(/404/.test(m))return"NOT FOUND (404) — CHECK owner/name, AND THAT THE TOKEN IS SCOPED TO THIS EXACT REPO";
+  if(/409|422/.test(m))return"SYNC CONFLICT — TAP PUSH NOW ONCE MORE";
+  return"NO CONNECTION TO GITHUB — OFFLINE, OR THIS VIEWER BLOCKS WEB REQUESTS (CLAUDE'S PREVIEW AND IPHONE FILE PREVIEWS BOTH DO). OPEN THE APP FROM AN https:// ADDRESS";
+}
+function ghPayload(){const p=JSON.parse(JSON.stringify(S));delete p.gh;return p}
+function ghApi(){const parts=normRepo(S.gh.repo).split("/");
+  return "https://api.github.com/repos/"+parts[0]+"/"+parts[1]+"/contents/data/mono-base.json"}
+function ghHdr(){return{"Authorization":"Bearer "+S.gh.token,"Accept":"application/vnd.github+json"}}
+function ghMsg(m){const el=$("ghStatus");if(el)el.textContent=m}
+async function ghGet(){
+  const r=await fetch(ghApi(),{headers:ghHdr()});
+  if(r.status===404)return{sha:null,data:null};
+  if(!r.ok)throw new Error("GET "+r.status);
+  const j=await r.json();
+  return{sha:j.sha,data:JSON.parse(b64d(j.content))};
+}
+async function ghPush(){
+  if(!S.gh.enabled)return;
+  try{
+    ghMsg("PUSHING…");
+    let sha=null;try{sha=(await ghGet()).sha}catch(e){}
+    const body={message:"mono-base sync "+new Date().toISOString(),content:b64e(JSON.stringify(ghPayload()))};
+    if(sha)body.sha=sha;
+    const r=await fetch(ghApi(),{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},ghHdr()),body:JSON.stringify(body)});
+    if(!r.ok)throw new Error("PUT "+r.status);
+    S.gh.lastSync=Date.now();store.save(S);
+    ghMsg("SYNCED "+new Date().toLocaleTimeString());
+  }catch(e){ghMsg(ghExplain(e))}
+}
+function applyRemoteIfNewer(remote){
+  const r=(remote&&remote.meta&&remote.meta.updatedAt)||0,l=(S.meta&&S.meta.updatedAt)||0;
+  if(remote&&r>l){const gh=S.gh;S=Object.assign(blank(),remote);S.gh=gh;store.save(S);return true}
+  return false;
+}
+async function ghPull(manual){
+  if(!S.gh.enabled)return;
+  try{
+    ghMsg("CHECKING GITHUB…");
+    const res=await ghGet();
+    if(res.data){
+      const adopted=applyRemoteIfNewer(res.data);
+      if(adopted){rCur();ghMsg("PULLED NEWER DATA "+new Date().toLocaleTimeString())}
+      else{ghMsg(manual?"ALREADY UP TO DATE.":"UP TO DATE.");if(((S.meta&&S.meta.updatedAt)||0)>((res.data.meta&&res.data.meta.updatedAt)||0))ghPush()}
+    }else{ghMsg("NO REMOTE FILE YET — PUSHING FIRST COPY…");await ghPush()}
+    S.gh.lastSync=Date.now();store.save(S);
+  }catch(e){ghMsg(ghExplain(e))}
+}
+let ghTimer=null;
+function ghSchedule(){if(!S.gh||!S.gh.enabled||!S.gh.auto)return;clearTimeout(ghTimer);ghTimer=setTimeout(ghPush,2500)}
+
+/* ================= EVENTS / INIT ================= */
+function rCur(){if(curView==="lib")rLib();else rPeople()}
+function switchView(v){curView=v;
+  document.querySelectorAll(".view").forEach(s=>s.classList.remove("on"));
+  $("view-"+v).classList.add("on");
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.goview===v));
+  window.scrollTo({top:0});rCur();
+}
+document.addEventListener("click",e=>{
+  if(e.target.id==="popWrap"){closePop();return}
+  const el=e.target.closest("[data-goview],[data-sec],[data-known],[data-send],[data-person],[data-qa],[data-closepop],[data-close]");
+  if(!el)return;
+  const d=el.dataset;
+  if(d.goview)switchView(d.goview);
+  else if(d.sec){curSec=d.sec;query="";$("libSearch").value="";rLib()}
+  else if(d.known){S.known[d.known]=!S.known[d.known];if(!S.known[d.known])delete S.known[d.known];save();rLib()}
+  else if(d.send){
+    const f=findEntry(d.send);if(!f)return;
+    if(S.sent[d.send]){toast("ALREADY IN MONO MIND");return}
+    const okd=sendToMind(f.e.t+" — "+f.e.b,f.sec.n);
+    if(okd){S.sent[d.send]=true;save();rLib();toast("SAVED TO MONO MIND — RESURFACES TOMORROW")}
+    else toast("COULDN'T REACH MIND — OPEN BOTH APPS FROM YOUR TOOLS SITE");
+  }
+  else if(d.person)popPerson(d.person);
+  else if(d.qa)answerQuiz(d.qa);
+  else if(d.closepop)closePop();
+  else if(d.close)document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"));
+});
+$("libSearch").addEventListener("input",e=>{query=e.target.value.trim();rLib()});
+$("quizBtn").addEventListener("click",playQuiz);
+$("guideBtn").addEventListener("click",()=>$("guideSheet").classList.add("on"));
+$("gearBtn").addEventListener("click",()=>{
+  $("ghRepo").value=S.gh.repo||"";$("ghToken").value=S.gh.token||"";
+  $("ghAuto").textContent=S.gh.auto?"Auto-sync ✓ on":"Auto-sync off";
+  $("ghAuto").classList.toggle("on",!!S.gh.auto);
+  ghMsg(S.gh.enabled?("CONNECTED"+(S.gh.lastSync?" · LAST SYNC "+new Date(S.gh.lastSync).toLocaleString():"")):"NOT CONNECTED");
+  $("setSheet").classList.add("on");
+});
+$("ghConnect").addEventListener("click",async()=>{
+  const repo=normRepo($("ghRepo").value),tok=$("ghToken").value.trim();
+  const parts=repo.split("/");
+  if(parts.length!==2||!parts[0]||!parts[1]||!tok){ghMsg("NEED owner/repo (OR A FULL GITHUB URL) AND A TOKEN.");return}
+  $("ghRepo").value=repo;
+  S.gh.repo=repo;S.gh.token=tok;S.gh.enabled=true;store.save(S);
+  await ghPull(true);
+});
+$("ghPushBtn").addEventListener("click",()=>ghPush());
+$("ghPullBtn").addEventListener("click",()=>ghPull(true));
+$("ghAuto").addEventListener("click",()=>{S.gh.auto=!S.gh.auto;store.save(S);
+  $("ghAuto").textContent=S.gh.auto?"Auto-sync ✓ on":"Auto-sync off";$("ghAuto").classList.toggle("on",S.gh.auto)});
+$("ghOff").addEventListener("click",()=>{S.gh.enabled=false;S.gh.token="";store.save(S);ghMsg("DISCONNECTED — TOKEN CLEARED FROM THIS DEVICE.")});
+$("exportBtn").addEventListener("click",()=>{$("dataBox").value=JSON.stringify(ghPayload());$("setMsg").textContent="EXPORTED (SYNC TOKEN EXCLUDED)."});
+$("copyBtn").addEventListener("click",async()=>{
+  $("dataBox").select();
+  try{await navigator.clipboard.writeText($("dataBox").value);$("setMsg").textContent="COPIED."}
+  catch(e){document.execCommand("copy");$("setMsg").textContent="COPIED."}
+});
+$("importBtn").addEventListener("click",()=>{
+  try{const d=JSON.parse($("dataBox").value);
+    if(!d||typeof d!=="object"||typeof d.known!=="object")throw 0;
+    S=Object.assign(blank(),d);save();rCur();$("setMsg").textContent="IMPORTED."}
+  catch(e){$("setMsg").textContent="THAT DIDN'T PARSE — PASTE THE FULL EXPORTED TEXT."}
+});
+$("resetBtn").addEventListener("click",()=>{
+  if(confirm("Reset everything? This can't be undone.")){S=blank();save();rCur();$("setMsg").textContent="RESET DONE."}
+});
+(async function(){
+  const loaded=await store.load();
+  if(loaded&&loaded.meta)S=Object.assign(blank(),loaded);
+  if(S.gh&&S.gh.enabled)await ghPull(false);
+  rLib();
+})();
+</script>
+</body>
+</html>

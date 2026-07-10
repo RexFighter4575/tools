@@ -82,6 +82,15 @@ main{padding-top:6px;padding-bottom:40px}
     </a>
     <div class="status" id="status-Mind">&nbsp;</div>
 
+    <a class="card" href="mono-base-knowledge.html">
+      <div>
+        <h3>Base</h3>
+        <p>Basic-knowledge library &amp; faces</p>
+      </div>
+      <span class="chev">→</span>
+    </a>
+    <div class="status" id="status-Base">&nbsp;</div>
+
     <!-- New tool? Add another card here, same shape, pointing at its .html file,
          plus a matching <div class="status" id="status-NAME"> line, and add it
          to the APPS list in the script below. -->
@@ -100,7 +109,8 @@ const $=id=>document.getElementById(id);
 // covers them automatically.
 const APPS=[
   {name:"Budget",key:"mono-budget-v1",path:"data/mono-budget.json"},
-  {name:"Mind",key:"mono-mind-v1",path:"data/mono-mind.json"}
+  {name:"Mind",key:"mono-mind-v1",path:"data/mono-mind.json"},
+  {name:"Base",key:"mono-base-v1",path:"data/mono-base.json"}
 ];
 const b64e=s=>btoa(unescape(encodeURIComponent(s)));
 const b64d=s=>decodeURIComponent(escape(atob(String(s).replace(/\s/g,""))));
