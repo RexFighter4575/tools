@@ -7,12 +7,14 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FFFFFF">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Mono — Tool Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
+  color-scheme:light;
   --bk:#0A0A0A;
   --wh:#FFFFFF;
   --g1:#F4F4F4;
@@ -24,8 +26,8 @@
   --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:16px}
-body{font-family:var(--body);color:var(--bk);background:var(--wh);line-height:1.5;
+html{font-size:16px;background:#FFFFFF}
+body{font-family:var(--body);color:#0A0A0A;background:#FFFFFF;line-height:1.5;
   min-height:100vh;min-height:100dvh}
 .wrap{max-width:680px;margin:0 auto;padding:0 18px}
 header{position:sticky;top:0;z-index:40;background:var(--wh);border-bottom:1.5px solid var(--bk);padding-top:env(safe-area-inset-top)}
@@ -49,6 +51,7 @@ main{padding-top:6px;padding-bottom:40px}
 .btn:active{opacity:.8}
 .btn:disabled{opacity:.5}
 .status{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;color:var(--g3);margin-top:4px}
+/*WHITELOCK*/@media (prefers-color-scheme: dark){:root{--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;color-scheme:light}html,body{background:#FFFFFF !important;color:#0A0A0A !important}}
 </style>
 </head>
 <body>
@@ -82,6 +85,15 @@ main{padding-top:6px;padding-bottom:40px}
     </a>
     <div class="status" id="status-Mind">&nbsp;</div>
 
+    <a class="card" href="mono-base-knowledge.html">
+      <div>
+        <h3>Base</h3>
+        <p>Basic-knowledge library &amp; faces</p>
+      </div>
+      <span class="chev">→</span>
+    </a>
+    <div class="status" id="status-Base">&nbsp;</div>
+
     <!-- New tool? Add another card here, same shape, pointing at its .html file,
          plus a matching <div class="status" id="status-NAME"> line, and add it
          to the APPS list in the script below. -->
@@ -100,7 +112,8 @@ const $=id=>document.getElementById(id);
 // covers them automatically.
 const APPS=[
   {name:"Budget",key:"mono-budget-v1",path:"data/mono-budget.json"},
-  {name:"Mind",key:"mono-mind-v1",path:"data/mono-mind.json"}
+  {name:"Mind",key:"mono-mind-v1",path:"data/mono-mind.json"},
+  {name:"Base",key:"mono-base-v1",path:"data/mono-base.json"}
 ];
 const b64e=s=>btoa(unescape(encodeURIComponent(s)));
 const b64d=s=>decodeURIComponent(escape(atob(String(s).replace(/\s/g,""))));

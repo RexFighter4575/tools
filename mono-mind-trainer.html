@@ -7,20 +7,22 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FFFFFF">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Mono Mind — Attention & Memory Trainer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
+  color-scheme:light;
   --bk:#0A0A0A; --wh:#FFFFFF; --g1:#F4F4F4; --g2:#E2E2E2; --g3:#8A8A8A; --r:14px;
   --disp:"Familjen Grotesk",-apple-system,"Segoe UI",sans-serif;
   --body:"Spline Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:16px}
-body{font-family:var(--body);color:var(--bk);background:var(--wh);line-height:1.5;
+html{font-size:16px;background:#FFFFFF}
+body{font-family:var(--body);color:#0A0A0A;background:#FFFFFF;line-height:1.5;
   min-height:100vh;min-height:100dvh;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .wrap{max-width:680px;margin:0 auto;padding:0 18px}
 
@@ -123,6 +125,7 @@ textarea.exportbox{font-family:var(--mono);font-size:.78rem;min-height:100px}
 
 :focus-visible{outline:2.5px solid var(--bk);outline-offset:2px;border-radius:4px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/*WHITELOCK*/@media (prefers-color-scheme: dark){:root{--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;color-scheme:light}html,body{background:#FFFFFF !important;color:#0A0A0A !important}}
 </style>
 </head>
 <body>
@@ -404,7 +407,7 @@ const store={
     try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
   }
 };
-function blank(){return{seen:{},freshCache:[],freshChecked:0,marks:{},savedItems:[],notes:[],
+function blank(){return{seen:{},freshCache:[],freshChecked:0,srcLinks:{},marks:{},savedItems:[],notes:[],
   sessions:[],lessons:{},pRot:0,wRot:0,meta:{updatedAt:0},
   gh:{enabled:false,repo:"",token:"",auto:true,lastSync:0}}}
 let S=blank(),saveTimer=null;
@@ -465,6 +468,7 @@ async function checkFresh(manual){
       const r=d&&d.results&&d.results[0];
       if(!r||!r.releaseDate)throw new Error("no result");
       okCount++;
+      if(r.collectionViewUrl)S.srcLinks[p.id]=r.collectionViewUrl;
       const rel=new Date(r.releaseDate).getTime();
       if(rel>(S.seen[p.id]||0)){
         const item={srcId:p.id,date:rel,title:null};
@@ -481,6 +485,10 @@ async function checkFresh(manual){
 }
 function markSeen(srcId,date){S.seen[srcId]=Math.max(S.seen[srcId]||0,date||Date.now());
   S.freshCache=S.freshCache.filter(f=>f.srcId!==srcId);save()}
+function linkFor(s){
+  if(s.url)return s.url;
+  return S.srcLinks[s.id]||("https://www.google.com/search?q="+encodeURIComponent('"'+s.n+'" '+s.by+" podcast"));
+}
 
 /* ================= RENDER: TODAY ================= */
 function fmtAgo(ts){if(!ts)return"—";const d=Math.floor((Date.now()-ts)/DAY);
@@ -628,7 +636,8 @@ function srcRow(s){
   const isFresh=S.freshCache.some(f=>f.srcId===s.id);
   return '<div class="srow"><div class="main-tap" data-src="'+s.id+'">'+
   '<b class="small">'+(isFresh?'<span class="newdot"></span>':"")+esc(s.n)+'</b>'+
-  '<div class="mono">'+esc(s.by)+' · '+(s.kind==="pod"?"PODCAST":s.kind==="yt"?"YOUTUBE":"SITE")+'</div></div>'+markChips(s.id)+'</div>'}
+  '<div class="mono">'+esc(s.by)+' · '+(s.kind==="pod"?"PODCAST":s.kind==="yt"?"YOUTUBE":"SITE")+'</div></div>'+
+  '<div class="markrow"><button class="chip mini" data-openlink="'+s.id+'">OPEN ↗</button></div>'+markChips(s.id)+'</div>'}
 function rTopics(){
   $("topicChips").innerHTML=TOPICS.map(t=>'<button class="chip'+(t.id===curTopic?" on":"")+'" data-topic="'+t.id+'">'+t.n+'</button>').join("");
   const t=TOPICS.find(x=>x.id===curTopic);
@@ -679,8 +688,8 @@ function popSrc(id){
   '<p class="small">'+esc(s.d)+'</p>'+
   (fresh?'<div class="passage" style="font-size:.9rem;margin-top:10px"><span class="newdot"></span><b>New:</b> '+(fresh.title?esc(fresh.title):"episode")+' · '+new Date(fresh.date).toLocaleDateString()+'</div>':"")+
   '<div style="margin-top:12px">'+markChips(id)+'</div>'+
-  (s.url?'<a class="btn wide ghost" style="margin-top:12px;text-decoration:none" href="'+s.url+'" target="_blank" rel="noopener">Open site ↗</a>'
-        :'<p class="mono" style="margin-top:12px">SEARCH "'+esc(s.n)+'" IN ANY PODCAST APP</p>')+
+  '<a class="btn wide ghost" style="margin-top:12px;text-decoration:none" href="'+linkFor(s)+'" target="_blank" rel="noopener">'+
+    (s.url?"Open site ↗":(S.srcLinks[s.id]?"Open in Apple Podcasts ↗":"Find this show ↗"))+'</a>'+
   '<label class="fl">Quick note about this</label><textarea id="popNote" placeholder="What\'s worth remembering?"></textarea>'+
   '<button class="btn wide" id="popNoteSave" style="margin-top:10px">Save note</button>');
   $("popNoteSave").onclick=()=>{if(addNote($("popNote").value,s.topic)){closePop();rAll()}};
@@ -772,9 +781,10 @@ function rAll(){rToday();rPractice();rTopics();rLater();rNotes()}
 document.addEventListener("click",e=>{
   if(e.target.id==="popWrap"){closePop();return}
   if(e.target.id==="sessStart"){startSession();return}
-  const el=e.target.closest("[data-goview],[data-topic],[data-src],[data-mark],[data-latefilter],[data-lesson],[data-quiz],[data-notegot],[data-noteagain],[data-notedel],[data-seen],[data-saveitem],[data-unsaveitem],[data-closepop],[data-close]");
+  const el=e.target.closest("[data-openlink],[data-goview],[data-topic],[data-src],[data-mark],[data-latefilter],[data-lesson],[data-quiz],[data-notegot],[data-noteagain],[data-notedel],[data-seen],[data-saveitem],[data-unsaveitem],[data-closepop],[data-close]");
   if(!el)return;
   const d=el.dataset;
+  if(d.openlink){const s=srcById(d.openlink);if(s)window.open(linkFor(s),"_blank","noopener");return}
   if(d.goview)switchView(d.goview);
   else if(d.topic){curTopic=d.topic;rTopics()}
   else if(d.mark){const p=d.mark.split(":");setMark(p[1],p[0]);
