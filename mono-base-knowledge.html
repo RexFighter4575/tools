@@ -6,16 +6,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#FFFFFF">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Mono Base — Basic Knowledge Library</title>
 <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;--r:14px;
+:root{color-scheme:light;--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;--r:14px;
   --disp:"Familjen Grotesk",-apple-system,"Segoe UI",sans-serif;
   --body:"Spline Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{font-size:16px}
-body{font-family:var(--body);color:var(--bk);background:var(--wh);line-height:1.5;
+html{font-size:16px;background:#FFFFFF}
+body{font-family:var(--body);color:#0A0A0A;background:#FFFFFF;line-height:1.5;
   min-height:100vh;min-height:100dvh;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 .wrap{max-width:680px;margin:0 auto;padding:0 18px}
 header{position:sticky;top:0;z-index:40;background:var(--wh);border-bottom:1.5px solid var(--bk);padding-top:env(safe-area-inset-top)}
@@ -98,6 +99,7 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 :focus-visible{outline:2.5px solid var(--bk);outline-offset:2px;border-radius:4px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/*WHITELOCK*/@media (prefers-color-scheme: dark){:root{--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;color-scheme:light}html,body{background:#FFFFFF !important;color:#0A0A0A !important}}
 </style>
 </head>
 <body>
