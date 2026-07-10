@@ -404,7 +404,7 @@ const store={
     try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
   }
 };
-function blank(){return{seen:{},freshCache:[],freshChecked:0,marks:{},savedItems:[],notes:[],
+function blank(){return{seen:{},freshCache:[],freshChecked:0,srcLinks:{},marks:{},savedItems:[],notes:[],
   sessions:[],lessons:{},pRot:0,wRot:0,meta:{updatedAt:0},
   gh:{enabled:false,repo:"",token:"",auto:true,lastSync:0}}}
 let S=blank(),saveTimer=null;
@@ -465,6 +465,7 @@ async function checkFresh(manual){
       const r=d&&d.results&&d.results[0];
       if(!r||!r.releaseDate)throw new Error("no result");
       okCount++;
+      if(r.collectionViewUrl)S.srcLinks[p.id]=r.collectionViewUrl;
       const rel=new Date(r.releaseDate).getTime();
       if(rel>(S.seen[p.id]||0)){
         const item={srcId:p.id,date:rel,title:null};
@@ -481,6 +482,10 @@ async function checkFresh(manual){
 }
 function markSeen(srcId,date){S.seen[srcId]=Math.max(S.seen[srcId]||0,date||Date.now());
   S.freshCache=S.freshCache.filter(f=>f.srcId!==srcId);save()}
+function linkFor(s){
+  if(s.url)return s.url;
+  return S.srcLinks[s.id]||("https://www.google.com/search?q="+encodeURIComponent('"'+s.n+'" '+s.by+" podcast"));
+}
 
 /* ================= RENDER: TODAY ================= */
 function fmtAgo(ts){if(!ts)return"—";const d=Math.floor((Date.now()-ts)/DAY);
@@ -628,7 +633,8 @@ function srcRow(s){
   const isFresh=S.freshCache.some(f=>f.srcId===s.id);
   return '<div class="srow"><div class="main-tap" data-src="'+s.id+'">'+
   '<b class="small">'+(isFresh?'<span class="newdot"></span>':"")+esc(s.n)+'</b>'+
-  '<div class="mono">'+esc(s.by)+' · '+(s.kind==="pod"?"PODCAST":s.kind==="yt"?"YOUTUBE":"SITE")+'</div></div>'+markChips(s.id)+'</div>'}
+  '<div class="mono">'+esc(s.by)+' · '+(s.kind==="pod"?"PODCAST":s.kind==="yt"?"YOUTUBE":"SITE")+'</div></div>'+
+  '<div class="markrow"><button class="chip mini" data-openlink="'+s.id+'">OPEN ↗</button></div>'+markChips(s.id)+'</div>'}
 function rTopics(){
   $("topicChips").innerHTML=TOPICS.map(t=>'<button class="chip'+(t.id===curTopic?" on":"")+'" data-topic="'+t.id+'">'+t.n+'</button>').join("");
   const t=TOPICS.find(x=>x.id===curTopic);
@@ -679,8 +685,8 @@ function popSrc(id){
   '<p class="small">'+esc(s.d)+'</p>'+
   (fresh?'<div class="passage" style="font-size:.9rem;margin-top:10px"><span class="newdot"></span><b>New:</b> '+(fresh.title?esc(fresh.title):"episode")+' · '+new Date(fresh.date).toLocaleDateString()+'</div>':"")+
   '<div style="margin-top:12px">'+markChips(id)+'</div>'+
-  (s.url?'<a class="btn wide ghost" style="margin-top:12px;text-decoration:none" href="'+s.url+'" target="_blank" rel="noopener">Open site ↗</a>'
-        :'<p class="mono" style="margin-top:12px">SEARCH "'+esc(s.n)+'" IN ANY PODCAST APP</p>')+
+  '<a class="btn wide ghost" style="margin-top:12px;text-decoration:none" href="'+linkFor(s)+'" target="_blank" rel="noopener">'+
+    (s.url?"Open site ↗":(S.srcLinks[s.id]?"Open in Apple Podcasts ↗":"Find this show ↗"))+'</a>'+
   '<label class="fl">Quick note about this</label><textarea id="popNote" placeholder="What\'s worth remembering?"></textarea>'+
   '<button class="btn wide" id="popNoteSave" style="margin-top:10px">Save note</button>');
   $("popNoteSave").onclick=()=>{if(addNote($("popNote").value,s.topic)){closePop();rAll()}};
@@ -772,9 +778,10 @@ function rAll(){rToday();rPractice();rTopics();rLater();rNotes()}
 document.addEventListener("click",e=>{
   if(e.target.id==="popWrap"){closePop();return}
   if(e.target.id==="sessStart"){startSession();return}
-  const el=e.target.closest("[data-goview],[data-topic],[data-src],[data-mark],[data-latefilter],[data-lesson],[data-quiz],[data-notegot],[data-noteagain],[data-notedel],[data-seen],[data-saveitem],[data-unsaveitem],[data-closepop],[data-close]");
+  const el=e.target.closest("[data-openlink],[data-goview],[data-topic],[data-src],[data-mark],[data-latefilter],[data-lesson],[data-quiz],[data-notegot],[data-noteagain],[data-notedel],[data-seen],[data-saveitem],[data-unsaveitem],[data-closepop],[data-close]");
   if(!el)return;
   const d=el.dataset;
+  if(d.openlink){const s=srcById(d.openlink);if(s)window.open(linkFor(s),"_blank","noopener");return}
   if(d.goview)switchView(d.goview);
   else if(d.topic){curTopic=d.topic;rTopics()}
   else if(d.mark){const p=d.mark.split(":");setMark(p[1],p[0]);
