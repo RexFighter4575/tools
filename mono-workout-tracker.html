@@ -72,6 +72,9 @@ section.view.on{display:block;animation:fadeUp .3s ease both}
 .exblock:last-child{border-bottom:none}
 .exhead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .exname{font-family:var(--disp);font-weight:700;font-size:1.02rem}
+/* only the name opens the stats popup — hairline hints it's tappable */
+.exname.tapname{cursor:pointer;display:inline-block;border-bottom:1.5px solid var(--g2)}
+.exname.tapname:active{border-bottom-color:var(--bk)}
 .setrow{display:flex;align-items:center;gap:7px;margin-top:8px}
 .setno{font-family:var(--mono);font-size:.62rem;color:var(--g3);width:22px;flex:0 0 auto}
 .setrow input{flex:1;min-width:0;font-family:var(--mono);font-size:16px;border:1.5px solid var(--g2);border-radius:9px;
@@ -452,7 +455,7 @@ function rLog(){
     const last=lastSetsFor(ex.id);
     const lastTxt=last.length?last.map(l=>(isLift(ex)?(l.w||0)+"×"+l.r:l.r+" "+unitOf(ex).toLowerCase())).join("  ·  "):"first time";
     return '<div class="exblock">'+
-      '<div class="exhead"><div style="min-width:0"><div class="exname">'+esc(ex.n)+'</div>'+
+      '<div class="exhead"><div style="min-width:0"><div class="exname tapname" data-ex="'+ex.id+'">'+esc(ex.n)+'</div>'+
         '<div class="mono" style="margin-top:2px">'+(isLift(ex)?"TARGET "+esc(ex.r||"—")+" REPS":unitOf(ex))+'</div></div>'+
         ovBadge(ex.id)+'</div>'+
       '<div class="mono" style="margin-top:6px">LAST: '+esc(lastTxt)+'</div>'+
@@ -707,6 +710,9 @@ document.addEventListener("click",e=>{
   const el=e.target.closest("[data-goview],[data-day],[data-addset],[data-delset],[data-ex],[data-habit],[data-rampoff],[data-exadd],[data-exdel],[data-exmove],[data-daydel],[data-closepop],[data-close]");
   if(!el)return;
   const d=el.dataset;
+  /* set fields carry data-ex so typing can find their row — but tapping one must
+     never open the stats popup over what you're entering. Only the exercise name does. */
+  if(d.in)return;
   if(d.goview)switchView(d.goview);
   else if(d.day){curDay=d.day;draft=null;rLog()}
   else if(d.addset){const rows=ensureDraft(curDay).rows[d.addset];if(rows){const l=rows[rows.length-1];rows.push(l?{w:l.w,r:"",rir:""}:blankRow());saveDraft();rLog()}}
