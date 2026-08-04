@@ -94,6 +94,7 @@ input[type=text],input[type=password]{width:100%;font-family:var(--body);font-si
   <a class="apptile" href="mono-budget-tracker.html"><h2><span class="blk">M</span>Budget</h2><p>Savings-first money tracker · safe-to-spend, goals, finance learning library</p></a>
   <a class="apptile" href="mono-mind-trainer.html"><h2><span class="blk">M</span>Mind</h2><p>Attention &amp; memory trainer · daily practice, topic sources, spaced notes</p></a>
   <a class="apptile" href="mono-base-knowledge.html"><h2><span class="blk">M</span>Base</h2><p>Basic-knowledge library · vehicles, design &amp; materials, history, sports — with faces</p></a>
+  <a class="apptile" href="mono-workout-tracker.html"><h2><span class="blk">M</span>Lift</h2><p>Workout &amp; progress tracker · session logging, progressive-overload cues, bodyweight</p></a>
 
   <!-- One shared GitHub login for all tools. Enter it once here; every tool reads
        it automatically (same-origin localStorage). Tokens stay on this device and
@@ -117,6 +118,7 @@ input[type=text],input[type=password]{width:100%;font-family:var(--body);font-si
       <div class="approw"><b>Budget</b><span class="st" id="st-Budget">—</span></div>
       <div class="approw"><b>Mind</b><span class="st" id="st-Mind">—</span></div>
       <div class="approw"><b>Base</b><span class="st" id="st-Base">—</span></div>
+      <div class="approw"><b>Lift</b><span class="st" id="st-Lift">—</span></div>
     </div>
 
     <button class="linkbtn" id="disconnectBtn" style="margin-top:10px">disconnect &amp; forget token</button>
@@ -225,7 +227,8 @@ const SHAREDGH="mono-sync-v1";
 const APPS=[
   {name:"Budget",key:"mono-budget-v1",path:"data/mono-budget.json"},
   {name:"Mind",key:"mono-mind-v1",path:"data/mono-mind.json"},
-  {name:"Base",key:"mono-base-v1",path:"data/mono-base.json"}
+  {name:"Base",key:"mono-base-v1",path:"data/mono-base.json"},
+  {name:"Lift",key:"mono-workout-v1",path:"data/mono-workout.json"}
 ];
 const b64e=s=>btoa(unescape(encodeURIComponent(s)));
 const b64d=s=>decodeURIComponent(escape(atob(String(s).replace(/\s/g,""))));
