@@ -86,6 +86,14 @@ section.view.on{display:block;animation:fadeUp .3s ease both}
 .fieldkey span{flex:1;font-family:var(--mono);font-size:.55rem;letter-spacing:.08em;color:var(--g3);text-align:center}
 .fieldkey i{width:14px;flex:0 0 auto}
 
+/* ---- exercise demo + form guide ---- */
+.demo{display:block;width:100%;max-height:240px;object-fit:contain;background:var(--g1);
+  border:1.5px solid var(--g2);border-radius:12px}
+.demo.ph{display:flex;align-items:center;justify-content:center;min-height:110px;text-align:center;padding:14px}
+ul.cues{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+ul.cues li{font-size:.9rem}
+.watchout{background:var(--g1);border-radius:10px;padding:10px;margin-top:12px}
+
 /* ---- charts ---- */
 svg.line{display:block;width:100%;height:auto;margin:10px 0 4px}
 svg.line polyline{fill:none;stroke:var(--bk);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
@@ -192,6 +200,8 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
     <div class="card soft-c"><h3>Target rep ranges</h3><p class="small" style="margin-top:6px">Main compounds default to <b>6–8</b>, accessories to <b>8–12</b>. Both are editable per exercise in Settings → Edit program, along with day names and exercise order.</p></div>
     <div class="card soft-c"><h3>Estimated 1RM</h3><p class="small" style="margin-top:6px">Each lift's detail shows an estimated one-rep max using the Epley formula (<span style="font-family:var(--mono)">weight × (1 + reps/30)</span>). It's a rough comparison tool across different rep counts — not a number to go test.</p></div>
     <div class="card soft-c"><h3>Rest days are the plan</h3><p class="small" style="margin-top:6px">Wednesday is cardio and joints; weekends are off. Nothing here tracks streaks or scolds you for a day away — recovery is when the work actually lands.</p></div>
+    <div class="card soft-c"><h3>Tap an exercise name</h3><p class="small" style="margin-top:6px">The name of any exercise — in the logger or the Lifts tab — opens how to do it: a demo photo, a link to video demonstrations, setup and execution cues, and the mistake people most often make. Its history and chart are on the same card. Tapping the weight/reps fields never opens it, so it can't cover what you're typing.</p></div>
+    <div class="card"><h3>Nothing you type is lost</h3><p class="small" style="margin-top:6px">Numbers you enter are kept the moment you type them — <b>per day</b>. Switch days, change tabs, close the app, or reload the page and they're still there; a dot on a day chip marks one holding unsaved work. They clear only when you tap <b>Save session</b> for that day, or deliberately discard them. Drafts live on this device only and are never synced.</p></div>
     <div class="card soft-c"><h3>Sync</h3><p class="small" style="margin-top:6px">Same shared login as the rest of the toolkit — set it once in the Tool Center and this app picks it up. It writes <span style="font-family:var(--mono)">data/mono-workout.json</span>. A half-finished session is kept on this device only and never synced.</p></div>
   </div>
 </div>
@@ -295,6 +305,91 @@ function defaultProgram(){return[
 /* weekday (0=Sun) -> day id; Sat/Sun intentionally rest */
 const WEEKMAP={1:"d1",2:"d2",3:"d3",4:"d4",5:"d5"};
 
+/* ================= HOW TO DO IT =================
+   Per-exercise form guide shown when you tap an exercise name.
+   w = Wikipedia article the demo photo is pulled from (see fetchDemo).
+   Renaming an exercise keeps its guide, because these are keyed by id. */
+const GUIDE={
+e_bench:{w:"Bench_press",d:"The main horizontal press — chest, front delts and triceps.",
+  c:["Shoulder blades pulled back and down into the bench, feet planted.","Bar over mid-chest at the bottom, wrists stacked over elbows.","Touch the chest under control, then press back over the shoulders."],
+  m:"Flaring the elbows straight out to 90° — keep them tucked to roughly 45–75° from the torso."},
+e_ohp:{w:"Overhead_press",d:"Standing vertical press — shoulders and triceps, with the whole trunk bracing.",
+  c:["Bar resting on the front delts, elbows just in front of it.","Squeeze glutes and abs so the ribs don't flare.","Press up and slightly back, moving your head 'through' at lockout."],
+  m:"Leaning back to turn it into a standing incline press."},
+e_incdb:{w:"Bench_press",d:"Upper-chest biased press; dumbbells let each side travel freely.",
+  c:["Bench at 30–45°, no steeper.","Start at lower-chest level with elbows under the wrists.","Press up and slightly together without clanging the bells."],
+  m:"Setting the bench too upright — past ~45° it quietly becomes a shoulder press."},
+e_dip:{w:"Dip_(exercise)",d:"Triceps-heavy press; dips also load the lower chest.",
+  c:["Dips: lean forward for chest, stay upright for triceps.","Descend until the upper arms are about parallel to the floor.","Close-grip bench: hands shoulder width, elbows tucked, bar to lower chest."],
+  m:"Sinking too deep on dips and letting the shoulders roll forward."},
+e_lat:{w:"Lateral_raise",d:"Isolates the side delt — the muscle that makes shoulders look wide.",
+  c:["Slight forward lean, soft elbows.","Lead with the elbows, raise to about shoulder height.","Lower slowly. This one is about control, not load."],
+  m:"Swinging from the hips and shrugging the traps into it."},
+e_tri:{w:"Triceps_brachii_muscle",d:"Triceps isolation — easy volume without taxing the shoulders.",
+  c:["Elbows pinned to your sides, upper arms still.","Push down until the elbows lock softly.","Let the cable back up under control."],
+  m:"Letting the elbows drift forward, turning it into a shoulder movement."},
+e_sq:{w:"Squat_(exercise)",d:"The main lower-body pattern — quads, glutes and a braced trunk.",
+  c:["Bar on the upper back, never the neck.","Brace as if about to take a punch, then sit down and slightly back.","Knees track over the toes; hips and shoulders rise together."],
+  m:"Letting the hips shoot up first, which turns it into a good morning."},
+e_rdl:{w:"Romanian_deadlift",d:"Hip hinge for hamstrings and glutes — a stretch movement, not a squat.",
+  c:["Soft knees, bar dragging close to the legs.","Push the hips back and let the bar slide down the thighs.","Stop when the hamstring stretch stops — usually mid-shin. Flat back throughout."],
+  m:"Bending the knees to lower the bar instead of pushing the hips back."},
+e_legpress:{w:"Leg_press",d:"Loaded quad work with far less trunk fatigue than squatting.",
+  c:["Leg press: feet mid-platform, lower until the knees reach about 90°.","Never let the lower back peel off the pad.","Split squat: long stance, front shin near vertical, back knee toward the floor."],
+  m:"Slamming the knees into a hard lockout at the top."},
+e_legcurl:{w:"Hamstring",d:"The one common movement that trains the hamstrings at the knee.",
+  c:["Hips flat against the pad, pad just above the heels.","Curl all the way, pause at the top.","Lower slowly — the lowering is where the growth is."],
+  m:"Lifting the hips off the pad to move more weight."},
+e_calf:{w:"Calf_raises",d:"Direct calf work — needs a full stretch to do much of anything.",
+  c:["Let the heels drop below the step for a deep stretch.","Rise all the way onto the toes.","Pause at both ends; keep the tempo slow."],
+  m:"Short bouncy reps with no stretch at the bottom."},
+e_pull:{w:"Pull-up_(exercise)",d:"Main vertical pull — lats, upper back and biceps.",
+  c:["Start from a full hang with the shoulders active.","Drive the elbows down and back, chest toward the bar.","Control the descent all the way to straight arms."],
+  m:"Kipping, or half reps that never return to a full hang."},
+e_row:{w:"Bent-over_row",d:"Main horizontal pull — this is what builds mid-back thickness.",
+  c:["Hinge to roughly 45°, flat back, braced.","Pull to the belly button with the elbows travelling past the ribs.","Squeeze, then lower to full extension."],
+  m:"Standing up as you pull, making the lower back the engine."},
+e_face:{w:"Deltoid_muscle",d:"Rear delts and upper-back health — the counterweight to all the pressing.",
+  c:["Rope at about eye height.","Pull toward the face, hands finishing beside the ears, elbows high.","Light weight, higher reps, brief pause at the end."],
+  m:"Going heavy and turning it into a sloppy row."},
+e_reard:{w:"Deltoid_muscle",d:"Isolates the rear delt, which almost everyone under-trains.",
+  c:["Hinge forward, soft elbows.","Open the arms wide like drawing a curtain.","Think about moving the elbows, not the hands."],
+  m:"Shrugging or using momentum instead of the rear delt."},
+e_bi:{w:"Biceps_curl",d:"Direct biceps work.",
+  c:["Elbows at your sides, torso still.","Full range — all the way down every rep.","Squeeze at the top."],
+  m:"Rocking the torso to throw the weight up."},
+e_ham:{w:"Biceps_curl",d:"Neutral-grip curl — hits the brachialis, which adds arm thickness.",
+  c:["Palms facing each other the whole way.","Elbows pinned to the ribs.","Same rules as a curl: no swing, full range."],
+  m:"Letting the elbows drift forward at the top."},
+e_dl:{w:"Deadlift",d:"The heaviest full-body pull — hips, back, grip, everything.",
+  c:["Bar over mid-foot, shins close to it.","Take the slack out of the bar before you pull.","Push the floor away; hips and shoulders rise together. Finish with the glutes."],
+  m:"Jerking the bar off the floor with a rounded lower back."},
+e_front:{w:"Front_squat",d:"Quad-dominant squat variants that keep the torso more upright.",
+  c:["Front squat: elbows high, bar resting on the front delts.","Stay tall — the bar path is straight down.","Bulgarian: rear foot on a bench, most of the weight through the front leg."],
+  m:"Letting the elbows drop in a front squat, which dumps the bar forward."},
+e_hip:{w:"Hip_thrust",d:"The most direct glute loader there is.",
+  c:["Shoulder blades on the bench, chin tucked.","Feet placed so the shins are vertical at the top.","Drive through the heels and squeeze; keep the ribs down."],
+  m:"Overextending the lower back at the top instead of finishing with the glutes."},
+e_legext:{w:"Leg_extension",d:"Quad isolation that asks nothing of the rest of the body.",
+  c:["Pad on the lower shin, back against the seat.","Extend fully and pause a beat.","Lower under control."],
+  m:"Letting the stack slam down between reps."},
+e_tib:{w:"Tibialis_anterior_muscle",d:"Trains the shin muscle — pays off in knee and ankle resilience.",
+  c:["Heels down, toes pulled up toward the shins.","Full range, deliberately slow.","Bodyweight is plenty at first."],
+  m:"Rushing the reps — this one only responds to slow and controlled."},
+e_z2:{w:"Aerobic_exercise",d:"Easy conversational cardio — builds the aerobic base without eating recovery.",
+  c:["You should be able to hold a conversation the entire time.","20–45 minutes.","Bike, incline walk or row all work."],
+  m:"Drifting too hard. If you're breathing hard, it stopped being zone 2."},
+e_goblet:{w:"Squat_(exercise)",d:"Isometric hold that opens the hips and teaches an upright squat.",
+  c:["Hold a dumbbell at the chest and sit into the bottom of a squat.","Elbows inside the knees, chest tall.","Breathe normally and hold."],
+  m:"Letting the chest collapse forward."},
+e_copen:{w:"Plank_(exercise)",d:"Adductor strength — one of the best groin-injury preventers going.",
+  c:["Top leg on a bench, forearm on the floor.","Lift the hips so the body makes a straight line.","Start with the knee on the bench, progress to the foot."],
+  m:"Letting the hips sag or rotate backward."},
+e_shldr:{w:"Shoulder",d:"Strength at the edges of shoulder range — this is what keeps pressing pain-free.",
+  c:["Slow raises or holds at the very top of your range.","Little or no load — think prone Y raises, wall slides, shoulder CARs.","Own the position before adding weight."],
+  m:"Adding load before you actually own the range."}
+};
+
 /* ================= HELPERS / STATE ================= */
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -303,6 +398,7 @@ const DAY=864e5;
 const dstr=d=>{const z=new Date(d);z.setMinutes(z.getMinutes()-z.getTimezoneOffset());return z.toISOString().slice(0,10)};
 const KEY="mono-workout-v1";
 const DRAFTKEY="mono-workout-draft";
+const DEMOKEY="mono-workout-demos";
 let mem=null;
 const store={
   async load(){
@@ -375,6 +471,34 @@ function ovBadge(exId){
   return"";
 }
 
+/* ================= DEMO PHOTOS =================
+   Pulled live from Wikipedia the first time you open an exercise, then cached
+   on this device. Kept out of the synced payload — it's just an image URL, not
+   your data. Coverage varies, so the video link below is always offered too. */
+let demos={};
+function loadDemos(){try{return JSON.parse(localStorage.getItem(DEMOKEY)||"{}")}catch(e){return{}}}
+function saveDemos(){try{localStorage.setItem(DEMOKEY,JSON.stringify(demos))}catch(e){}}
+async function fetchDemo(exId){
+  const g=GUIDE[exId];
+  if(!g||!g.w||demos[exId]!==undefined)return;
+  try{
+    const r=await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(g.w));
+    if(!r.ok)throw new Error("http");
+    const j=await r.json();
+    demos[exId]=(j.thumbnail&&j.thumbnail.source)?j.thumbnail.source:"0";
+  }catch(e){demos[exId]="0"}
+  saveDemos();
+}
+const watchUrl=n=>"https://www.youtube.com/results?search_query="+encodeURIComponent(n+" proper form");
+function demoHtml(exId,name){
+  const g=GUIDE[exId];
+  if(!g||!g.w)return"";
+  const u=demos[exId];
+  if(u&&u!=="0")return'<img class="demo" src="'+esc(u)+'" alt="'+esc(name)+' demonstration" loading="lazy">';
+  if(u==="0")return'<div class="demo ph"><span class="mono">NO PHOTO AVAILABLE — THE VIDEO BELOW SHOWS THE MOVEMENT</span></div>';
+  return'<div class="demo ph"><span class="mono">LOADING PHOTO…</span></div>';
+}
+
 /* ================= CHART ================= */
 function lineChart(vals,fmt){
   if(!vals.length)return'<p class="small soft" style="padding:6px 0">Nothing logged yet.</p>';
@@ -403,10 +527,26 @@ function topSetSeries(exId){
   return Object.keys(bySess).sort().map(k=>bySess[k]);
 }
 
-/* ================= DRAFT (device-local, never synced) ================= */
-let draft=null;
-function saveDraft(){try{draft?localStorage.setItem(DRAFTKEY,JSON.stringify(draft)):localStorage.removeItem(DRAFTKEY)}catch(e){}}
-function loadDraft(){try{const v=localStorage.getItem(DRAFTKEY);return v?JSON.parse(v):null}catch(e){return null}}
+/* ================= DRAFTS (device-local, never synced) =================
+   One draft per day, kept until you tap Save session (or Discard) on that
+   day. Switching days, changing tabs, closing the app, or reloading the
+   page all leave typed-in numbers exactly where they were. Only days you
+   actually typed into are written to storage, so an untouched day that's
+   merely showing last session's pre-fill is never mistaken for real work. */
+let drafts={},dirty={};
+function persistDrafts(){
+  const out={};
+  Object.keys(dirty).forEach(id=>{if(drafts[id])out[id]={rows:drafts[id].rows}});
+  try{Object.keys(out).length?localStorage.setItem(DRAFTKEY,JSON.stringify(out)):localStorage.removeItem(DRAFTKEY)}catch(e){}
+}
+function markDirty(dayId){if(!dayId)return;dirty[dayId]=1;persistDrafts()}
+function dropDraft(dayId){delete drafts[dayId];delete dirty[dayId];persistDrafts()}
+function loadDrafts(){
+  let raw=null;try{raw=JSON.parse(localStorage.getItem(DRAFTKEY)||"null")}catch(e){}
+  if(!raw||typeof raw!=="object")return{};
+  if(raw.dayId&&raw.rows){const o={};o[raw.dayId]={rows:raw.rows};return o}  /* migrate the older single-draft format */
+  return raw;
+}
 function blankRow(){return{w:"",r:"",rir:""}}
 function buildDraft(dayId){
   const day=dayById(dayId);if(!day)return null;
@@ -419,12 +559,19 @@ function buildDraft(dayId){
   });
   return{dayId:dayId,rows:rows};
 }
+/* update the unsaved markers in place — a full re-render mid-typing would steal focus */
+function markLive(){
+  const note=$("unsavedNote");
+  if(note)note.textContent="UNSAVED — KEPT ON THIS DEVICE UNTIL YOU TAP SAVE SESSION";
+  const chip=document.querySelector('#dayChips .chip[data-day="'+curDay+'"]');
+  if(chip&&chip.textContent.indexOf("•")<0)chip.textContent=chip.textContent+" •";
+}
 function ensureDraft(dayId){
-  if(!draft||draft.dayId!==dayId){draft=buildDraft(dayId);saveDraft()}
+  if(!drafts[dayId]){const d=buildDraft(dayId);if(!d)return null;drafts[dayId]=d}
   /* a day edited since the draft was made may have new exercises */
-  const day=dayById(dayId);
-  if(day&&draft)day.ex.forEach(ex=>{if(!draft.rows[ex.id])draft.rows[ex.id]=[blankRow(),blankRow(),blankRow()]});
-  return draft;
+  const day=dayById(dayId),dr=drafts[dayId];
+  if(day&&dr)day.ex.forEach(ex=>{if(!dr.rows[ex.id])dr.rows[ex.id]=[blankRow(),blankRow(),blankRow()]});
+  return dr;
 }
 
 /* ================= RENDER: LOG ================= */
@@ -442,8 +589,9 @@ function rRamp(){
 function rLog(){
   $("todayDate").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}).toUpperCase();
   rRamp();
+  /* a dot marks a day holding numbers you typed but haven't saved */
   $("dayChips").innerHTML=S.program.map(d=>
-    '<button class="chip'+(d.id===curDay?" on":"")+'" data-day="'+d.id+'">'+esc(d.label.split("—")[0].trim())+'</button>').join("");
+    '<button class="chip'+(d.id===curDay?" on":"")+'" data-day="'+d.id+'">'+esc(d.label.split("—")[0].trim())+(dirty[d.id]?" •":"")+'</button>').join("");
   const day=dayById(curDay);
   if(!day){$("logBody").innerHTML='<div class="card soft-c"><p class="small soft">Rest day — nothing scheduled. Tap a day above if you want to train anyway.</p></div>';return}
   const dr=ensureDraft(curDay);
@@ -476,15 +624,18 @@ function rLog(){
   }).join("");
   html+='</div>';
   html+='<button class="btn wide" id="saveSess">Save session</button>';
-  html+='<button class="linkbtn" id="clearSess" style="display:block;margin:10px auto 0">discard this draft</button>';
+  html+='<p class="mono" id="unsavedNote" style="text-align:center;margin-top:8px">'+
+    (dirty[curDay]?"UNSAVED — KEPT ON THIS DEVICE UNTIL YOU TAP SAVE SESSION":"")+'</p>';
+  html+='<button class="linkbtn" id="clearSess" style="display:block;margin:6px auto 0">discard this draft</button>';
   $("logBody").innerHTML=html;
 }
 function saveSession(){
-  const day=dayById(draft&&draft.dayId);
-  if(!day){toast("PICK A DAY FIRST");return}
+  const day=dayById(curDay);
+  const dr=day&&drafts[day.id];
+  if(!day||!dr){toast("PICK A DAY FIRST");return}
   const logs=[];
   day.ex.forEach(ex=>{
-    (draft.rows[ex.id]||[]).forEach(row=>{
+    (dr.rows[ex.id]||[]).forEach(row=>{
       const r=parseFloat(row.r);
       if(isNaN(r)||r<=0)return;                       /* a set only counts once it has reps/time */
       const w=parseFloat(row.w);
@@ -495,7 +646,7 @@ function saveSession(){
   if(!logs.length){toast("NOTHING FILLED IN YET");return}
   S.sessions.push({id:uid(),date:dstr(new Date()),dayId:day.id,logs:logs});
   if(!S.startedAt)S.startedAt=Date.now();
-  draft=null;saveDraft();save();
+  dropDraft(day.id);save();
   rAll();
   const ups=day.ex.filter(e=>overload(e.id).s==="up").length;
   toast(ups?"SAVED · "+ups+" LIFT"+(ups>1?"S":"")+" READY FOR MORE WEIGHT":"SESSION SAVED");
@@ -527,12 +678,22 @@ function popEx(exId){
   const bySess={};
   hist.forEach(h=>{(bySess[h.date]=bySess[h.date]||[]).push(h)});
   const dates=Object.keys(bySess).sort().reverse().slice(0,6);
+  const g=GUIDE[exId];
   openPop(
     '<span class="mono">'+esc(ex.day)+'</span>'+
     '<h2 style="margin:2px 0 6px">'+esc(ex.n)+'</h2>'+
-    '<div class="rowline"><span class="mono">TARGET '+esc(ex.r||"—")+' REPS</span>'+ovBadge(exId)+'</div>'+
+    '<div class="rowline"><span class="mono">'+(isLift(ex)?"TARGET "+esc(ex.r||"—")+" REPS":unitOf(ex))+'</span>'+ovBadge(exId)+'</div>'+
     (o.s==="up"?'<div class="card inv" style="margin-top:12px"><p class="small">Every set reached '+o.top+' reps without going to failure. Add the smallest jump you can — 5 lb, or 2.5 on a dumbbell.</p></div>':"")+
     (o.s==="near"&&o.why?'<p class="small soft" style="margin-top:10px">'+esc(o.why)+'.</p>':"")+
+
+    '<hr class="divider"><span class="mono dark">HOW TO DO IT</span>'+
+    '<div id="demoSlot" style="margin-top:10px">'+demoHtml(exId,ex.n)+'</div>'+
+    '<a class="btn wide ghost" style="margin-top:10px;text-decoration:none" href="'+watchUrl(ex.n)+'" target="_blank" rel="noopener">Watch a demo ↗</a>'+
+    (g?'<p class="small" style="margin-top:12px">'+esc(g.d)+'</p>'+
+       '<ul class="cues">'+g.c.map(c=>'<li>'+esc(c)+'</li>').join("")+'</ul>'+
+       '<div class="watchout"><span class="mono dark">WATCH OUT</span><p class="small" style="margin-top:4px">'+esc(g.m)+'</p></div>'
+      :'<p class="small soft" style="margin-top:12px">No built-in guide for this one — the video link above will show the movement.</p>')+
+
     '<hr class="divider"><span class="mono dark">TOP SET OVER TIME</span>'+
     lineChart(series,v=>v+" lb")+
     (best?'<p class="mono" style="margin-top:8px">BEST EST. 1RM: '+e1rm(Number(best.w),Number(best.r)).toFixed(0)+' LB ('+best.w+'×'+best.r+')</p>':"")+
@@ -541,6 +702,13 @@ function popEx(exId){
       '<div class="mono">'+bySess[d].map(l=>(l.w||0)+"×"+l.r+(l.rir!=null&&l.rir!==""?" @"+l.rir:"")).join("  ·  ")+'</div></div></div>').join("")
       :'<p class="small soft" style="padding:6px 0">No sessions logged yet.</p>')
   );
+  popShowing=exId;
+  /* photo arrives after the popup is already up — swap it in if you're still here */
+  if(g&&g.w&&demos[exId]===undefined)fetchDemo(exId).then(()=>{
+    if(popShowing===exId&&$("popWrap").classList.contains("on")){
+      const slot=$("demoSlot");if(slot)slot.innerHTML=demoHtml(exId,ex.n);
+    }
+  });
 }
 
 /* ================= RENDER: BODY ================= */
@@ -595,8 +763,9 @@ function rProg(){
 }
 
 /* ================= POPOUTS ================= */
+let popShowing=null;
 function openPop(html){$("popCard").innerHTML='<button class="popx" data-closepop="1">✕</button>'+html;$("popWrap").classList.add("on")}
-function closePop(){$("popWrap").classList.remove("on")}
+function closePop(){$("popWrap").classList.remove("on");popShowing=null}
 
 /* ================= GITHUB SYNC ================= */
 const b64e=s=>btoa(unescape(encodeURIComponent(s)));
@@ -694,9 +863,10 @@ function switchView(v){curView=v;
 /* typing into a set field updates the draft in place (no re-render, so focus is kept) */
 document.addEventListener("input",e=>{
   const t=e.target;
-  if(t.dataset&&t.dataset.in&&draft){
-    const rows=draft.rows[t.dataset.ex];
-    if(rows&&rows[t.dataset.i]){rows[t.dataset.i][t.dataset.in]=t.value;saveDraft()}
+  if(t.dataset&&t.dataset.in){
+    const dr=drafts[curDay];
+    const rows=dr&&dr.rows[t.dataset.ex];
+    if(rows&&rows[t.dataset.i]){rows[t.dataset.i][t.dataset.in]=t.value;markDirty(curDay);markLive()}
     return;
   }
   if(t.dataset&&t.dataset.daylabel){const d=dayById(t.dataset.daylabel);if(d){d.label=t.value;save()}return}
@@ -706,7 +876,11 @@ document.addEventListener("input",e=>{
 document.addEventListener("click",e=>{
   if(e.target.id==="popWrap"){closePop();return}
   if(e.target.id==="saveSess"){saveSession();return}
-  if(e.target.id==="clearSess"){draft=null;saveDraft();rLog();toast("DRAFT CLEARED");return}
+  if(e.target.id==="clearSess"){
+    if(confirm("Discard the numbers typed in for this day? This can't be undone."))
+      {dropDraft(curDay);rLog();toast("DRAFT DISCARDED")}
+    return;
+  }
   const el=e.target.closest("[data-goview],[data-day],[data-addset],[data-delset],[data-ex],[data-habit],[data-rampoff],[data-exadd],[data-exdel],[data-exmove],[data-daydel],[data-closepop],[data-close]");
   if(!el)return;
   const d=el.dataset;
@@ -714,10 +888,11 @@ document.addEventListener("click",e=>{
      never open the stats popup over what you're entering. Only the exercise name does. */
   if(d.in)return;
   if(d.goview)switchView(d.goview);
-  else if(d.day){curDay=d.day;draft=null;rLog()}
-  else if(d.addset){const rows=ensureDraft(curDay).rows[d.addset];if(rows){const l=rows[rows.length-1];rows.push(l?{w:l.w,r:"",rir:""}:blankRow());saveDraft();rLog()}}
-  else if(d.delset){const[ex,i]=d.delset.split(":");const rows=draft&&draft.rows[ex];
-    if(rows&&rows.length>1){rows.splice(+i,1);saveDraft();rLog()}else toast("KEEP AT LEAST ONE SET")}
+  else if(d.day){curDay=d.day;rLog()}   /* each day keeps its own draft — switching never clears one */
+  else if(d.addset){const dr=ensureDraft(curDay);const rows=dr&&dr.rows[d.addset];
+    if(rows){const l=rows[rows.length-1];rows.push(l?{w:l.w,r:"",rir:""}:blankRow());markDirty(curDay);rLog()}}
+  else if(d.delset){const[ex,i]=d.delset.split(":");const dr=drafts[curDay];const rows=dr&&dr.rows[ex];
+    if(rows&&rows.length>1){rows.splice(+i,1);markDirty(curDay);rLog()}else toast("KEEP AT LEAST ONE SET")}
   else if(d.ex)popEx(d.ex);
   else if(d.habit){const t=dstr(new Date());const h=S.habits[t]=S.habits[t]||{};h[d.habit]=!h[d.habit];
     if(!h.cre&&!h.pro)delete S.habits[t];save();rBody()}
@@ -727,7 +902,7 @@ document.addEventListener("click",e=>{
   else if(d.exmove){const[di,ei,dir]=d.exmove.split(":");const day=dayById(di);
     if(day){const i=+ei,j=i+ +dir;if(j>=0&&j<day.ex.length){const t=day.ex[i];day.ex[i]=day.ex[j];day.ex[j]=t;save();rProg();rLog()}}}
   else if(d.daydel){const i=S.program.findIndex(x=>x.id===d.daydel);
-    if(i>-1&&confirm("Remove this day? Logged history is kept.")){S.program.splice(i,1);if(curDay===d.daydel){curDay=null;draft=null}save();rProg();rLog()}}
+    if(i>-1&&confirm("Remove this day? Logged history is kept.")){S.program.splice(i,1);dropDraft(d.daydel);if(curDay===d.daydel)curDay=null;save();rProg();rLog()}}
   else if(d.closepop)closePop();
   else if(d.close)document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"));
 });
@@ -747,7 +922,7 @@ $("addDayBtn").addEventListener("click",()=>{
 });
 $("resetProgBtn").addEventListener("click",()=>{
   if(confirm("Restore the default 5-day split? Your logged sessions are kept.")){
-    S.program=defaultProgram();draft=null;saveDraft();save();rProg();rAll();$("progMsg").textContent="DEFAULT PROGRAM RESTORED.";
+    S.program=defaultProgram();save();rProg();rAll();$("progMsg").textContent="DEFAULT PROGRAM RESTORED — ANY UNSAVED NUMBERS WERE KEPT.";
   }
 });
 $("rampChip").addEventListener("click",()=>{S.rampOn=!S.rampOn;save();
@@ -786,12 +961,12 @@ $("copyBtn").addEventListener("click",async()=>{
 $("importBtn").addEventListener("click",()=>{
   try{const d=JSON.parse($("dataBox").value);
     if(!d||typeof d!=="object"||!Array.isArray(d.sessions))throw 0;
-    S=Object.assign(blank(),d);draft=null;saveDraft();save();rAll();$("setMsg").textContent="IMPORTED."}
+    S=Object.assign(blank(),d);drafts={};dirty={};persistDrafts();save();rAll();$("setMsg").textContent="IMPORTED."}
   catch(e){$("setMsg").textContent="THAT DIDN'T PARSE — PASTE THE FULL EXPORTED TEXT."}
 });
 $("resetBtn").addEventListener("click",()=>{
   if(confirm("Reset everything — program, sessions, bodyweight? This can't be undone.")){
-    S=blank();draft=null;saveDraft();save();rAll();$("setMsg").textContent="RESET DONE."}
+    S=blank();drafts={};dirty={};persistDrafts();save();rAll();$("setMsg").textContent="RESET DONE."}
 });
 
 /* ================= INIT ================= */
@@ -800,9 +975,11 @@ $("resetBtn").addEventListener("click",()=>{
   if(loaded&&Array.isArray(loaded.sessions))S=Object.assign(blank(),loaded);
   adoptSharedGH();
   if(S.gh&&S.gh.enabled)await ghPull(false);
-  const saved=loadDraft();
-  if(saved&&dayById(saved.dayId)){draft=saved;curDay=saved.dayId}
-  else curDay=suggestedDay();
+  demos=loadDemos();
+  /* restore every unsaved draft, dropping only ones whose day no longer exists */
+  drafts=loadDrafts();
+  Object.keys(drafts).forEach(id=>{if(dayById(id))dirty[id]=1;else delete drafts[id]});
+  curDay=suggestedDay()||Object.keys(drafts)[0]||null;
   rAll();
 })();
 </script>
