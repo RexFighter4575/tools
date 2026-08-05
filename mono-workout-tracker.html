@@ -87,9 +87,14 @@ section.view.on{display:block;animation:fadeUp .3s ease both}
 .fieldkey i{width:14px;flex:0 0 auto}
 
 /* ---- exercise demo + form guide ---- */
-.demo{display:block;width:100%;max-height:240px;object-fit:contain;background:var(--g1);
-  border:1.5px solid var(--g2);border-radius:12px}
-.demo.ph{display:flex;align-items:center;justify-content:center;min-height:110px;text-align:center;padding:14px}
+.art{display:block;width:100%;height:auto;background:var(--wh);border:1.5px solid var(--g2);border-radius:12px;padding:6px}
+.art .fig{fill:none;stroke:var(--bk);stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+.art .fig circle{fill:var(--bk)}
+.art .fig circle.ring{fill:none;stroke-width:3.2}
+.art .fig rect{fill:var(--bk);stroke:none}
+.art .arw{fill:none;stroke:var(--g3);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.artkey{display:flex;justify-content:space-around;margin-top:4px}
+.artkey span{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;color:var(--g3)}
 ul.cues{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 ul.cues li{font-size:.9rem}
 .watchout{background:var(--g1);border-radius:10px;padding:10px;margin-top:12px}
@@ -307,85 +312,84 @@ const WEEKMAP={1:"d1",2:"d2",3:"d3",4:"d4",5:"d5"};
 
 /* ================= HOW TO DO IT =================
    Per-exercise form guide shown when you tap an exercise name.
-   w = Wikipedia article the demo photo is pulled from (see fetchDemo).
    Renaming an exercise keeps its guide, because these are keyed by id. */
 const GUIDE={
-e_bench:{w:"Bench_press",d:"The main horizontal press — chest, front delts and triceps.",
+e_bench:{d:"The main horizontal press — chest, front delts and triceps.",
   c:["Shoulder blades pulled back and down into the bench, feet planted.","Bar over mid-chest at the bottom, wrists stacked over elbows.","Touch the chest under control, then press back over the shoulders."],
   m:"Flaring the elbows straight out to 90° — keep them tucked to roughly 45–75° from the torso."},
-e_ohp:{w:"Overhead_press",d:"Standing vertical press — shoulders and triceps, with the whole trunk bracing.",
+e_ohp:{d:"Standing vertical press — shoulders and triceps, with the whole trunk bracing.",
   c:["Bar resting on the front delts, elbows just in front of it.","Squeeze glutes and abs so the ribs don't flare.","Press up and slightly back, moving your head 'through' at lockout."],
   m:"Leaning back to turn it into a standing incline press."},
-e_incdb:{w:"Bench_press",d:"Upper-chest biased press; dumbbells let each side travel freely.",
+e_incdb:{d:"Upper-chest biased press; dumbbells let each side travel freely.",
   c:["Bench at 30–45°, no steeper.","Start at lower-chest level with elbows under the wrists.","Press up and slightly together without clanging the bells."],
   m:"Setting the bench too upright — past ~45° it quietly becomes a shoulder press."},
-e_dip:{w:"Dip_(exercise)",d:"Triceps-heavy press; dips also load the lower chest.",
+e_dip:{d:"Triceps-heavy press; dips also load the lower chest.",
   c:["Dips: lean forward for chest, stay upright for triceps.","Descend until the upper arms are about parallel to the floor.","Close-grip bench: hands shoulder width, elbows tucked, bar to lower chest."],
   m:"Sinking too deep on dips and letting the shoulders roll forward."},
-e_lat:{w:"Lateral_raise",d:"Isolates the side delt — the muscle that makes shoulders look wide.",
+e_lat:{d:"Isolates the side delt — the muscle that makes shoulders look wide.",
   c:["Slight forward lean, soft elbows.","Lead with the elbows, raise to about shoulder height.","Lower slowly. This one is about control, not load."],
   m:"Swinging from the hips and shrugging the traps into it."},
-e_tri:{w:"Triceps_brachii_muscle",d:"Triceps isolation — easy volume without taxing the shoulders.",
+e_tri:{d:"Triceps isolation — easy volume without taxing the shoulders.",
   c:["Elbows pinned to your sides, upper arms still.","Push down until the elbows lock softly.","Let the cable back up under control."],
   m:"Letting the elbows drift forward, turning it into a shoulder movement."},
-e_sq:{w:"Squat_(exercise)",d:"The main lower-body pattern — quads, glutes and a braced trunk.",
+e_sq:{d:"The main lower-body pattern — quads, glutes and a braced trunk.",
   c:["Bar on the upper back, never the neck.","Brace as if about to take a punch, then sit down and slightly back.","Knees track over the toes; hips and shoulders rise together."],
   m:"Letting the hips shoot up first, which turns it into a good morning."},
-e_rdl:{w:"Romanian_deadlift",d:"Hip hinge for hamstrings and glutes — a stretch movement, not a squat.",
+e_rdl:{d:"Hip hinge for hamstrings and glutes — a stretch movement, not a squat.",
   c:["Soft knees, bar dragging close to the legs.","Push the hips back and let the bar slide down the thighs.","Stop when the hamstring stretch stops — usually mid-shin. Flat back throughout."],
   m:"Bending the knees to lower the bar instead of pushing the hips back."},
-e_legpress:{w:"Leg_press",d:"Loaded quad work with far less trunk fatigue than squatting.",
+e_legpress:{d:"Loaded quad work with far less trunk fatigue than squatting.",
   c:["Leg press: feet mid-platform, lower until the knees reach about 90°.","Never let the lower back peel off the pad.","Split squat: long stance, front shin near vertical, back knee toward the floor."],
   m:"Slamming the knees into a hard lockout at the top."},
-e_legcurl:{w:"Hamstring",d:"The one common movement that trains the hamstrings at the knee.",
+e_legcurl:{d:"The one common movement that trains the hamstrings at the knee.",
   c:["Hips flat against the pad, pad just above the heels.","Curl all the way, pause at the top.","Lower slowly — the lowering is where the growth is."],
   m:"Lifting the hips off the pad to move more weight."},
-e_calf:{w:"Calf_raises",d:"Direct calf work — needs a full stretch to do much of anything.",
+e_calf:{d:"Direct calf work — needs a full stretch to do much of anything.",
   c:["Let the heels drop below the step for a deep stretch.","Rise all the way onto the toes.","Pause at both ends; keep the tempo slow."],
   m:"Short bouncy reps with no stretch at the bottom."},
-e_pull:{w:"Pull-up_(exercise)",d:"Main vertical pull — lats, upper back and biceps.",
+e_pull:{d:"Main vertical pull — lats, upper back and biceps.",
   c:["Start from a full hang with the shoulders active.","Drive the elbows down and back, chest toward the bar.","Control the descent all the way to straight arms."],
   m:"Kipping, or half reps that never return to a full hang."},
-e_row:{w:"Bent-over_row",d:"Main horizontal pull — this is what builds mid-back thickness.",
+e_row:{d:"Main horizontal pull — this is what builds mid-back thickness.",
   c:["Hinge to roughly 45°, flat back, braced.","Pull to the belly button with the elbows travelling past the ribs.","Squeeze, then lower to full extension."],
   m:"Standing up as you pull, making the lower back the engine."},
-e_face:{w:"Deltoid_muscle",d:"Rear delts and upper-back health — the counterweight to all the pressing.",
+e_face:{d:"Rear delts and upper-back health — the counterweight to all the pressing.",
   c:["Rope at about eye height.","Pull toward the face, hands finishing beside the ears, elbows high.","Light weight, higher reps, brief pause at the end."],
   m:"Going heavy and turning it into a sloppy row."},
-e_reard:{w:"Deltoid_muscle",d:"Isolates the rear delt, which almost everyone under-trains.",
+e_reard:{d:"Isolates the rear delt, which almost everyone under-trains.",
   c:["Hinge forward, soft elbows.","Open the arms wide like drawing a curtain.","Think about moving the elbows, not the hands."],
   m:"Shrugging or using momentum instead of the rear delt."},
-e_bi:{w:"Biceps_curl",d:"Direct biceps work.",
+e_bi:{d:"Direct biceps work.",
   c:["Elbows at your sides, torso still.","Full range — all the way down every rep.","Squeeze at the top."],
   m:"Rocking the torso to throw the weight up."},
-e_ham:{w:"Biceps_curl",d:"Neutral-grip curl — hits the brachialis, which adds arm thickness.",
+e_ham:{d:"Neutral-grip curl — hits the brachialis, which adds arm thickness.",
   c:["Palms facing each other the whole way.","Elbows pinned to the ribs.","Same rules as a curl: no swing, full range."],
   m:"Letting the elbows drift forward at the top."},
-e_dl:{w:"Deadlift",d:"The heaviest full-body pull — hips, back, grip, everything.",
+e_dl:{d:"The heaviest full-body pull — hips, back, grip, everything.",
   c:["Bar over mid-foot, shins close to it.","Take the slack out of the bar before you pull.","Push the floor away; hips and shoulders rise together. Finish with the glutes."],
   m:"Jerking the bar off the floor with a rounded lower back."},
-e_front:{w:"Front_squat",d:"Quad-dominant squat variants that keep the torso more upright.",
+e_front:{d:"Quad-dominant squat variants that keep the torso more upright.",
   c:["Front squat: elbows high, bar resting on the front delts.","Stay tall — the bar path is straight down.","Bulgarian: rear foot on a bench, most of the weight through the front leg."],
   m:"Letting the elbows drop in a front squat, which dumps the bar forward."},
-e_hip:{w:"Hip_thrust",d:"The most direct glute loader there is.",
+e_hip:{d:"The most direct glute loader there is.",
   c:["Shoulder blades on the bench, chin tucked.","Feet placed so the shins are vertical at the top.","Drive through the heels and squeeze; keep the ribs down."],
   m:"Overextending the lower back at the top instead of finishing with the glutes."},
-e_legext:{w:"Leg_extension",d:"Quad isolation that asks nothing of the rest of the body.",
+e_legext:{d:"Quad isolation that asks nothing of the rest of the body.",
   c:["Pad on the lower shin, back against the seat.","Extend fully and pause a beat.","Lower under control."],
   m:"Letting the stack slam down between reps."},
-e_tib:{w:"Tibialis_anterior_muscle",d:"Trains the shin muscle — pays off in knee and ankle resilience.",
+e_tib:{d:"Trains the shin muscle — pays off in knee and ankle resilience.",
   c:["Heels down, toes pulled up toward the shins.","Full range, deliberately slow.","Bodyweight is plenty at first."],
   m:"Rushing the reps — this one only responds to slow and controlled."},
-e_z2:{w:"Aerobic_exercise",d:"Easy conversational cardio — builds the aerobic base without eating recovery.",
+e_z2:{d:"Easy conversational cardio — builds the aerobic base without eating recovery.",
   c:["You should be able to hold a conversation the entire time.","20–45 minutes.","Bike, incline walk or row all work."],
   m:"Drifting too hard. If you're breathing hard, it stopped being zone 2."},
-e_goblet:{w:"Squat_(exercise)",d:"Isometric hold that opens the hips and teaches an upright squat.",
+e_goblet:{d:"Isometric hold that opens the hips and teaches an upright squat.",
   c:["Hold a dumbbell at the chest and sit into the bottom of a squat.","Elbows inside the knees, chest tall.","Breathe normally and hold."],
   m:"Letting the chest collapse forward."},
-e_copen:{w:"Plank_(exercise)",d:"Adductor strength — one of the best groin-injury preventers going.",
+e_copen:{d:"Adductor strength — one of the best groin-injury preventers going.",
   c:["Top leg on a bench, forearm on the floor.","Lift the hips so the body makes a straight line.","Start with the knee on the bench, progress to the foot."],
   m:"Letting the hips sag or rotate backward."},
-e_shldr:{w:"Shoulder",d:"Strength at the edges of shoulder range — this is what keeps pressing pain-free.",
+e_shldr:{d:"Strength at the edges of shoulder range — this is what keeps pressing pain-free.",
   c:["Slow raises or holds at the very top of your range.","Little or no load — think prone Y raises, wall slides, shoulder CARs.","Own the position before adding weight."],
   m:"Adding load before you actually own the range."}
 };
@@ -398,7 +402,6 @@ const DAY=864e5;
 const dstr=d=>{const z=new Date(d);z.setMinutes(z.getMinutes()-z.getTimezoneOffset());return z.toISOString().slice(0,10)};
 const KEY="mono-workout-v1";
 const DRAFTKEY="mono-workout-draft";
-const DEMOKEY="mono-workout-demos";
 let mem=null;
 const store={
   async load(){
@@ -471,32 +474,136 @@ function ovBadge(exId){
   return"";
 }
 
-/* ================= DEMO PHOTOS =================
-   Pulled live from Wikipedia the first time you open an exercise, then cached
-   on this device. Kept out of the synced payload — it's just an image URL, not
-   your data. Coverage varies, so the video link below is always offered too. */
-let demos={};
-function loadDemos(){try{return JSON.parse(localStorage.getItem(DEMOKEY)||"{}")}catch(e){return{}}}
-function saveDemos(){try{localStorage.setItem(DEMOKEY,JSON.stringify(demos))}catch(e){}}
-async function fetchDemo(exId){
-  const g=GUIDE[exId];
-  if(!g||!g.w||demos[exId]!==undefined)return;
-  try{
-    const r=await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(g.w));
-    if(!r.ok)throw new Error("http");
-    const j=await r.json();
-    demos[exId]=(j.thumbnail&&j.thumbnail.source)?j.thumbnail.source:"0";
-  }catch(e){demos[exId]="0"}
-  saveDemos();
-}
+/* ================= MOVEMENT LINE ART =================
+   One figure system so every exercise reads the same. Each drawing is two
+   panels: start on the left, end on the right, with an arrow between.
+   Side view faces right; a barbell seen from the side is a plate (circle),
+   so only the head-on views draw a bar as a line. viewBox 0 0 208 104. */
+const GY=90;
+const pl=p=>'<polyline points="'+p.map(q=>q[0]+','+q[1]).join(' ')+'"/>';
+const ln=(a,b)=>'<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'"/>';
+const cir=(c,r)=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="'+(r||5.5)+'"/>';
+const rct=(x,y,w,h)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="1.5"/>';
+const ring=(c,r)=>'<circle class="ring" cx="'+c[0]+'" cy="'+c[1]+'" r="'+(r||7)+'"/>';
+/* side-view body: head, torso, near arm, near leg */
+const body=P=>cir(P.h)+pl([P.s,P.p])+pl([P.s,P.e,P.w])+pl([P.p,P.k,P.a]);
+/* head-on body: both arms and both legs */
+const bodyF=P=>cir(P.h)+pl([P.s,P.p])+pl([P.s,P.e,P.w])+pl([P.s,P.e2,P.w2])+pl([P.p,P.k,P.a])+pl([P.p,P.k2,P.a2]);
+/* lying / seated body (no arms) */
+const trunk=P=>cir(P.h)+pl([P.s,P.p])+pl([P.p,P.k,P.a]);
+const plate=c=>ring(c,7);                       /* barbell seen end-on */
+const dbell=c=>rct(c[0]-2.5,c[1]-6,5,12);       /* dumbbell seen end-on */
+const barF=(c,half)=>ln([c[0]-(half||20),c[1]],[c[0]+(half||20),c[1]])+
+  rct(c[0]-(half||20)-3,c[1]-5,3.5,10)+rct(c[0]+(half||20)-.5,c[1]-5,3.5,10);
+const ground=()=>ln([8,GY+2],[92,GY+2]);
+const benchTop=(x,y,w)=>rct(x,y,w,4)+ln([x+4,y+4],[x+4,GY+2])+ln([x+w-4,y+4],[x+w-4,GY+2]);
+const cable=(from,to)=>ln(from,to)+rct(to[0]-6,to[1]-4,12,4);
+
+const ART={};
+const F=(a,b)=>({a:a,b:b});
+
+/* ---------- squat pattern ---------- */
+const sqTop={h:[46,16],s:[46,29],e:[39,35],w:[35,30],p:[46,55],k:[46,72],a:[46,GY]};
+const sqBot={h:[39,34],s:[43,47],e:[36,53],w:[32,48],p:[34,65],k:[58,68],a:[47,GY]};
+ART.squat=F(ground()+body(sqTop)+plate([39,29]),ground()+body(sqBot)+plate([36,47]));
+const fsTop={h:[46,16],s:[46,29],e:[42,38],w:[52,31],p:[46,55],k:[46,72],a:[46,GY]};
+const fsBot={h:[40,34],s:[44,47],e:[41,56],w:[52,49],p:[34,65],k:[58,68],a:[47,GY]};
+ART.frontsq=F(ground()+body(fsTop)+plate([54,30]),ground()+body(fsBot)+plate([54,48]));
+ART.goblet=F(ground()+body(fsTop)+dbell([53,32]),ground()+body(fsBot)+dbell([53,50]));
+/* ---------- hinge ---------- */
+const hgTop={h:[46,16],s:[46,28],e:[46,40],w:[46,52],p:[46,54],k:[46,71],a:[46,GY]};
+const hgBot={h:[64,40],s:[57,45],e:[57,57],w:[57,68],p:[38,57],k:[44,72],a:[47,GY]};
+ART.hinge=F(ground()+body(hgTop)+plate([46,55]),ground()+body(hgBot)+plate([57,70]));
+const dlBot={h:[64,44],s:[56,49],e:[56,61],w:[56,73],p:[37,59],k:[44,73],a:[47,GY]};
+ART.deadlift=F(ground()+body(dlBot)+plate([56,78]),ground()+body(hgTop)+plate([46,55]));
+/* ---------- presses ---------- */
+const lie={h:[26,52],s:[38,52],p:[62,54],k:[74,52],a:[76,70]};
+const bp=y=>benchTop(30,58,46)+trunk(lie)+pl([[38,52],[35,y+9],[42,y]])+plate([42,y]);
+ART.bench=F(bp(44),bp(26));
+const incBack=()=>pl([[30,68],[54,44]])+rct(26,66,32,4)+ln([30,70],[30,GY+2])+ln([54,66],[54,GY+2]);
+const inc=y=>incBack()+cir([57,39])+pl([[54,46],[48,y+8],[56,y]])+dbell([57,y]);
+ART.incline=F(inc(52),inc(26));
+const ohpA={h:[46,20],s:[46,32],e:[39,38],w:[45,32],p:[46,56],k:[46,73],a:[46,GY]};
+const ohpB={h:[46,20],s:[46,32],e:[44,23],w:[46,13],p:[46,56],k:[46,73],a:[46,GY]};
+ART.ohp=F(ground()+body(ohpA)+plate([46,31]),ground()+body(ohpB)+plate([46,13]));
+const dipBars=()=>rct(34,56,26,4);
+const dipA={h:[48,22],s:[48,34],e:[48,46],w:[48,57],p:[48,58],k:[58,66],a:[54,78]};
+const dipB={h:[48,36],s:[48,48],e:[37,54],w:[48,57],p:[48,72],k:[58,80],a:[54,GY]};
+ART.dip=F(dipBars()+body(dipA),dipBars()+body(dipB));
+/* ---------- shoulders / arms ---------- */
+const latA={h:[48,17],s:[48,30],e:[39,42],w:[37,54],e2:[57,42],w2:[59,54],p:[48,56],k:[42,73],a:[42,GY],k2:[54,73],a2:[54,GY]};
+const latB={h:[48,17],s:[48,30],e:[35,32],w:[22,30],e2:[61,32],w2:[74,30],p:[48,56],k:[42,73],a:[42,GY],k2:[54,73],a2:[54,GY]};
+ART.lateral=F(ground()+bodyF(latA)+dbell([37,56])+dbell([59,56]),ground()+bodyF(latB)+dbell([21,30])+dbell([75,30]));
+const pdA={h:[46,20],s:[46,32],e:[48,45],w:[41,37],p:[46,56],k:[46,73],a:[46,GY]};
+const pdB={h:[46,20],s:[46,32],e:[48,45],w:[45,57],p:[46,56],k:[46,73],a:[46,GY]};
+ART.pushdown=F(ground()+cable([41,37],[41,12])+body(pdA),ground()+cable([45,57],[45,12])+body(pdB));
+const clA={h:[46,20],s:[46,32],e:[47,46],w:[49,59],p:[46,56],k:[46,73],a:[46,GY]};
+const clB={h:[46,20],s:[46,32],e:[47,46],w:[41,37],p:[46,56],k:[46,73],a:[46,GY]};
+ART.curl=F(ground()+body(clA)+dbell([50,60]),ground()+body(clB)+dbell([40,36]));
+const fpA={h:[44,22],s:[44,34],e:[54,38],w:[64,34],p:[44,58],k:[44,74],a:[44,GY]};
+const fpB={h:[44,22],s:[44,34],e:[34,32],w:[47,25],p:[44,58],k:[44,74],a:[44,GY]};
+ART.facepull=F(ground()+cable([64,34],[88,26])+body(fpA),ground()+cable([47,25],[88,26])+body(fpB));
+const rdA={h:[48,28],s:[48,40],e:[43,51],w:[41,61],e2:[53,51],w2:[55,61],p:[48,60],k:[42,75],a:[42,GY],k2:[54,75],a2:[54,GY]};
+const rdB={h:[48,28],s:[48,40],e:[34,42],w:[22,40],e2:[62,42],w2:[74,40],p:[48,60],k:[42,75],a:[42,GY],k2:[54,75],a2:[54,GY]};
+ART.reardelt=F(ground()+bodyF(rdA)+dbell([41,62])+dbell([55,62]),ground()+bodyF(rdB)+dbell([21,40])+dbell([75,40]));
+const syA={h:[48,20],s:[48,33],e:[37,41],w:[31,51],e2:[59,41],w2:[65,51],p:[48,58],k:[42,74],a:[42,GY],k2:[54,74],a2:[54,GY]};
+const syB={h:[48,20],s:[48,33],e:[36,25],w:[27,14],e2:[60,25],w2:[69,14],p:[48,58],k:[42,74],a:[42,GY],k2:[54,74],a2:[54,GY]};
+ART.shoulderY=F(ground()+bodyF(syA),ground()+bodyF(syB));
+/* ---------- pulls ---------- */
+const puBar=()=>ln([24,16],[72,16]);
+const puA={h:[48,38],s:[48,49],e:[47,33],w:[46,17],p:[48,70],k:[54,84],a:[46,GY]};
+const puB={h:[48,26],s:[48,38],e:[38,29],w:[46,17],p:[48,60],k:[56,74],a:[48,84]};
+ART.pullup=F(puBar()+body(puA),puBar()+body(puB));
+const rwA={h:[66,38],s:[58,43],e:[58,56],w:[58,68],p:[38,55],k:[44,72],a:[46,GY]};
+const rwB={h:[66,38],s:[58,43],e:[64,53],w:[57,54],p:[38,55],k:[44,72],a:[46,GY]};
+ART.row=F(ground()+body(rwA)+plate([58,70]),ground()+body(rwB)+plate([57,55]));
+/* ---------- legs ---------- */
+const lpSeat=()=>rct(14,60,26,4)+ln([18,64],[18,GY+2])+pl([[14,60],[8,44]]);
+const lpA={h:[14,40],s:[22,48],p:[40,60],k:[58,48],a:[54,32]};
+const lpB={h:[14,40],s:[22,48],p:[40,60],k:[64,40],a:[76,26]};
+ART.legpress=F(lpSeat()+trunk(lpA)+rct(46,24,24,5),lpSeat()+trunk(lpB)+rct(68,18,24,5));
+const lcPad=()=>rct(18,56,52,4)+ln([24,60],[24,GY+2])+ln([64,60],[64,GY+2]);
+const lcA={h:[16,50],s:[26,52],p:[52,52],k:[66,52],a:[86,52]};
+const lcB={h:[16,50],s:[26,52],p:[52,52],k:[66,52],a:[74,30]};
+ART.legcurl=F(lcPad()+trunk(lcA)+ring([86,52],5),lcPad()+trunk(lcB)+ring([74,30],5));
+const leSeat=()=>rct(18,58,26,4)+ln([22,62],[22,GY+2])+pl([[18,58],[12,40]]);
+const leA={h:[14,36],s:[20,46],p:[40,58],k:[50,72],a:[50,86]};
+const leB={h:[14,36],s:[20,46],p:[40,58],k:[50,72],a:[74,64]};
+ART.legext=F(leSeat()+trunk(leA)+rct(46,82,8,10),leSeat()+trunk(leB)+rct(70,60,8,10));
+const cfStep=()=>rct(34,GY,26,5);
+const cfA={h:[46,22],s:[46,34],e:[46,45],w:[46,56],p:[46,58],k:[46,74],a:[46,GY+4]};
+const cfB={h:[46,14],s:[46,26],e:[46,37],w:[46,48],p:[46,50],k:[46,68],a:[46,84]};
+ART.calf=F(cfStep()+body(cfA)+pl([[46,GY+4],[56,GY+4]]),cfStep()+body(cfB)+pl([[46,84],[56,GY-1]]));
+const htBench=()=>rct(10,52,26,4)+ln([14,56],[14,GY+2]);
+const htA={h:[16,46],s:[26,52],p:[50,76],k:[62,64],a:[62,GY+2]};
+const htB={h:[16,46],s:[26,52],p:[52,58],k:[64,60],a:[64,GY+2]};
+ART.hipthrust=F(ground()+htBench()+trunk(htA)+plate([50,74]),ground()+htBench()+trunk(htB)+plate([52,56]));
+const tbA={h:[46,22],s:[46,34],e:[46,45],w:[46,56],p:[46,58],k:[46,74],a:[46,GY]};
+ART.tib=F(ground()+body(tbA)+pl([[46,GY],[58,GY]]),ground()+body(tbA)+pl([[46,GY],[57,GY-9]]));
+/* ---------- other ---------- */
+const cdA={h:[42,20],s:[42,32],e:[51,38],w:[59,41],p:[42,56],k:[32,70],a:[26,84]};
+const cdB={h:[52,20],s:[52,32],e:[43,38],w:[35,41],p:[52,56],k:[62,70],a:[68,84]};
+ART.cardio=F(ground()+body(cdA),ground()+body(cdB));
+const cpBench=()=>rct(58,56,32,4)+ln([86,60],[86,GY+2]);
+const cpA={h:[16,72],s:[26,72],p:[48,72],k:[60,68],a:[72,56]};
+const cpB={h:[16,58],s:[26,60],p:[48,63],k:[60,59],a:[72,54]};
+const cpFig=P=>trunk(P)+ln(P.s,[P.s[0]-2,P.s[1]+14]);
+ART.copen=F(cpBench()+cpFig(cpA),cpBench()+cpFig(cpB));
+
+/* which drawing each exercise uses */
+const ARTMAP={e_bench:"bench",e_ohp:"ohp",e_incdb:"incline",e_dip:"dip",e_lat:"lateral",e_tri:"pushdown",
+e_sq:"squat",e_rdl:"hinge",e_legpress:"legpress",e_legcurl:"legcurl",e_calf:"calf",e_pull:"pullup",
+e_row:"row",e_face:"facepull",e_reard:"reardelt",e_bi:"curl",e_ham:"curl",e_dl:"deadlift",
+e_front:"frontsq",e_hip:"hipthrust",e_legext:"legext",e_tib:"tib",e_z2:"cardio",e_goblet:"goblet",
+e_copen:"copen",e_shldr:"shoulderY"};
 const watchUrl=n=>"https://www.youtube.com/results?search_query="+encodeURIComponent(n+" proper form");
-function demoHtml(exId,name){
-  const g=GUIDE[exId];
-  if(!g||!g.w)return"";
-  const u=demos[exId];
-  if(u&&u!=="0")return'<img class="demo" src="'+esc(u)+'" alt="'+esc(name)+' demonstration" loading="lazy">';
-  if(u==="0")return'<div class="demo ph"><span class="mono">NO PHOTO AVAILABLE — THE VIDEO BELOW SHOWS THE MOVEMENT</span></div>';
-  return'<div class="demo ph"><span class="mono">LOADING PHOTO…</span></div>';
+function demoHtml(exId){
+  const A=ART[ARTMAP[exId]];
+  if(!A)return"";
+  return '<svg class="art" viewBox="0 0 208 104" role="img" aria-label="movement diagram">'+
+    '<g class="fig">'+A.a+'</g><g class="fig" transform="translate(108,0)">'+A.b+'</g>'+
+    '<g class="arw"><line x1="96" y1="52" x2="108" y2="52"/><polyline points="104,48 108,52 104,56"/></g>'+
+    '</svg><div class="artkey"><span>START</span><span>FINISH</span></div>';
 }
 
 /* ================= CHART ================= */
@@ -687,7 +794,7 @@ function popEx(exId){
     (o.s==="near"&&o.why?'<p class="small soft" style="margin-top:10px">'+esc(o.why)+'.</p>':"")+
 
     '<hr class="divider"><span class="mono dark">HOW TO DO IT</span>'+
-    '<div id="demoSlot" style="margin-top:10px">'+demoHtml(exId,ex.n)+'</div>'+
+    '<div style="margin-top:10px">'+demoHtml(exId)+'</div>'+
     '<a class="btn wide ghost" style="margin-top:10px;text-decoration:none" href="'+watchUrl(ex.n)+'" target="_blank" rel="noopener">Watch a demo ↗</a>'+
     (g?'<p class="small" style="margin-top:12px">'+esc(g.d)+'</p>'+
        '<ul class="cues">'+g.c.map(c=>'<li>'+esc(c)+'</li>').join("")+'</ul>'+
@@ -702,13 +809,6 @@ function popEx(exId){
       '<div class="mono">'+bySess[d].map(l=>(l.w||0)+"×"+l.r+(l.rir!=null&&l.rir!==""?" @"+l.rir:"")).join("  ·  ")+'</div></div></div>').join("")
       :'<p class="small soft" style="padding:6px 0">No sessions logged yet.</p>')
   );
-  popShowing=exId;
-  /* photo arrives after the popup is already up — swap it in if you're still here */
-  if(g&&g.w&&demos[exId]===undefined)fetchDemo(exId).then(()=>{
-    if(popShowing===exId&&$("popWrap").classList.contains("on")){
-      const slot=$("demoSlot");if(slot)slot.innerHTML=demoHtml(exId,ex.n);
-    }
-  });
 }
 
 /* ================= RENDER: BODY ================= */
@@ -763,9 +863,8 @@ function rProg(){
 }
 
 /* ================= POPOUTS ================= */
-let popShowing=null;
 function openPop(html){$("popCard").innerHTML='<button class="popx" data-closepop="1">✕</button>'+html;$("popWrap").classList.add("on")}
-function closePop(){$("popWrap").classList.remove("on");popShowing=null}
+function closePop(){$("popWrap").classList.remove("on")}
 
 /* ================= GITHUB SYNC ================= */
 const b64e=s=>btoa(unescape(encodeURIComponent(s)));
@@ -975,7 +1074,6 @@ $("resetBtn").addEventListener("click",()=>{
   if(loaded&&Array.isArray(loaded.sessions))S=Object.assign(blank(),loaded);
   adoptSharedGH();
   if(S.gh&&S.gh.enabled)await ghPull(false);
-  demos=loadDemos();
   /* restore every unsaved draft, dropping only ones whose day no longer exists */
   drafts=loadDrafts();
   Object.keys(drafts).forEach(id=>{if(dayById(id))dirty[id]=1;else delete drafts[id]});
