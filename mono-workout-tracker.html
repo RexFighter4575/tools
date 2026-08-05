@@ -70,6 +70,8 @@ section.view.on{display:block;animation:fadeUp .3s ease both}
 /* ---- exercise logging ---- */
 .exblock{padding:14px 2px;border-bottom:1.5px solid var(--g1)}
 .exblock:last-child{border-bottom:none}
+.exblock.gone{opacity:.45}
+.exblock.gone .exname{font-weight:500}
 .exhead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .exname{font-family:var(--disp);font-weight:700;font-size:1.02rem}
 /* only the name opens the stats popup — hairline hints it's tappable */
@@ -160,6 +162,8 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
 
     <div id="rampBanner"></div>
 
+    <p class="mono dark" style="margin-top:4px">WHERE ARE YOU?</p>
+    <div class="chips" id="locChips"></div>
     <div class="chips" id="dayChips"></div>
     <div id="logBody"></div>
   </section>
@@ -204,6 +208,8 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
     <div class="card soft-c"><h3>RIR — reps in reserve</h3><p class="small" style="margin-top:6px">Optional, but it makes the cue smarter. Log how many reps you could still have done: <b>leave 1–2 reps in reserve</b> on working sets. RIR&nbsp;0 means you went to failure. Leave the field blank if you'd rather not think about it — the cue still works off reps alone.</p></div>
     <div class="card soft-c"><h3>Target rep ranges</h3><p class="small" style="margin-top:6px">Main compounds default to <b>6–8</b>, accessories to <b>8–12</b>. Both are editable per exercise in Settings → Edit program, along with day names and exercise order.</p></div>
     <div class="card soft-c"><h3>Estimated 1RM</h3><p class="small" style="margin-top:6px">Each lift's detail shows an estimated one-rep max using the Epley formula (<span style="font-family:var(--mono)">weight × (1 + reps/30)</span>). It's a rough comparison tool across different rep counts — not a number to go test.</p></div>
+    <div class="card"><h3>Where you're training</h3><p class="small" style="margin-top:6px">Pick <b>Gym</b>, <b>Apartment</b> or <b>Home</b> at the top of the logger. Anything the place doesn't have gets swapped for the best alternative you can do there — a barbell bench becomes a DB press, then a push-up — and anything with no substitute is greyed out. Each implement keeps <b>its own weights and its own add-weight cue</b>, because 135 on a bar and 50s in your hands aren't the same number. Correct what each place has in Settings → Edit program.</p></div>
+    <div class="card soft-c"><h3>The Home day</h3><p class="small" style="margin-top:6px">A pull-up bar and the floor is a real session: chin-ups, push-ups, inverted rows, bench dips, split squats, single-leg RDLs, a hollow hold. The best workout is the one that actually happens — a home day beats a skipped gym day every time.</p></div>
     <div class="card soft-c"><h3>Rest days are the plan</h3><p class="small" style="margin-top:6px">Wednesday is cardio and joints; weekends are off. Nothing here tracks streaks or scolds you for a day away — recovery is when the work actually lands.</p></div>
     <div class="card soft-c"><h3>Tap an exercise name</h3><p class="small" style="margin-top:6px">The name of any exercise — in the logger or the Lifts tab — opens how to do it: a demo photo, a link to video demonstrations, setup and execution cues, and the mistake people most often make. Its history and chart are on the same card. Tapping the weight/reps fields never opens it, so it can't cover what you're typing.</p></div>
     <div class="card"><h3>Nothing you type is lost</h3><p class="small" style="margin-top:6px">Numbers you enter are kept the moment you type them — <b>per day</b>. Switch days, change tabs, close the app, or reload the page and they're still there; a dot on a day chip marks one holding unsaved work. They clear only when you tap <b>Save session</b> for that day, or deliberately discard them. Drafts live on this device only and are never synced.</p></div>
@@ -217,6 +223,11 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
   <div class="sheet-body">
     <h2>Edit program</h2>
     <p class="soft small" style="margin:6px 0 4px">Rename days, reorder or remove exercises, and set each target rep range (like <span style="font-family:var(--mono)">6-8</span>). History follows the exercise, so renaming is safe.</p>
+    <h3 style="margin-top:18px">Where you train</h3>
+    <p class="soft small" style="margin:6px 0 4px">Tick what each place actually has. Anything an exercise needs that's missing gets swapped for the best alternative you can do there.</p>
+    <div id="locBody"></div>
+    <hr class="divider">
+    <h3>Days &amp; exercises</h3>
     <div id="progBody"></div>
     <button class="btn wide ghost" id="addDayBtn" style="margin-top:14px">+ Add a day</button>
     <button class="btn wide danger" id="resetProgBtn" style="margin-top:10px">Restore default program</button>
@@ -275,37 +286,77 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
    Calf raises deliberately share one id across Tue/Fri so their history merges. */
 function defaultProgram(){return[
 {id:"d1",label:"Monday — Upper (Push)",ex:[
-  {id:"e_bench",n:"Bench press",r:"6-8"},
-  {id:"e_ohp",n:"Overhead press",r:"6-8"},
-  {id:"e_incdb",n:"Incline DB press",r:"8-12"},
-  {id:"e_dip",n:"Dips / close-grip bench",r:"8-12"},
-  {id:"e_lat",n:"Lateral raises",r:"8-12"},
-  {id:"e_tri",n:"Triceps pushdown",r:"8-12"}]},
+  {id:"e_bench",n:"Bench press",r:"6-8",eq:["bb","bench"],alt:[
+    {id:"e_bench_db",n:"DB bench press",r:"8-12",eq:["db","bench"]},
+    {id:"e_pushup",n:"Push-up",r:"8-15",eq:["bw"]}]},
+  {id:"e_ohp",n:"Overhead press",r:"6-8",eq:["bb"],alt:[
+    {id:"e_ohp_db",n:"DB shoulder press",r:"8-12",eq:["db"]},
+    {id:"e_pike",n:"Pike push-up",r:"6-12",eq:["bw"]}]},
+  {id:"e_incdb",n:"Incline DB press",r:"8-12",eq:["db","bench"],alt:[
+    {id:"e_pushup",n:"Push-up",r:"8-15",eq:["bw"]}]},
+  {id:"e_dip",n:"Dips / close-grip bench",r:"8-12",eq:["bw"]},
+  {id:"e_lat",n:"Lateral raises",r:"8-12",eq:["db"]},
+  {id:"e_tri",n:"Triceps pushdown",r:"8-12",eq:["cable"],alt:[
+    {id:"e_tri_db",n:"Overhead DB extension",r:"8-12",eq:["db"]},
+    {id:"e_tri_bw",n:"Bench dip",r:"8-15",eq:["bw"]}]}]},
 {id:"d2",label:"Tuesday — Lower (Squat)",ex:[
-  {id:"e_sq",n:"Back squat",r:"6-8"},
-  {id:"e_rdl",n:"Romanian deadlift",r:"6-8"},
-  {id:"e_legpress",n:"Leg press / split squat",r:"8-12"},
-  {id:"e_legcurl",n:"Leg curl",r:"8-12"},
-  {id:"e_calf",n:"Calf raises",r:"8-12"}]},
+  {id:"e_sq",n:"Back squat",r:"6-8",eq:["bb"],alt:[
+    {id:"e_gobsq",n:"Goblet squat",r:"8-12",eq:["db"]},
+    {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
+  {id:"e_rdl",n:"Romanian deadlift",r:"6-8",eq:["bb"],alt:[
+    {id:"e_rdl_db",n:"DB Romanian deadlift",r:"8-12",eq:["db"]},
+    {id:"e_hinge_bw",n:"Single-leg RDL",r:"8-12",eq:["bw"]}]},
+  {id:"e_legpress",n:"Leg press / split squat",r:"8-12",eq:["mach"],alt:[
+    {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
+  {id:"e_legcurl",n:"Leg curl",r:"8-12",eq:["mach"],alt:[
+    {id:"e_nordic",n:"Nordic / slider curl",r:"5-10",eq:["bw"]}]},
+  {id:"e_calf",n:"Calf raises",r:"8-12",eq:["bw"]}]},
 {id:"d3",label:"Wednesday — Cardio / Joints",ex:[
-  {id:"e_z2",n:"Zone-2 cardio",k:"cardio"},
-  {id:"e_goblet",n:"Goblet squat hold",k:"hold"},
-  {id:"e_copen",n:"Copenhagen plank",k:"hold"},
-  {id:"e_tib",n:"Tibialis raises",r:"8-12"},
-  {id:"e_shldr",n:"End-range shoulder work",k:"hold"}]},
+  {id:"e_z2",n:"Zone-2 cardio",k:"cardio",eq:["bw"]},
+  {id:"e_goblet",n:"Goblet squat hold",k:"hold",eq:["db"],alt:[
+    {id:"e_sqhold_bw",n:"Bodyweight squat hold",k:"hold",eq:["bw"]}]},
+  {id:"e_copen",n:"Copenhagen plank",k:"hold",eq:["bw"]},
+  {id:"e_tib",n:"Tibialis raises",r:"8-12",eq:["bw"]},
+  {id:"e_shldr",n:"End-range shoulder work",k:"hold",eq:["bw"]}]},
 {id:"d4",label:"Thursday — Upper (Pull)",ex:[
-  {id:"e_pull",n:"Weighted pull-ups / lat pulldown",r:"6-8"},
-  {id:"e_row",n:"Barbell / DB row",r:"6-8"},
-  {id:"e_face",n:"Face pulls",r:"8-12"},
-  {id:"e_reard",n:"Rear delt flye",r:"8-12"},
-  {id:"e_bi",n:"Biceps curl",r:"8-12"},
-  {id:"e_ham",n:"Hammer curl",r:"8-12"}]},
+  {id:"e_pull",n:"Weighted pull-ups / lat pulldown",r:"6-8",eq:["bar"],alt:[
+    {id:"e_pulldown",n:"Lat pulldown",r:"8-12",eq:["cable"]}]},
+  {id:"e_row",n:"Barbell / DB row",r:"6-8",eq:["bb"],alt:[
+    {id:"e_row_db",n:"DB row",r:"8-12",eq:["db"]},
+    {id:"e_invrow",n:"Inverted row",r:"8-15",eq:["bar"]}]},
+  {id:"e_face",n:"Face pulls",r:"8-12",eq:["cable"]},
+  {id:"e_reard",n:"Rear delt flye",r:"8-12",eq:["db"]},
+  {id:"e_bi",n:"Biceps curl",r:"8-12",eq:["db"],alt:[
+    {id:"e_chin",n:"Chin-up",r:"5-10",eq:["bar"]}]},
+  {id:"e_ham",n:"Hammer curl",r:"8-12",eq:["db"]}]},
 {id:"d5",label:"Friday — Lower (Hinge)",ex:[
-  {id:"e_dl",n:"Deadlift",r:"6-8"},
-  {id:"e_front",n:"Front squat / Bulgarian split squat",r:"6-8"},
-  {id:"e_hip",n:"Hip thrust",r:"8-12"},
-  {id:"e_legext",n:"Leg extension",r:"8-12"},
-  {id:"e_calf",n:"Calf raises",r:"8-12"}]}
+  {id:"e_dl",n:"Deadlift",r:"6-8",eq:["bb"],alt:[
+    {id:"e_rdl_db",n:"DB Romanian deadlift",r:"8-12",eq:["db"]},
+    {id:"e_hinge_bw",n:"Single-leg RDL",r:"8-12",eq:["bw"]}]},
+  {id:"e_front",n:"Front squat / Bulgarian split squat",r:"6-8",eq:["bb"],alt:[
+    {id:"e_gobsq",n:"Goblet squat",r:"8-12",eq:["db"]},
+    {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
+  {id:"e_hip",n:"Hip thrust",r:"8-12",eq:["bb","bench"],alt:[
+    {id:"e_glutebridge",n:"Glute bridge",r:"10-20",eq:["bw"]}]},
+  {id:"e_legext",n:"Leg extension",r:"8-12",eq:["mach"],alt:[
+    {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
+  {id:"e_calf",n:"Calf raises",r:"8-12",eq:["bw"]}]},
+{id:"d6",label:"Home — Calisthenics",ex:[
+  {id:"e_chin",n:"Chin-up",r:"5-10",eq:["bar"]},
+  {id:"e_pushup",n:"Push-up",r:"8-15",eq:["bw"]},
+  {id:"e_invrow",n:"Inverted row",r:"8-15",eq:["bar"]},
+  {id:"e_tri_bw",n:"Bench dip",r:"8-15",eq:["bw"]},
+  {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]},
+  {id:"e_hinge_bw",n:"Single-leg RDL",r:"8-12",eq:["bw"]},
+  {id:"e_hollow",n:"Hollow hold",k:"hold",eq:["bw"]},
+  {id:"e_calf",n:"Calf raises",r:"8-12",eq:["bw"]}]}
+]}
+/* what each place has. Editable in Settings -> Edit program. */
+const EQNAMES={bb:"Barbell + rack",db:"Dumbbells",cable:"Cable machine",mach:"Machines",bench:"A bench",bar:"Pull-up bar",bw:"Bodyweight"};
+function defaultLocations(){return[
+  {id:"loc_gym",label:"Gym",eq:["bb","db","cable","mach","bench","bar","bw"]},
+  {id:"loc_apt",label:"Apartment",eq:["db","cable","bench","bw"]},
+  {id:"loc_home",label:"Home",eq:["bar","bw"]}
 ]}
 /* weekday (0=Sun) -> day id; Sat/Sun intentionally rest */
 const WEEKMAP={1:"d1",2:"d2",3:"d3",4:"d4",5:"d5"};
@@ -389,6 +440,60 @@ e_goblet:{d:"Isometric hold that opens the hips and teaches an upright squat.",
 e_copen:{d:"Adductor strength — one of the best groin-injury preventers going.",
   c:["Top leg on a bench, forearm on the floor.","Lift the hips so the body makes a straight line.","Start with the knee on the bench, progress to the foot."],
   m:"Letting the hips sag or rotate backward."},
+e_bench_db:{d:"Dumbbell version of the main press — each arm works on its own, and the stretch at the bottom is deeper.",
+  c:["Bench flat, dumbbells starting at lower-chest level.","Press up and slightly together; don't clang them.","Lower until you feel the chest stretch, no further."],
+  m:"Letting the dumbbells drift out wide, which strains the shoulder."},
+e_pushup:{d:"The bodyweight horizontal press. Endlessly scalable — feet up to make it harder, hands up to make it easier.",
+  c:["Hands just wider than the shoulders, under the chest.","Squeeze glutes and abs so the body is one straight line.","Chest to the floor, elbows around 45° from the torso."],
+  m:"Letting the hips sag or the head crane forward to fake depth."},
+e_pike:{d:"Bodyweight vertical press — the closest thing to an overhead press with no equipment.",
+  c:["Hands and feet down, hips high so the body makes an upside-down V.","Lower the crown of the head toward the floor between the hands.","The steeper the hips, the more it becomes a shoulder press."],
+  m:"Turning it back into a push-up by letting the hips drop."},
+e_ohp_db:{d:"Dumbbell overhead press — friendlier on the shoulders than a bar, and each side works alone.",
+  c:["Start at shoulder height, palms forward.","Press up without flaring the ribs — squeeze the glutes.","Finish with the bells stacked over the shoulders."],
+  m:"Arching the lower back to get the weight up."},
+e_tri_db:{d:"Overhead triceps extension — trains the triceps in the stretched position, which is where it grows.",
+  c:["One dumbbell held overhead in both hands.","Elbows point forward and stay put; only the forearms move.","Lower behind the head until you feel the stretch."],
+  m:"Letting the elbows flare wide and turning it into a press."},
+e_tri_bw:{d:"Bench dip — triceps work needing nothing but a chair or a step.",
+  c:["Hands on the edge behind you, fingers forward.","Lower until the upper arms are about parallel.","Keep the back close to the bench the whole way."],
+  m:"Drifting the hips forward away from the bench, which loads the shoulder instead."},
+e_gobsq:{d:"Squat holding one dumbbell at the chest — the counterweight makes staying upright easy.",
+  c:["Dumbbell held vertically against the chest.","Sit straight down between the hips, elbows inside the knees.","Stand up without letting the chest fall forward."],
+  m:"Letting the weight pull you forward instead of using it as ballast."},
+e_split_bw:{d:"Split squat — one leg at a time, which makes bodyweight genuinely hard.",
+  c:["Long stance, front shin close to vertical.","Drop the back knee straight down toward the floor.","Most of the weight through the front heel."],
+  m:"Too short a stance, which jams the front knee forward."},
+e_rdl_db:{d:"Dumbbell hinge for hamstrings and glutes.",
+  c:["Bells in front of the thighs, soft knees.","Push the hips back and let the bells travel down the legs.","Stop where the hamstring stretch stops."],
+  m:"Squatting down instead of hinging back."},
+e_hinge_bw:{d:"Single-leg RDL — bodyweight is plenty here because balance does the rest.",
+  c:["Stand on one leg, soft knee.","Hinge forward and let the back leg rise behind you in one line.","Come back up by squeezing the glute of the standing leg."],
+  m:"Letting the hips open sideways instead of staying square to the floor."},
+e_nordic:{d:"The hardest hamstring movement there is — lowering slowly is the whole exercise.",
+  c:["Kneel with the heels anchored, or use sliders on a smooth floor.","Lower forward as slowly as you can hold it.","Push off with the hands and start again — no shame in it."],
+  m:"Dropping fast and calling it a rep. Slow is the point."},
+e_pulldown:{d:"Cable version of the vertical pull — the same job as a pull-up with adjustable load.",
+  c:["Grip a bit wider than the shoulders.","Drive the elbows down and back, bar to the upper chest.","Let it back up all the way to a full stretch."],
+  m:"Leaning way back and rowing it instead of pulling down."},
+e_row_db:{d:"Single-arm row — mid-back work with no bar needed.",
+  c:["One hand and knee on a bench, back flat.","Pull the bell to the hip, elbow past the ribs.","Lower to a full stretch each rep."],
+  m:"Twisting the torso to heave the weight up."},
+e_invrow:{d:"Horizontal pull using your own weight under a bar or a sturdy table.",
+  c:["Hang underneath, body straight from head to heels.","Pull the chest to the bar, elbows down and back.","Lower the feet position to make it harder."],
+  m:"Letting the hips sag so the abs stop working."},
+e_chin:{d:"Palms-up pull-up — hits the lats and biceps together, and is the easiest full-range pull to progress.",
+  c:["Palms facing you, hands shoulder width.","Start from a dead hang, chest toward the bar.","Lower all the way down each rep."],
+  m:"Half reps that never return to a straight-arm hang."},
+e_glutebridge:{d:"Floor version of the hip thrust — no bench, no bar.",
+  c:["Lie on your back, heels close to the hips.","Drive through the heels until the body makes a straight line.","Squeeze the glutes hard at the top; keep the ribs down."],
+  m:"Arching the lower back instead of finishing with the glutes."},
+e_hollow:{d:"Isometric hold for the whole front of the trunk — the anti-arch counterpart to all the pressing.",
+  c:["On your back, press the lower back flat into the floor.","Lift the shoulders and legs just off the ground.","Lower the legs to make it harder, raise them to make it easier."],
+  m:"Letting the lower back come off the floor — stop the set when it does."},
+e_sqhold_bw:{d:"Bodyweight version of the squat hold — the same hip opener without a dumbbell.",
+  c:["Sit into the bottom of a squat, feet flat.","Hold the chest tall and elbows inside the knees.","Breathe normally and hold."],
+  m:"Letting the heels lift or the chest collapse."},
 e_shldr:{d:"Strength at the edges of shoulder range — this is what keeps pressing pain-free.",
   c:["Slow raises or holds at the very top of your range.","Little or no load — think prone Y raises, wall slides, shoulder CARs.","Own the position before adding weight."],
   m:"Adding load before you actually own the range."}
@@ -414,6 +519,7 @@ const store={
   }
 };
 function blank(){return{program:defaultProgram(),sessions:[],bw:[],habits:{},
+  locations:defaultLocations(),curLoc:"loc_gym",
   startedAt:0,rampOn:true,meta:{updatedAt:0},
   gh:{enabled:false,repo:"",token:"",auto:true,lastSync:0}}}
 let S=blank(),saveTimer=null;
@@ -425,8 +531,51 @@ function toast(m){const t=$("toast");if(!t)return;t.textContent=m;t.classList.ad
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2600)}
 
 const dayById=id=>S.program.find(d=>d.id===id);
+const locById=id=>(S.locations||[]).find(l=>l.id===id);
+function curLocation(){return locById(S.curLoc)||null}
+/* an exercise with no equipment listed is assumed doable anywhere */
+function hasEq(need,loc){
+  if(!need||!need.length)return true;
+  if(!loc)return true;
+  return need.every(e=>(loc.eq||[]).indexOf(e)>-1);
+}
+/* what you actually do for this slot at this location: the exercise itself,
+   the first alternate whose kit is available, or nothing */
+function resolveEx(ex,loc){
+  if(!loc||hasEq(ex.eq,loc))return ex;
+  const alt=(ex.alt||[]).find(a=>hasEq(a.eq,loc));
+  if(alt)return Object.assign({},alt,{swapFor:ex.n});
+  return null;
+}
+const eqLabel=list=>(list||[]).map(e=>EQNAMES[e]||e).join(" + ");
+/* bring data saved before locations existed up to date without touching
+   anything the user customised (names, ranges, order, logged sessions) */
+function migrate(){
+  let ch=false;
+  const D={};defaultProgram().forEach(d=>d.ex.forEach(e=>{D[e.id]=e}));
+  (S.program||[]).forEach(d=>d.ex.forEach(e=>{
+    const def=D[e.id];
+    if(def){
+      if(!e.eq&&def.eq){e.eq=def.eq.slice();ch=true}
+      if(!e.alt&&def.alt){e.alt=JSON.parse(JSON.stringify(def.alt));ch=true}
+    }
+  }));
+  if(!S.locations||!S.locations.length){S.locations=defaultLocations();ch=true}
+  if(!S.curLoc){S.curLoc="loc_gym";ch=true}
+  if(!S.migHome){                 /* one-time: offer the home day, but respect a later delete */
+    if(!(S.program||[]).some(d=>d.id==="d6")){
+      const home=defaultProgram().find(d=>d.id==="d6");
+      if(home)S.program.push(JSON.parse(JSON.stringify(home)));
+    }
+    S.migHome=1;ch=true;
+  }
+  return ch;
+}
 function allEx(){const seen={},out=[];
-  S.program.forEach(d=>d.ex.forEach(e=>{if(!seen[e.id]){seen[e.id]=1;out.push(Object.assign({day:d.label},e))}}));
+  S.program.forEach(d=>d.ex.forEach(e=>{
+    if(!seen[e.id]){seen[e.id]=1;out.push(Object.assign({day:d.label},e))}
+    (e.alt||[]).forEach(a=>{if(!seen[a.id]){seen[a.id]=1;out.push(Object.assign({day:d.label},a))}});
+  }));
   return out}
 const exById=id=>allEx().find(e=>e.id===id);
 const isLift=ex=>!ex.k;                       /* weight x reps, overload-tracked */
@@ -590,12 +739,27 @@ const cpB={h:[16,58],s:[26,60],p:[48,63],k:[60,59],a:[72,54]};
 const cpFig=P=>trunk(P)+ln(P.s,[P.s[0]-2,P.s[1]+14]);
 ART.copen=F(cpBench()+cpFig(cpA),cpBench()+cpFig(cpB));
 
+const psA={h:[24,52],s:[36,56],e:[36,68],w:[36,80],p:[60,62],k:[76,70],a:[86,78]};
+const psB={h:[24,64],s:[36,66],e:[30,74],w:[36,80],p:[60,70],k:[76,76],a:[86,80]};
+ART.pushup=F(ground()+trunk(psA)+pl([psA.s,psA.e,psA.w]),ground()+trunk(psB)+pl([psB.s,psB.e,psB.w]));
+const spA={h:[44,18],s:[44,30],e:[44,42],w:[44,53],p:[44,56],k:[32,72],a:[28,GY],k2:[60,70],a2:[68,GY]};
+const spB={h:[44,30],s:[44,42],e:[44,53],w:[44,63],p:[44,66],k:[30,78],a:[28,GY],k2:[64,76],a2:[70,GY]};
+const spFig=P=>cir(P.h)+pl([P.s,P.p])+pl([P.s,P.e,P.w])+pl([P.p,P.k,P.a])+pl([P.p,P.k2,P.a2]);
+ART.split=F(ground()+spFig(spA),ground()+spFig(spB));
+const hoA={h:[22,66],s:[34,68],p:[58,68],k:[74,68],a:[88,68]};
+const hoB={h:[22,58],s:[34,62],p:[58,66],k:[74,60],a:[88,52]};
+const hoFig=P=>trunk(P)+pl([P.s,[P.s[0]+6,P.s[1]-12],[P.s[0]-2,P.s[1]-20]]);
+ART.hollow=F(ground()+hoFig(hoA),ground()+hoFig(hoB));
 /* which drawing each exercise uses */
 const ARTMAP={e_bench:"bench",e_ohp:"ohp",e_incdb:"incline",e_dip:"dip",e_lat:"lateral",e_tri:"pushdown",
 e_sq:"squat",e_rdl:"hinge",e_legpress:"legpress",e_legcurl:"legcurl",e_calf:"calf",e_pull:"pullup",
 e_row:"row",e_face:"facepull",e_reard:"reardelt",e_bi:"curl",e_ham:"curl",e_dl:"deadlift",
 e_front:"frontsq",e_hip:"hipthrust",e_legext:"legext",e_tib:"tib",e_z2:"cardio",e_goblet:"goblet",
-e_copen:"copen",e_shldr:"shoulderY"};
+e_copen:"copen",e_shldr:"shoulderY",
+e_bench_db:"bench",e_pushup:"pushup",e_pike:"pushup",e_ohp_db:"ohp",e_tri_db:"pushdown",e_tri_bw:"dip",
+e_gobsq:"goblet",e_split_bw:"split",e_rdl_db:"hinge",e_hinge_bw:"hinge",e_nordic:"legcurl",
+e_pulldown:"pullup",e_row_db:"row",e_invrow:"row",e_chin:"pullup",e_glutebridge:"hipthrust",
+e_hollow:"hollow",e_sqhold_bw:"goblet"};
 const watchUrl=n=>"https://www.youtube.com/results?search_query="+encodeURIComponent(n+" proper form");
 function demoHtml(exId){
   const A=ART[ARTMAP[exId]];
@@ -696,6 +860,8 @@ function rRamp(){
 function rLog(){
   $("todayDate").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}).toUpperCase();
   rRamp();
+  $("locChips").innerHTML=(S.locations||[]).map(l=>
+    '<button class="chip'+(l.id===S.curLoc?" on":"")+'" data-loc="'+l.id+'">'+esc(l.label)+'</button>').join("");
   /* a dot marks a day holding numbers you typed but haven't saved */
   $("dayChips").innerHTML=S.program.map(d=>
     '<button class="chip'+(d.id===curDay?" on":"")+'" data-day="'+d.id+'">'+esc(d.label.split("—")[0].trim())+(dirty[d.id]?" •":"")+'</button>').join("");
@@ -704,12 +870,17 @@ function rLog(){
   const dr=ensureDraft(curDay);
   let html='<div class="card"><div class="rowline" style="margin-bottom:4px"><h3>'+esc(day.label)+'</h3>'+
     '<span class="mono">'+day.ex.length+' EXERCISES</span></div>';
-  html+=day.ex.map(ex=>{
-    const rows=dr.rows[ex.id]||[];
+  const loc=curLocation();
+  html+=day.ex.map(slot=>{
+    const ex=resolveEx(slot,loc);
+    if(!ex)return '<div class="exblock gone"><div class="exname">'+esc(slot.n)+'</div>'+
+      '<div class="mono" style="margin-top:4px">NEEDS '+esc(eqLabel(slot.eq).toUpperCase())+' — SKIP IT HERE</div></div>';
+    const rows=(dr.rows[ex.id]=dr.rows[ex.id]||[blankRow(),blankRow(),blankRow()]);
     const o=overload(ex.id);
     const last=lastSetsFor(ex.id);
     const lastTxt=last.length?last.map(l=>(isLift(ex)?(l.w||0)+"×"+l.r:l.r+" "+unitOf(ex).toLowerCase())).join("  ·  "):"first time";
     return '<div class="exblock">'+
+      (ex.swapFor?'<div class="mono" style="margin-bottom:4px">SWAPPED IN FOR '+esc(ex.swapFor.toUpperCase())+'</div>':"")+
       '<div class="exhead"><div style="min-width:0"><div class="exname tapname" data-ex="'+ex.id+'">'+esc(ex.n)+'</div>'+
         '<div class="mono" style="margin-top:2px">'+(isLift(ex)?"TARGET "+esc(ex.r||"—")+" REPS":unitOf(ex))+'</div></div>'+
         ovBadge(ex.id)+'</div>'+
@@ -741,7 +912,8 @@ function saveSession(){
   const dr=day&&drafts[day.id];
   if(!day||!dr){toast("PICK A DAY FIRST");return}
   const logs=[];
-  day.ex.forEach(ex=>{
+  const loc=curLocation();
+  day.ex.map(s=>resolveEx(s,loc)).filter(Boolean).forEach(ex=>{
     (dr.rows[ex.id]||[]).forEach(row=>{
       const r=parseFloat(row.r);
       if(isNaN(r)||r<=0)return;                       /* a set only counts once it has reps/time */
@@ -755,7 +927,7 @@ function saveSession(){
   if(!S.startedAt)S.startedAt=Date.now();
   dropDraft(day.id);save();
   rAll();
-  const ups=day.ex.filter(e=>overload(e.id).s==="up").length;
+  const ups=day.ex.map(s=>resolveEx(s,curLocation())).filter(Boolean).filter(e=>overload(e.id).s==="up").length;
   toast(ups?"SAVED · "+ups+" LIFT"+(ups>1?"S":"")+" READY FOR MORE WEIGHT":"SESSION SAVED");
 }
 
@@ -843,6 +1015,13 @@ function rBody(){
 }
 
 /* ================= RENDER: PROGRAM EDITOR ================= */
+function rLocs(){
+  $("locBody").innerHTML=(S.locations||[]).map(l=>
+    '<div class="card soft-c" style="margin-top:10px"><div class="rowline"><b class="small">'+esc(l.label)+'</b></div>'+
+    '<div class="chips" style="margin-bottom:0">'+Object.keys(EQNAMES).map(k=>
+      '<button class="chip mini'+((l.eq||[]).indexOf(k)>-1?" on":"")+'" data-eqtog="'+l.id+':'+k+'">'+esc(EQNAMES[k])+'</button>').join("")+
+    '</div></div>').join("");
+}
 function rProg(){
   $("progBody").innerHTML=S.program.map((d,di)=>
     '<div class="card" style="margin-top:14px">'+
@@ -911,7 +1090,7 @@ async function ghPush(){
 }
 function applyRemoteIfNewer(remote){
   const r=(remote&&remote.meta&&remote.meta.updatedAt)||0,l=(S.meta&&S.meta.updatedAt)||0;
-  if(remote&&r>l){const gh=S.gh;S=Object.assign(blank(),remote);S.gh=gh;store.save(S);return true}
+  if(remote&&r>l){const gh=S.gh;S=Object.assign(blank(),remote);S.gh=gh;migrate();store.save(S);return true}
   return false;
 }
 async function ghPull(manual){
@@ -980,13 +1159,16 @@ document.addEventListener("click",e=>{
       {dropDraft(curDay);rLog();toast("DRAFT DISCARDED")}
     return;
   }
-  const el=e.target.closest("[data-goview],[data-day],[data-addset],[data-delset],[data-ex],[data-habit],[data-rampoff],[data-exadd],[data-exdel],[data-exmove],[data-daydel],[data-closepop],[data-close]");
+  const el=e.target.closest("[data-goview],[data-loc],[data-eqtog],[data-day],[data-addset],[data-delset],[data-ex],[data-habit],[data-rampoff],[data-exadd],[data-exdel],[data-exmove],[data-daydel],[data-closepop],[data-close]");
   if(!el)return;
   const d=el.dataset;
   /* set fields carry data-ex so typing can find their row — but tapping one must
      never open the stats popup over what you're entering. Only the exercise name does. */
   if(d.in)return;
   if(d.goview)switchView(d.goview);
+  else if(d.loc){S.curLoc=d.loc;save();rLog()}
+  else if(d.eqtog){const[lid,k]=d.eqtog.split(":");const l=locById(lid);
+    if(l){l.eq=l.eq||[];const i=l.eq.indexOf(k);i>-1?l.eq.splice(i,1):l.eq.push(k);save();rLocs();rLog()}}
   else if(d.day){curDay=d.day;rLog()}   /* each day keeps its own draft — switching never clears one */
   else if(d.addset){const dr=ensureDraft(curDay);const rows=dr&&dr.rows[d.addset];
     if(rows){const l=rows[rows.length-1];rows.push(l?{w:l.w,r:"",rir:""}:blankRow());markDirty(curDay);rLog()}}
@@ -1014,7 +1196,7 @@ $("bwSave").addEventListener("click",()=>{
   save();rBody();$("bwMsg").textContent="SAVED FOR "+t+".";
 });
 $("guideBtn").addEventListener("click",()=>$("guideSheet").classList.add("on"));
-$("openProgBtn").addEventListener("click",()=>{rProg();$("progSheet").classList.add("on")});
+$("openProgBtn").addEventListener("click",()=>{rProg();rLocs();$("progSheet").classList.add("on")});
 $("addDayBtn").addEventListener("click",()=>{
   S.program.push({id:"d_"+uid().slice(0,8),label:"New day",ex:[]});save();rProg();rLog();
   $("progMsg").textContent="DAY ADDED — RENAME IT ABOVE.";
@@ -1072,6 +1254,7 @@ $("resetBtn").addEventListener("click",()=>{
 (async function(){
   const loaded=await store.load();
   if(loaded&&Array.isArray(loaded.sessions))S=Object.assign(blank(),loaded);
+  if(migrate())save();
   adoptSharedGH();
   if(S.gh&&S.gh.enabled)await ghPull(false);
   /* restore every unsaved draft, dropping only ones whose day no longer exists */
