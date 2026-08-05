@@ -90,10 +90,11 @@ section.view.on{display:block;animation:fadeUp .3s ease both}
 
 /* ---- exercise demo + form guide ---- */
 .art{display:block;width:100%;height:auto;background:var(--wh);border:1.5px solid var(--g2);border-radius:12px;padding:6px}
-.art .fig{fill:none;stroke:var(--bk);stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
-.art .fig circle{fill:var(--bk)}
-.art .fig circle.ring{fill:none;stroke-width:3.2}
+.art .fig{fill:none;stroke:var(--bk);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .art .fig rect{fill:var(--bk);stroke:none}
+.art .fig circle.ring{fill:none;stroke-width:2.6}
+.art .fig .ink .p{stroke:var(--bk);fill:var(--bk);stroke-linecap:round}
+.art .fig .skin .p{stroke:var(--wh);fill:var(--wh);stroke-linecap:round}
 .art .arw{fill:none;stroke:var(--g3);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .artkey{display:flex;justify-content:space-around;margin-top:4px}
 .artkey span{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;color:var(--g3)}
@@ -634,12 +635,42 @@ const ln=(a,b)=>'<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'"/>
 const cir=(c,r)=>'<circle cx="'+c[0]+'" cy="'+c[1]+'" r="'+(r||5.5)+'"/>';
 const rct=(x,y,w,h)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="1.5"/>';
 const ring=(c,r)=>'<circle class="ring" cx="'+c[0]+'" cy="'+c[1]+'" r="'+(r||7)+'"/>';
-/* side-view body: head, torso, near arm, near leg */
-const body=P=>cir(P.h)+pl([P.s,P.p])+pl([P.s,P.e,P.w])+pl([P.p,P.k,P.a]);
-/* head-on body: both arms and both legs */
-const bodyF=P=>cir(P.h)+pl([P.s,P.p])+pl([P.s,P.e,P.w])+pl([P.s,P.e2,P.w2])+pl([P.p,P.k,P.a])+pl([P.p,P.k2,P.a2]);
-/* lying / seated body (no arms) */
-const trunk=P=>cir(P.h)+pl([P.s,P.p])+pl([P.p,P.k,P.a]);
+
+/* ---- fleshed body ----
+   Each part is a round-capped stroke whose width is its thickness, so limbs
+   taper from torso to hand and foot. The whole figure is drawn twice: a
+   fattened black copy, then a white copy over it. The outline therefore
+   follows the silhouette of the body rather than each separate part, which
+   is what stops joints reading as a string of circles. */
+const seg=(a,b,w)=>'<line class="p" x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke-width="'+w+'"/>';
+const hd=(c,r)=>'<ellipse class="p" cx="'+c[0]+'" cy="'+c[1]+'" rx="'+(r*0.86).toFixed(1)+'" ry="'+r.toFixed(1)+'"/>';
+const ft=(a,f,w)=>seg(a,[a[0]+(f===undefined?1:f)*5.5,a[1]+0.5],w);
+const ARM=(s,e,w,k)=>seg(s,e,7.2+k)+seg(e,w,5.6+k);
+const LEG=(p,q,a,f,k)=>seg(p,q,11+k)+seg(q,a,7.6+k)+ft(a,f,5+k);
+const TORSO=(s,p,k)=>seg(s,p,14+k);
+const NECK=(h,s,k)=>seg(h,s,6.6+k);
+const HEAD=(h,k)=>hd(h,5.8+k/2);
+const OUT=3.6;
+/* Layered so overlapping parts keep their own outline: the whole figure is
+   inked once as a silhouette, filled white, then each overlapping limb is
+   re-inked and re-filled on top. Without this a near arm just melts into the
+   torso; with it you can read one from the other. */
+function layer(base,over){
+  const all=k=>base(k)+over.map(o=>o(k)).join("");
+  let out='<g class="ink">'+all(OUT)+'</g><g class="skin">'+base(0)+'</g>';
+  over.forEach(o=>{out+='<g class="ink">'+o(OUT)+'</g><g class="skin">'+o(0)+'</g>'});
+  return out;
+}
+const body=P=>layer(
+  k=>TORSO(P.s,P.p,k)+LEG(P.p,P.k,P.a,P.f,k)+NECK(P.h,P.s,k)+HEAD(P.h,k),
+  [k=>ARM(P.s,P.e,P.w,k)]);
+const bodyF=P=>layer(
+  k=>TORSO(P.s,P.p,k)+LEG(P.p,P.k,P.a,P.f,k)+NECK(P.h,P.s,k)+HEAD(P.h,k),
+  [k=>LEG(P.p,P.k2,P.a2,P.f,k),k=>ARM(P.s,P.e,P.w,k),k=>ARM(P.s,P.e2,P.w2,k)]);
+const trunk=P=>layer(
+  k=>TORSO(P.s,P.p,k)+NECK(P.h,P.s,k)+HEAD(P.h,k),
+  [k=>LEG(P.p,P.k,P.a,P.f,k)]);
+
 const plate=c=>ring(c,7);                       /* barbell seen end-on */
 const dbell=c=>rct(c[0]-2.5,c[1]-6,5,12);       /* dumbbell seen end-on */
 const barF=(c,half)=>ln([c[0]-(half||20),c[1]],[c[0]+(half||20),c[1]])+
@@ -666,18 +697,17 @@ ART.hinge=F(ground()+body(hgTop)+plate([46,55]),ground()+body(hgBot)+plate([57,7
 const dlBot={h:[64,44],s:[56,49],e:[56,61],w:[56,73],p:[37,59],k:[44,73],a:[47,GY]};
 ART.deadlift=F(ground()+body(dlBot)+plate([56,78]),ground()+body(hgTop)+plate([46,55]));
 /* ---------- presses ---------- */
-const lie={h:[26,52],s:[38,52],p:[62,54],k:[74,52],a:[76,70]};
-const bp=y=>benchTop(30,58,46)+trunk(lie)+pl([[38,52],[35,y+9],[42,y]])+plate([42,y]);
+const bp=y=>benchTop(30,58,46)+body({h:[26,52],s:[38,52],e:[34,y+10],w:[42,y],p:[62,54],k:[74,52],a:[76,68],f:1})+plate([42,y]);
 ART.bench=F(bp(44),bp(26));
 const incBack=()=>pl([[30,68],[54,44]])+rct(26,66,32,4)+ln([30,70],[30,GY+2])+ln([54,66],[54,GY+2]);
-const inc=y=>incBack()+cir([57,39])+pl([[54,46],[48,y+8],[56,y]])+dbell([57,y]);
+const inc=y=>incBack()+body({h:[58,37],s:[53,47],e:[47,y+9],w:[56,y],p:[35,64],k:[47,80],a:[59,84],f:1})+dbell([57,y]);
 ART.incline=F(inc(52),inc(26));
 const ohpA={h:[46,20],s:[46,32],e:[39,38],w:[45,32],p:[46,56],k:[46,73],a:[46,GY]};
 const ohpB={h:[46,20],s:[46,32],e:[44,23],w:[46,13],p:[46,56],k:[46,73],a:[46,GY]};
 ART.ohp=F(ground()+body(ohpA)+plate([46,31]),ground()+body(ohpB)+plate([46,13]));
-const dipBars=()=>rct(34,56,26,4);
-const dipA={h:[48,22],s:[48,34],e:[48,46],w:[48,57],p:[48,58],k:[58,66],a:[54,78]};
-const dipB={h:[48,36],s:[48,48],e:[37,54],w:[48,57],p:[48,72],k:[58,80],a:[54,GY]};
+const dipBars=()=>rct(26,56,20,4)+rct(52,56,20,4);
+const dipA={h:[50,22],s:[50,34],e:[44,46],w:[38,57],p:[50,58],k:[60,66],a:[56,78]};
+const dipB={h:[50,36],s:[50,48],e:[34,52],w:[38,57],p:[50,72],k:[60,80],a:[56,GY]};
 ART.dip=F(dipBars()+body(dipA),dipBars()+body(dipB));
 /* ---------- shoulders / arms ---------- */
 const latA={h:[48,17],s:[48,30],e:[39,42],w:[37,54],e2:[57,42],w2:[59,54],p:[48,56],k:[42,73],a:[42,GY],k2:[54,73],a2:[54,GY]};
@@ -736,19 +766,18 @@ ART.cardio=F(ground()+body(cdA),ground()+body(cdB));
 const cpBench=()=>rct(58,56,32,4)+ln([86,60],[86,GY+2]);
 const cpA={h:[16,72],s:[26,72],p:[48,72],k:[60,68],a:[72,56]};
 const cpB={h:[16,58],s:[26,60],p:[48,63],k:[60,59],a:[72,54]};
-const cpFig=P=>trunk(P)+ln(P.s,[P.s[0]-2,P.s[1]+14]);
+const cpFig=P=>body(Object.assign({e:[P.s[0]-3,P.s[1]+8],w:[P.s[0]-1,P.s[1]+16],f:-1},P));
 ART.copen=F(cpBench()+cpFig(cpA),cpBench()+cpFig(cpB));
-
-const psA={h:[24,52],s:[36,56],e:[36,68],w:[36,80],p:[60,62],k:[76,70],a:[86,78]};
-const psB={h:[24,64],s:[36,66],e:[30,74],w:[36,80],p:[60,70],k:[76,76],a:[86,80]};
-ART.pushup=F(ground()+trunk(psA)+pl([psA.s,psA.e,psA.w]),ground()+trunk(psB)+pl([psB.s,psB.e,psB.w]));
+const psA={h:[24,52],s:[36,56],e:[36,68],w:[36,80],p:[60,62],k:[76,70],a:[86,78],f:1};
+const psB={h:[24,64],s:[36,66],e:[28,73],w:[36,80],p:[60,70],k:[76,76],a:[86,80],f:1};
+ART.pushup=F(ground()+body(psA),ground()+body(psB));
 const spA={h:[44,18],s:[44,30],e:[44,42],w:[44,53],p:[44,56],k:[32,72],a:[28,GY],k2:[60,70],a2:[68,GY]};
 const spB={h:[44,30],s:[44,42],e:[44,53],w:[44,63],p:[44,66],k:[30,78],a:[28,GY],k2:[64,76],a2:[70,GY]};
-const spFig=P=>cir(P.h)+pl([P.s,P.p])+pl([P.s,P.e,P.w])+pl([P.p,P.k,P.a])+pl([P.p,P.k2,P.a2]);
+const spFig=P=>bodyF(Object.assign({e2:P.e,w2:P.w},P));
 ART.split=F(ground()+spFig(spA),ground()+spFig(spB));
 const hoA={h:[22,66],s:[34,68],p:[58,68],k:[74,68],a:[88,68]};
 const hoB={h:[22,58],s:[34,62],p:[58,66],k:[74,60],a:[88,52]};
-const hoFig=P=>trunk(P)+pl([P.s,[P.s[0]+6,P.s[1]-12],[P.s[0]-2,P.s[1]-20]]);
+const hoFig=P=>body(Object.assign({e:[P.s[0]+7,P.s[1]-9],w:[P.s[0]-1,P.s[1]-18],f:1},P));
 ART.hollow=F(ground()+hoFig(hoA),ground()+hoFig(hoB));
 /* which drawing each exercise uses */
 const ARTMAP={e_bench:"bench",e_ohp:"ohp",e_incdb:"incline",e_dip:"dip",e_lat:"lateral",e_tri:"pushdown",
