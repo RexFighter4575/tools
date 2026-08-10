@@ -363,9 +363,9 @@ function defaultProgram(){return[
 const EQNAMES={bb:"Barbell + rack",db:"Dumbbells",cable:"Cable machine",mach:"Multi-gym stations",press:"Leg press",bag:"Weighted bags",bench:"A bench",bar:"Pull-up bar",bw:"Bodyweight"};
 function defaultLocations(){return[
   {id:"loc_gym",label:"Gym",eq:["bb","db","cable","mach","press","bag","bench","bar","bw"]},
-  /* the Paramount multi-gym covers leg extension, leg curl and a chest press,
-     but there's no leg press and no barbell — hence "mach" without "press" */
-  {id:"loc_apt",label:"Apartment",eq:["db","cable","mach","bag","bench","bw"]},
+  /* the Paramount multi-gym covers leg extension, leg curl, a chest press and
+     a leg press station — everything except a barbell */
+  {id:"loc_apt",label:"Apartment",eq:["db","cable","mach","press","bag","bench","bw"]},
   {id:"loc_home",label:"Home",eq:["bar","bw"]}
 ]}
 /* weekday (0=Sun) -> day id; Sat/Sun intentionally rest */
@@ -599,6 +599,11 @@ function migrate(){
     add(/apartment/i,["mach","bag"]);
     add(/gym/i,["press","bag"]);
     S.migApt=1;ch=true;
+  }
+  if(S.migApt<2){                 /* the multi-gym has a leg press after all */
+    const l=(S.locations||[]).find(x=>/apartment/i.test(x.label));
+    if(l){l.eq=l.eq||[];if(l.eq.indexOf("press")<0)l.eq.push("press")}
+    S.migApt=2;ch=true;
   }
   if(!S.migHome){                 /* one-time: offer the home day, but respect a later delete */
     if(!(S.program||[]).some(d=>d.id==="d6")){
