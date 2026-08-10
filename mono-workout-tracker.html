@@ -289,6 +289,7 @@ function defaultProgram(){return[
 {id:"d1",label:"Monday — Upper (Push)",ex:[
   {id:"e_bench",n:"Bench press",r:"6-8",eq:["bb","bench"],alt:[
     {id:"e_bench_db",n:"DB bench press",r:"8-12",eq:["db","bench"]},
+    {id:"e_chestpress",n:"Machine chest press",r:"8-12",eq:["mach"]},
     {id:"e_pushup",n:"Push-up",r:"8-15",eq:["bw"]}]},
   {id:"e_ohp",n:"Overhead press",r:"6-8",eq:["bb"],alt:[
     {id:"e_ohp_db",n:"DB shoulder press",r:"8-12",eq:["db"]},
@@ -303,11 +304,14 @@ function defaultProgram(){return[
 {id:"d2",label:"Tuesday — Lower (Squat)",ex:[
   {id:"e_sq",n:"Back squat",r:"6-8",eq:["bb"],alt:[
     {id:"e_gobsq",n:"Goblet squat",r:"8-12",eq:["db"]},
+    {id:"e_bagsq",n:"Sandbag front squat",r:"8-15",eq:["bag"]},
     {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
   {id:"e_rdl",n:"Romanian deadlift",r:"6-8",eq:["bb"],alt:[
     {id:"e_rdl_db",n:"DB Romanian deadlift",r:"8-12",eq:["db"]},
+    {id:"e_bagrdl",n:"Sandbag Romanian deadlift",r:"8-15",eq:["bag"]},
     {id:"e_hinge_bw",n:"Single-leg RDL",r:"8-12",eq:["bw"]}]},
-  {id:"e_legpress",n:"Leg press / split squat",r:"8-12",eq:["mach"],alt:[
+  {id:"e_legpress",n:"Leg press / split squat",r:"8-12",eq:["press"],alt:[
+    {id:"e_split_db",n:"DB split squat",r:"8-12",eq:["db"]},
     {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
   {id:"e_legcurl",n:"Leg curl",r:"8-12",eq:["mach"],alt:[
     {id:"e_nordic",n:"Nordic / slider curl",r:"5-10",eq:["bw"]}]},
@@ -318,6 +322,8 @@ function defaultProgram(){return[
     {id:"e_sqhold_bw",n:"Bodyweight squat hold",k:"hold",eq:["bw"]}]},
   {id:"e_copen",n:"Copenhagen plank",k:"hold",eq:["bw"]},
   {id:"e_tib",n:"Tibialis raises",r:"8-12",eq:["bw"]},
+  {id:"e_carry",n:"Loaded carry",k:"hold",eq:["bag"],alt:[
+    {id:"e_carry_db",n:"Farmer carry",k:"hold",eq:["db"]}]},
   {id:"e_shldr",n:"End-range shoulder work",k:"hold",eq:["bw"]}]},
 {id:"d4",label:"Thursday — Upper (Pull)",ex:[
   {id:"e_pull",n:"Weighted pull-ups / lat pulldown",r:"6-8",eq:["bar"],alt:[
@@ -338,6 +344,7 @@ function defaultProgram(){return[
     {id:"e_gobsq",n:"Goblet squat",r:"8-12",eq:["db"]},
     {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
   {id:"e_hip",n:"Hip thrust",r:"8-12",eq:["bb","bench"],alt:[
+    {id:"e_hip_db",n:"DB hip thrust",r:"8-15",eq:["db","bench"]},
     {id:"e_glutebridge",n:"Glute bridge",r:"10-20",eq:["bw"]}]},
   {id:"e_legext",n:"Leg extension",r:"8-12",eq:["mach"],alt:[
     {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
@@ -353,10 +360,12 @@ function defaultProgram(){return[
   {id:"e_calf",n:"Calf raises",r:"8-12",eq:["bw"]}]}
 ]}
 /* what each place has. Editable in Settings -> Edit program. */
-const EQNAMES={bb:"Barbell + rack",db:"Dumbbells",cable:"Cable machine",mach:"Machines",bench:"A bench",bar:"Pull-up bar",bw:"Bodyweight"};
+const EQNAMES={bb:"Barbell + rack",db:"Dumbbells",cable:"Cable machine",mach:"Multi-gym stations",press:"Leg press",bag:"Weighted bags",bench:"A bench",bar:"Pull-up bar",bw:"Bodyweight"};
 function defaultLocations(){return[
-  {id:"loc_gym",label:"Gym",eq:["bb","db","cable","mach","bench","bar","bw"]},
-  {id:"loc_apt",label:"Apartment",eq:["db","cable","bench","bw"]},
+  {id:"loc_gym",label:"Gym",eq:["bb","db","cable","mach","press","bag","bench","bar","bw"]},
+  /* the Paramount multi-gym covers leg extension, leg curl and a chest press,
+     but there's no leg press and no barbell — hence "mach" without "press" */
+  {id:"loc_apt",label:"Apartment",eq:["db","cable","mach","bag","bench","bw"]},
   {id:"loc_home",label:"Home",eq:["bar","bw"]}
 ]}
 /* weekday (0=Sun) -> day id; Sat/Sun intentionally rest */
@@ -486,6 +495,9 @@ e_invrow:{d:"Horizontal pull using your own weight under a bar or a sturdy table
 e_chin:{d:"Palms-up pull-up — hits the lats and biceps together, and is the easiest full-range pull to progress.",
   c:["Palms facing you, hands shoulder width.","Start from a dead hang, chest toward the bar.","Lower all the way down each rep."],
   m:"Half reps that never return to a straight-arm hang."},
+e_hip_db:{d:"Hip thrust with a dumbbell across the hips — nearly all of the barbell version without needing a bar.",
+  c:["Shoulder blades on the bench, dumbbell resting over the hips.","Feet placed so the shins are vertical at the top.","Drive through the heels and squeeze; keep the ribs down."],
+  m:"Arching the lower back at the top instead of finishing with the glutes."},
 e_glutebridge:{d:"Floor version of the hip thrust — no bench, no bar.",
   c:["Lie on your back, heels close to the hips.","Drive through the heels until the body makes a straight line.","Squeeze the glutes hard at the top; keep the ribs down."],
   m:"Arching the lower back instead of finishing with the glutes."},
@@ -495,6 +507,24 @@ e_hollow:{d:"Isometric hold for the whole front of the trunk — the anti-arch c
 e_sqhold_bw:{d:"Bodyweight version of the squat hold — the same hip opener without a dumbbell.",
   c:["Sit into the bottom of a squat, feet flat.","Hold the chest tall and elbows inside the knees.","Breathe normally and hold."],
   m:"Letting the heels lift or the chest collapse."},
+e_chestpress:{d:"The multi-gym's pressing station — a fixed path, so you can push close to failure safely with nobody spotting.",
+  c:["Set the seat so the handles sit at mid-chest.","Press without letting the shoulders shrug up.","Stop just short of locking the elbows out hard."],
+  m:"Setting the seat too low, which turns it into an incline press on the front delts."},
+e_bagsq:{d:"Front-loaded squat with a bag hugged to the chest — the awkward load forces an upright torso.",
+  c:["Hug the bag high against the chest, elbows underneath.","Sit straight down; the load keeps you honest.","Brace hard — a shifting bag punishes a loose trunk."],
+  m:"Letting the bag slide down, which drags you forward."},
+e_bagrdl:{d:"Hinge with a bag — good when the dumbbells stop being heavy enough.",
+  c:["Hold the bag against the thighs.","Push the hips back and let it slide down the legs.","Stop at the end of the hamstring stretch, back flat."],
+  m:"Rounding the back to chase depth."},
+e_carry:{d:"Pick something heavy up, walk with it. Trains the trunk, grip and everything holding you upright — and it's the least fussy conditioning there is.",
+  c:["Bag on one shoulder or hugged at the chest.","Walk tall, ribs down, no leaning away from the load.","Log the seconds you carried; swap sides each set."],
+  m:"Letting the shoulders round forward under the weight."},
+e_carry_db:{d:"Farmer carry — same idea with a dumbbell in each hand.",
+  c:["Heavy bells at your sides, shoulders pulled back.","Walk with short controlled steps.","Grip usually fails first — that's the point."],
+  m:"Shrugging the weights up instead of hanging from a tall, braced posture."},
+e_split_db:{d:"Split squat holding dumbbells — the apartment answer to a leg press.",
+  c:["Bells hanging at your sides, long stance.","Back knee straight down toward the floor.","Drive through the front heel to stand."],
+  m:"Leaning too far forward and turning it into a hinge."},
 e_shldr:{d:"Strength at the edges of shoulder range — this is what keeps pressing pain-free.",
   c:["Slow raises or holds at the very top of your range.","Little or no load — think prone Y raises, wall slides, shoulder CARs.","Own the position before adding weight."],
   m:"Adding load before you actually own the range."}
@@ -563,6 +593,13 @@ function migrate(){
   }));
   if(!S.locations||!S.locations.length){S.locations=defaultLocations();ch=true}
   if(!S.curLoc){S.curLoc="loc_gym";ch=true}
+  if(!S.migApt){        /* additive only — never removes a choice you made */
+    const add=(re,keys)=>{const l=(S.locations||[]).find(x=>re.test(x.label));
+      if(l){l.eq=l.eq||[];keys.forEach(k=>{if(l.eq.indexOf(k)<0)l.eq.push(k)})}};
+    add(/apartment/i,["mach","bag"]);
+    add(/gym/i,["press","bag"]);
+    S.migApt=1;ch=true;
+  }
   if(!S.migHome){                 /* one-time: offer the home day, but respect a later delete */
     if(!(S.program||[]).some(d=>d.id==="d6")){
       const home=defaultProgram().find(d=>d.id==="d6");
@@ -788,7 +825,9 @@ e_copen:"copen",e_shldr:"shoulderY",
 e_bench_db:"bench",e_pushup:"pushup",e_pike:"pushup",e_ohp_db:"ohp",e_tri_db:"pushdown",e_tri_bw:"dip",
 e_gobsq:"goblet",e_split_bw:"split",e_rdl_db:"hinge",e_hinge_bw:"hinge",e_nordic:"legcurl",
 e_pulldown:"pullup",e_row_db:"row",e_invrow:"row",e_chin:"pullup",e_glutebridge:"hipthrust",
-e_hollow:"hollow",e_sqhold_bw:"goblet"};
+e_hollow:"hollow",e_sqhold_bw:"goblet",
+e_chestpress:"bench",e_bagsq:"goblet",e_bagrdl:"hinge",e_carry:"goblet",e_carry_db:"lateral",e_hip_db:"hipthrust",
+e_split_db:"split"};
 const watchUrl=n=>"https://www.youtube.com/results?search_query="+encodeURIComponent(n+" proper form");
 function demoHtml(exId){
   const A=ART[ARTMAP[exId]];
