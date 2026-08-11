@@ -169,6 +169,16 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
     <div id="logBody"></div>
   </section>
 
+  <!-- ============ PLAN ============ -->
+  <section class="view" id="view-plan">
+    <h1 style="margin-bottom:4px">The whole plan.</h1>
+    <p class="soft small" style="margin-bottom:14px">Every day, when you last trained it, and what's ready to go up.</p>
+    <div class="card inv" id="planSummary"></div>
+    <div class="card soft-c" id="planDays"></div>
+    <h3 style="margin:18px 0 8px">Recent sessions</h3>
+    <div class="card soft-c" id="planLog"></div>
+  </section>
+
   <!-- ============ LIFTS ============ -->
   <section class="view" id="view-lifts">
     <h1 style="margin-bottom:4px">Every lift.</h1>
@@ -276,6 +286,7 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
 
 <nav><div class="tabs">
   <button class="tab on" data-goview="log"><span>Today</span></button>
+  <button class="tab" data-goview="plan"><span>Plan</span></button>
   <button class="tab" data-goview="lifts"><span>Lifts</span></button>
   <button class="tab" data-goview="body"><span>Body</span></button>
 </div></nav>
@@ -1004,6 +1015,65 @@ function saveSession(){
   toast(ups?"SAVED · "+ups+" LIFT"+(ups>1?"S":"")+" READY FOR MORE WEIGHT":"SESSION SAVED");
 }
 
+/* ================= RENDER: PLAN ================= */
+function lastSessionFor(dayId){
+  for(let i=S.sessions.length-1;i>=0;i--)if(S.sessions[i].dayId===dayId)return S.sessions[i];
+  return null;
+}
+function readyIn(day){
+  const loc=curLocation();
+  return day.ex.map(s=>resolveEx(s,loc)).filter(Boolean).filter(e=>overload(e.id).s==="up").length;
+}
+function daysAgo(dateStr){
+  const t=new Date(dateStr+"T12:00:00").getTime();
+  const n=Math.round((Date.now()-t)/DAY);
+  return n<=0?"today":n===1?"yesterday":n+" days ago";
+}
+function bwChange(days){
+  const sorted=[...S.bw].sort((a,b)=>a.date<b.date?-1:1);
+  if(sorted.length<2)return null;
+  const cut=Date.now()-days*DAY;
+  const recent=sorted.filter(b=>new Date(b.date+"T12:00:00").getTime()>=cut);
+  const base=recent.length>=2?recent:sorted.slice(-2);
+  return Number(base[base.length-1].w)-Number(base[0].w);
+}
+function rPlan(){
+  const loc=curLocation();
+  const week=S.sessions.filter(s=>new Date(s.date+"T12:00:00").getTime()>=Date.now()-7*DAY);
+  const setsWeek=week.reduce((a,s)=>a+(s.logs||[]).length,0);
+  const ready=allEx().filter(isLift).filter(e=>overload(e.id).s==="up").length;
+  const bwd=bwChange(14);
+  $("planSummary").innerHTML=
+    '<div class="rowline"><div><h3>Last 7 days</h3>'+
+      '<p class="small" style="opacity:.75;margin-top:2px">'+week.length+' session'+(week.length===1?"":"s")+
+      ' · '+setsWeek+' set'+(setsWeek===1?"":"s")+' logged</p></div>'+
+      '<span class="big">'+week.length+'</span></div>'+
+    '<hr style="border:none;border-top:1.5px solid rgba(255,255,255,.25);margin:12px 0">'+
+    '<div class="rowline"><span class="mono">READY FOR MORE WEIGHT</span><span class="mono" style="color:var(--wh)">'+ready+'</span></div>'+
+    '<div class="rowline" style="margin-top:6px"><span class="mono">SESSIONS ALL TIME</span><span class="mono" style="color:var(--wh)">'+S.sessions.length+'</span></div>'+
+    (bwd!==null?'<div class="rowline" style="margin-top:6px"><span class="mono">BODYWEIGHT · 14 DAYS</span><span class="mono" style="color:var(--wh)">'+(bwd>=0?"+":"")+bwd.toFixed(1)+' LB</span></div>':"");
+  $("planDays").innerHTML=S.program.map(d=>{
+    const last=lastSessionFor(d.id);
+    const doable=d.ex.map(s=>resolveEx(s,loc)).filter(Boolean).length;
+    const blocked=d.ex.length-doable;
+    const up=readyIn(d);
+    return '<div class="srow"><div class="main-tap" data-planday="'+d.id+'">'+
+      '<b class="small">'+esc(d.label)+'</b>'+
+      '<div class="mono">'+(last?daysAgo(last.date).toUpperCase():"NEVER TRAINED")+' · '+doable+' EXERCISE'+(doable===1?"":"S")+
+        (blocked?' · '+blocked+' UNAVAILABLE HERE':"")+'</div></div>'+
+      (dirty[d.id]?'<span class="badge">UNSAVED</span>':up?'<span class="badge inv">↑ '+up+'</span>':"")+
+      '</div>';
+  }).join("");
+  const recent=[...S.sessions].reverse().slice(0,12);
+  $("planLog").innerHTML=recent.length?recent.map(s=>{
+    const d=dayById(s.dayId);
+    const vol=(s.logs||[]).reduce((a,l)=>a+(Number(l.w)||0)*(Number(l.r)||0),0);
+    return '<div class="srow"><div><b class="small">'+esc(s.date)+'</b>'+
+      '<div class="mono">'+esc(d?d.label.split("—")[0].trim().toUpperCase():"—")+' · '+(s.logs||[]).length+' SETS'+
+      (vol?' · '+Math.round(vol).toLocaleString()+' LB VOLUME':"")+'</div></div></div>';
+  }).join(""):'<p class="small soft" style="padding:6px 0">Nothing logged yet — your first session will show up here.</p>';
+}
+
 /* ================= RENDER: LIFTS ================= */
 function rLifts(){
   const lifts=allEx().filter(isLift);
@@ -1203,8 +1273,8 @@ function askPushOrPull(remote){
 
 /* ================= EVENTS ================= */
 let curView="log";
-function rCur(){if(curView==="log")rLog();else if(curView==="lifts")rLifts();else rBody()}
-function rAll(){rLog();rLifts();rBody()}
+function rCur(){if(curView==="log")rLog();else if(curView==="plan")rPlan();else if(curView==="lifts")rLifts();else rBody()}
+function rAll(){rLog();rPlan();rLifts();rBody()}
 function switchView(v){curView=v;
   document.querySelectorAll(".view").forEach(s=>s.classList.remove("on"));
   $("view-"+v).classList.add("on");
@@ -1232,13 +1302,14 @@ document.addEventListener("click",e=>{
       {dropDraft(curDay);rLog();toast("DRAFT DISCARDED")}
     return;
   }
-  const el=e.target.closest("[data-goview],[data-loc],[data-eqtog],[data-day],[data-addset],[data-delset],[data-ex],[data-habit],[data-rampoff],[data-exadd],[data-exdel],[data-exmove],[data-daydel],[data-closepop],[data-close]");
+  const el=e.target.closest("[data-goview],[data-planday],[data-loc],[data-eqtog],[data-day],[data-addset],[data-delset],[data-ex],[data-habit],[data-rampoff],[data-exadd],[data-exdel],[data-exmove],[data-daydel],[data-closepop],[data-close]");
   if(!el)return;
   const d=el.dataset;
   /* set fields carry data-ex so typing can find their row — but tapping one must
      never open the stats popup over what you're entering. Only the exercise name does. */
   if(d.in)return;
   if(d.goview)switchView(d.goview);
+  else if(d.planday){curDay=d.planday;switchView("log")}
   else if(d.loc){S.curLoc=d.loc;save();rLog()}
   else if(d.eqtog){const[lid,k]=d.eqtog.split(":");const l=locById(lid);
     if(l){l.eq=l.eq||[];const i=l.eq.indexOf(k);i>-1?l.eq.splice(i,1):l.eq.push(k);save();rLocs();rLog()}}
