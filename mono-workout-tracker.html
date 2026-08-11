@@ -64,6 +64,16 @@ section.view.on{display:block;animation:fadeUp .3s ease both}
 .srow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 2px;border-bottom:1.5px solid var(--g1)}
 .srow:last-child{border-bottom:none}
 .srow .main-tap{flex:1;cursor:pointer;min-width:0}
+.sesswrap{border-bottom:1.5px solid var(--g1)}
+.sesswrap:last-child{border-bottom:none}
+.sesshead{cursor:pointer;border-bottom:none}
+.chevron{font-family:var(--mono);font-size:.8rem;color:var(--g3);flex:0 0 auto}
+.sessdetail{padding:0 0 10px}
+.sdrow{padding:9px 0;border-top:1.5px solid var(--g1)}
+.setlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.setpill{font-family:var(--mono);font-size:.68rem;border:1.5px solid var(--g2);border-radius:8px;padding:4px 8px;white-space:nowrap}
+.setpill i{font-style:normal;color:var(--g3);margin-right:5px}
+.setpill em{font-style:normal;color:var(--g3)}
 .bar{position:relative;height:10px;background:var(--g1);border-radius:99px;overflow:hidden;margin:8px 0 4px}
 .bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--bk);border-radius:99px;transition:width .7s cubic-bezier(.22,1,.36,1)}
 
@@ -215,7 +225,7 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
   <div class="sheet-body">
     <h1>How Mono Lift works</h1>
     <p class="soft small" style="margin:6px 0 16px">A logbook built around one question: is it time to add weight?</p>
-    <div class="card"><h3>The add-weight cue</h3><p class="small" style="margin-top:6px">This is the whole point of the tool. An exercise shows <b>↑ ADD WEIGHT</b> when, in your last session, <b>every set reached the top of its target rep range</b> and none of them was logged at <b>RIR&nbsp;0</b> (i.e. you didn't grind to failure to get there). Hit the top on some sets but not all, and you'll see <b>ALMOST</b> — stay at this weight one more session.</p></div>
+    <div class="card"><h3>The add-weight cue</h3><p class="small" style="margin-top:6px">This is the whole point of the tool. An exercise shows <b>↑ ADD WEIGHT</b> when, in your last session, <b>every working set reached the top of its target rep range</b> and none of them was logged at <b>RIR&nbsp;0</b> (i.e. you didn't grind to failure to get there). Hit the top on some sets but not all, and you'll see <b>ALMOST</b> — stay at this weight one more session.</p><p class="small" style="margin-top:8px">Only the sets at that session's <b>heaviest load</b> count, so warm-up sets are ignored automatically — ramp up however you like and the cue still reads your real work.</p></div>
     <div class="card soft-c"><h3>RIR — reps in reserve</h3><p class="small" style="margin-top:6px">Optional, but it makes the cue smarter. Log how many reps you could still have done: <b>leave 1–2 reps in reserve</b> on working sets. RIR&nbsp;0 means you went to failure. Leave the field blank if you'd rather not think about it — the cue still works off reps alone.</p></div>
     <div class="card soft-c"><h3>Target rep ranges</h3><p class="small" style="margin-top:6px">Main compounds default to <b>6–8</b>, accessories to <b>8–12</b>. Both are editable per exercise in Settings → Edit program, along with day names and exercise order.</p></div>
     <div class="card soft-c"><h3>Estimated 1RM</h3><p class="small" style="margin-top:6px">Each lift's detail shows an estimated one-rep max using the Epley formula (<span style="font-family:var(--mono)">weight × (1 + reps/30)</span>). It's a rough comparison tool across different rep counts — not a number to go test.</p></div>
@@ -656,19 +666,29 @@ const e1rm=(w,r)=>w*(1+r/30);                 /* Epley */
    up    = every set hit the top of the range and none went to failure (RIR 0)
    near  = some sets hit the top, or you got there only by failing
    none  = not yet / not applicable */
+/* Only the sets at the session's heaviest load count. Warm-ups are lighter by
+   definition, so ramping up to a working weight no longer drags the cue down —
+   before this, logging 95x5 and 115x5 ahead of 145x8,8,8 meant it never fired. */
+function workingSets(sets){
+  if(!sets.length)return sets;
+  const heaviest=Math.max.apply(null,sets.map(l=>Number(l.w)||0));
+  return sets.filter(l=>(Number(l.w)||0)===heaviest);
+}
 function overload(exId){
   const ex=exById(exId);
   if(!ex||!isLift(ex))return{s:"none"};
   const top=topOfRange(ex.r);
   if(!top)return{s:"none"};
-  const sets=lastSetsFor(exId).filter(l=>Number(l.r)>0);
-  if(!sets.length)return{s:"none"};
+  const all=lastSetsFor(exId).filter(l=>Number(l.r)>0);
+  if(!all.length)return{s:"none"};
+  const sets=workingSets(all);
+  const warm=all.length-sets.length;
   const atTop=sets.filter(l=>Number(l.r)>=top).length;
   const failed=sets.some(l=>l.rir!=null&&l.rir!==""&&Number(l.rir)===0);
-  if(atTop===sets.length&&!failed)return{s:"up",top:top};
-  if(atTop===sets.length&&failed)return{s:"near",why:"you hit the top but went to failure — repeat this weight"};
-  if(atTop>0)return{s:"near",why:atTop+" of "+sets.length+" sets at the top — one more session here"};
-  return{s:"none"};
+  if(atTop===sets.length&&!failed)return{s:"up",top:top,warm:warm};
+  if(atTop===sets.length&&failed)return{s:"near",why:"you hit the top but went to failure — repeat this weight",warm:warm};
+  if(atTop>0)return{s:"near",why:atTop+" of "+sets.length+" working set"+(sets.length===1?"":"s")+" at the top — one more session here",warm:warm};
+  return{s:"none",warm:warm};
 }
 function ovBadge(exId){
   const o=overload(exId);
@@ -930,7 +950,7 @@ function ensureDraft(dayId){
 }
 
 /* ================= RENDER: LOG ================= */
-let curDay=null;
+let curDay=null,openSess={};
 function suggestedDay(){return WEEKMAP[new Date().getDay()]||null}
 function rRamp(){
   const el=$("rampBanner");
@@ -1007,7 +1027,7 @@ function saveSession(){
     });
   });
   if(!logs.length){toast("NOTHING FILLED IN YET");return}
-  S.sessions.push({id:uid(),date:dstr(new Date()),dayId:day.id,logs:logs});
+  S.sessions.push({id:uid(),date:dstr(new Date()),dayId:day.id,loc:(loc&&loc.label)||"",logs:logs});
   if(!S.startedAt)S.startedAt=Date.now();
   dropDraft(day.id);save();
   rAll();
@@ -1064,14 +1084,53 @@ function rPlan(){
       (dirty[d.id]?'<span class="badge">UNSAVED</span>':up?'<span class="badge inv">↑ '+up+'</span>':"")+
       '</div>';
   }).join("");
-  const recent=[...S.sessions].reverse().slice(0,12);
-  $("planLog").innerHTML=recent.length?recent.map(s=>{
-    const d=dayById(s.dayId);
-    const vol=(s.logs||[]).reduce((a,l)=>a+(Number(l.w)||0)*(Number(l.r)||0),0);
-    return '<div class="srow"><div><b class="small">'+esc(s.date)+'</b>'+
-      '<div class="mono">'+esc(d?d.label.split("—")[0].trim().toUpperCase():"—")+' · '+(s.logs||[]).length+' SETS'+
-      (vol?' · '+Math.round(vol).toLocaleString()+' LB VOLUME':"")+'</div></div></div>';
-  }).join(""):'<p class="small soft" style="padding:6px 0">Nothing logged yet — your first session will show up here.</p>';
+  const recent=[...S.sessions].reverse().slice(0,20);
+  $("planLog").innerHTML=recent.length?recent.map(sessionRow).join("")
+    :'<p class="small soft" style="padding:6px 0">Nothing logged yet — your first session will show up here.</p>';
+}
+
+/* group a session's sets back into the exercises they belong to, in order */
+function sessionGroups(s){
+  const out=[],idx={};
+  (s.logs||[]).forEach(l=>{
+    if(idx[l.exId]===undefined){idx[l.exId]=out.length;out.push({exId:l.exId,sets:[]})}
+    out[idx[l.exId]].sets.push(l);
+  });
+  return out;
+}
+const sessVolume=s=>(s.logs||[]).reduce((a,l)=>a+(Number(l.w)||0)*(Number(l.r)||0),0);
+function fmtSessDate(d){
+  const t=new Date(d+"T12:00:00");
+  return t.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+}
+function sessionRow(s){
+  const day=dayById(s.dayId),groups=sessionGroups(s),vol=sessVolume(s);
+  const open=!!openSess[s.id];
+  let html='<div class="sesswrap"><div class="srow sesshead" data-sess="'+s.id+'">'+
+    '<div style="flex:1;min-width:0"><b class="small">'+esc(fmtSessDate(s.date))+'</b>'+
+    '<div class="mono">'+esc(day?day.label.split("—")[0].trim().toUpperCase():"—")+
+      ' · '+groups.length+' EXERCISE'+(groups.length===1?"":"S")+
+      ' · '+(s.logs||[]).length+' SETS'+
+      (vol?' · '+Math.round(vol).toLocaleString()+' LB':"")+
+      (s.loc?' · '+esc(s.loc.toUpperCase()):"")+'</div></div>'+
+    '<span class="chevron">'+(open?"▴":"▾")+'</span></div>';
+  if(open){
+    html+='<div class="sessdetail">'+groups.map(g=>{
+      const ex=exById(g.exId),lift=ex?isLift(ex):true,unit=ex?unitOf(ex):"REPS";
+      const gv=g.sets.reduce((a,l)=>a+(Number(l.w)||0)*(Number(l.r)||0),0);
+      const best=lift&&g.sets.length?g.sets.reduce((a,b)=>e1rm(Number(b.w),Number(b.r))>e1rm(Number(a.w),Number(a.r))?b:a):null;
+      return '<div class="sdrow"><div class="rowline"><b class="small">'+esc(ex?ex.n:g.exId)+'</b>'+
+        '<span class="mono">'+g.sets.length+' SET'+(g.sets.length===1?"":"S")+'</span></div>'+
+        '<div class="setlist">'+g.sets.map((l,i)=>
+          '<span class="setpill"><i>'+(i+1)+'</i>'+
+          (lift?esc(String(l.w||0))+' × '+esc(String(l.r))+(l.rir!=null&&l.rir!==""?' <em>@'+esc(String(l.rir))+'</em>':"")
+               :esc(String(l.r))+' '+unit.toLowerCase())+'</span>').join("")+'</div>'+
+        (gv?'<div class="mono" style="margin-top:5px">'+Math.round(gv).toLocaleString()+' LB VOLUME'+
+            (best?' · BEST EST. 1RM '+e1rm(Number(best.w),Number(best.r)).toFixed(0)+' LB':"")+'</div>':"")+
+      '</div>';
+    }).join("")+'</div>';
+  }
+  return html+'</div>';
 }
 
 /* ================= RENDER: LIFTS ================= */
@@ -1105,7 +1164,8 @@ function popEx(exId){
     '<span class="mono">'+esc(ex.day)+'</span>'+
     '<h2 style="margin:2px 0 6px">'+esc(ex.n)+'</h2>'+
     '<div class="rowline"><span class="mono">'+(isLift(ex)?"TARGET "+esc(ex.r||"—")+" REPS":unitOf(ex))+'</span>'+ovBadge(exId)+'</div>'+
-    (o.s==="up"?'<div class="card inv" style="margin-top:12px"><p class="small">Every set reached '+o.top+' reps without going to failure. Add the smallest jump you can — 5 lb, or 2.5 on a dumbbell.</p></div>':"")+
+    (o.s==="up"?'<div class="card inv" style="margin-top:12px"><p class="small">Every working set reached '+o.top+' reps without going to failure. Add the smallest jump you can — 5 lb, or 2.5 on a dumbbell.</p></div>':"")+
+    (o.warm?'<p class="mono" style="margin-top:8px">'+o.warm+' LIGHTER SET'+(o.warm===1?"":"S")+' TREATED AS WARM-UP</p>':"")+
     (o.s==="near"&&o.why?'<p class="small soft" style="margin-top:10px">'+esc(o.why)+'.</p>':"")+
 
     '<hr class="divider"><span class="mono dark">HOW TO DO IT</span>'+
@@ -1302,13 +1362,14 @@ document.addEventListener("click",e=>{
       {dropDraft(curDay);rLog();toast("DRAFT DISCARDED")}
     return;
   }
-  const el=e.target.closest("[data-goview],[data-planday],[data-loc],[data-eqtog],[data-day],[data-addset],[data-delset],[data-ex],[data-habit],[data-rampoff],[data-exadd],[data-exdel],[data-exmove],[data-daydel],[data-closepop],[data-close]");
+  const el=e.target.closest("[data-goview],[data-sess],[data-planday],[data-loc],[data-eqtog],[data-day],[data-addset],[data-delset],[data-ex],[data-habit],[data-rampoff],[data-exadd],[data-exdel],[data-exmove],[data-daydel],[data-closepop],[data-close]");
   if(!el)return;
   const d=el.dataset;
   /* set fields carry data-ex so typing can find their row — but tapping one must
      never open the stats popup over what you're entering. Only the exercise name does. */
   if(d.in)return;
   if(d.goview)switchView(d.goview);
+  else if(d.sess){openSess[d.sess]=!openSess[d.sess];if(!openSess[d.sess])delete openSess[d.sess];rPlan()}
   else if(d.planday){curDay=d.planday;switchView("log")}
   else if(d.loc){S.curLoc=d.loc;save();rLog()}
   else if(d.eqtog){const[lid,k]=d.eqtog.split(":");const l=locById(lid);
