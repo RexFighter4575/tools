@@ -321,9 +321,11 @@ function defaultProgram(){return[
   {id:"e_incdb",n:"Incline DB press",r:"8-12",eq:["db","bench"],alt:[
     {id:"e_pushup",n:"Push-up",r:"8-15",eq:["bw"]}]},
   {id:"e_dip",n:"Dips / close-grip bench",r:"8-12",eq:["bw"]},
-  {id:"e_lat",n:"Lateral raises",r:"8-12",eq:["db"]},
+  {id:"e_lat",n:"Lateral raises",r:"8-12",eq:["db"],alt:[
+    {id:"e_strapy",n:"Strap Y raise",r:"10-15",eq:["strap"]}]},
   {id:"e_tri",n:"Triceps pushdown",r:"8-12",eq:["cable"],alt:[
     {id:"e_tri_db",n:"Overhead DB extension",r:"8-12",eq:["db"]},
+    {id:"e_straptri",n:"Strap triceps extension",r:"8-15",eq:["strap"]},
     {id:"e_tri_bw",n:"Bench dip",r:"8-15",eq:["bw"]}]}]},
 {id:"d2",label:"Tuesday — Lower (Squat)",ex:[
   {id:"e_sq",n:"Back squat",r:"6-8",eq:["bb"],alt:[
@@ -354,12 +356,17 @@ function defaultProgram(){return[
     {id:"e_pulldown",n:"Lat pulldown",r:"8-12",eq:["cable"]}]},
   {id:"e_row",n:"Barbell / DB row",r:"6-8",eq:["bb"],alt:[
     {id:"e_row_db",n:"DB row",r:"8-12",eq:["db"]},
+    {id:"e_straprow",n:"Strap row",r:"8-12",eq:["strap"]},
     {id:"e_invrow",n:"Inverted row",r:"8-15",eq:["bar"]}]},
-  {id:"e_face",n:"Face pulls",r:"8-12",eq:["cable"]},
-  {id:"e_reard",n:"Rear delt flye",r:"8-12",eq:["db"]},
+  {id:"e_face",n:"Face pulls",r:"8-12",eq:["cable"],alt:[
+    {id:"e_strapface",n:"Strap face pull",r:"12-20",eq:["strap"]}]},
+  {id:"e_reard",n:"Rear delt flye",r:"8-12",eq:["db"],alt:[
+    {id:"e_strapreard",n:"Strap reverse flye",r:"12-20",eq:["strap"]}]},
   {id:"e_bi",n:"Biceps curl",r:"8-12",eq:["db"],alt:[
-    {id:"e_chin",n:"Chin-up",r:"5-10",eq:["bar"]}]},
-  {id:"e_ham",n:"Hammer curl",r:"8-12",eq:["db"]}]},
+    {id:"e_chin",n:"Chin-up",r:"5-10",eq:["bar"]},
+    {id:"e_strapcurl",n:"Strap biceps curl",r:"8-15",eq:["strap"]}]},
+  {id:"e_ham",n:"Hammer curl",r:"8-12",eq:["db"],alt:[
+    {id:"e_strapcurl",n:"Strap biceps curl",r:"8-15",eq:["strap"]}]}]},
 {id:"d5",label:"Friday — Lower (Hinge)",ex:[
   {id:"e_dl",n:"Deadlift",r:"6-8",eq:["bb"],alt:[
     {id:"e_rdl_db",n:"DB Romanian deadlift",r:"8-12",eq:["db"]},
@@ -373,24 +380,26 @@ function defaultProgram(){return[
   {id:"e_legext",n:"Leg extension",r:"8-12",eq:["mach"],alt:[
     {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]}]},
   {id:"e_calf",n:"Calf raises",r:"8-12",eq:["bw"]}]},
-{id:"d6",label:"Home — Calisthenics",ex:[
+{id:"d6",label:"Home — Bar & Straps",ex:[
   {id:"e_chin",n:"Chin-up",r:"5-10",eq:["bar"]},
   {id:"e_pushup",n:"Push-up",r:"8-15",eq:["bw"]},
-  {id:"e_invrow",n:"Inverted row",r:"8-15",eq:["bar"]},
-  {id:"e_tri_bw",n:"Bench dip",r:"8-15",eq:["bw"]},
+  {id:"e_straprow",n:"Strap row",r:"8-12",eq:["strap"]},
   {id:"e_split_bw",n:"Split squat",r:"8-15",eq:["bw"]},
   {id:"e_hinge_bw",n:"Single-leg RDL",r:"8-12",eq:["bw"]},
+  {id:"e_strapcurl",n:"Strap biceps curl",r:"8-15",eq:["strap"]},
+  {id:"e_straptri",n:"Strap triceps extension",r:"8-15",eq:["strap"]},
+  {id:"e_strapface",n:"Strap face pull",r:"12-20",eq:["strap"]},
   {id:"e_hollow",n:"Hollow hold",k:"hold",eq:["bw"]},
   {id:"e_calf",n:"Calf raises",r:"8-12",eq:["bw"]}]}
 ]}
 /* what each place has. Editable in Settings -> Edit program. */
-const EQNAMES={bb:"Barbell + rack",db:"Dumbbells",cable:"Cable machine",mach:"Multi-gym stations",press:"Leg press",bag:"Weighted bags",bench:"A bench",bar:"Pull-up bar",bw:"Bodyweight"};
+const EQNAMES={bb:"Barbell + rack",db:"Dumbbells",cable:"Cable machine",mach:"Multi-gym stations",press:"Leg press",bag:"Weighted bags",strap:"Suspension straps",bench:"A bench",bar:"Pull-up bar",bw:"Bodyweight"};
 function defaultLocations(){return[
   {id:"loc_gym",label:"Gym",eq:["bb","db","cable","mach","press","bag","bench","bar","bw"]},
   /* the Paramount multi-gym covers leg extension, leg curl, a chest press and
      a leg press; the pull-up bar is separate, elsewhere in the room. No barbell. */
   {id:"loc_apt",label:"Apartment",eq:["db","cable","mach","press","bag","bench","bar","bw"]},
-  {id:"loc_home",label:"Home",eq:["bar","bw"]}
+  {id:"loc_home",label:"Home",eq:["bar","strap","bw"]}
 ]}
 /* weekday (0=Sun) -> day id; Sat/Sun intentionally rest */
 const WEEKMAP={1:"d1",2:"d2",3:"d3",4:"d4",5:"d5"};
@@ -549,6 +558,24 @@ e_carry_db:{d:"Farmer carry — same idea with a dumbbell in each hand.",
 e_split_db:{d:"Split squat holding dumbbells — the apartment answer to a leg press.",
   c:["Bells hanging at your sides, long stance.","Back knee straight down toward the floor.","Drive through the front heel to stand."],
   m:"Leaning too far forward and turning it into a hinge."},
+e_straprow:{d:"Row your own bodyweight against the straps — the closest thing to a cable row with no stack in the room.",
+  c:["Set the straps about chest height and lean back with arms straight.","Pull the handles to your ribs, elbows down and back.","Walk your feet forward to make it harder, back to make it easier."],
+  m:"Letting the hips sag — stay in one straight line from head to heels."},
+e_strapcurl:{d:"Bodyweight biceps curl. Lean back on the straps and curl yourself up — far harder than it looks.",
+  c:["Palms up, arms straight, lean back until the biceps take the load.","Curl your body toward your hands, elbows high and completely still.","Step the feet forward to steepen the angle and add difficulty."],
+  m:"Letting the elbows drop, which quietly turns it into a row."},
+e_straptri:{d:"Bodyweight triceps extension — the strap version of a skull crusher.",
+  c:["Face away from the anchor, arms overhead, leaning onto the straps.","Bend only at the elbows, lowering your head between your hands.","Press back out by straightening the arms; upper arms stay put."],
+  m:"Hinging at the hips instead of the elbows, which takes the triceps out of it."},
+e_strapface:{d:"Face pull on the straps — the shoulder-health movement, and straps do it better than a cable.",
+  c:["Lean back, arms straight, palms facing each other.","Pull toward your face, hands finishing beside the ears, elbows high.","Squeeze for a beat before lowering under control."],
+  m:"Pulling with the hands instead of leading with the elbows."},
+e_strapreard:{d:"Reverse flye on the straps — rear delts, which almost everyone under-trains.",
+  c:["Lean back with arms straight out in front, palms facing each other.","Open the arms wide like drawing a curtain.","Small range, slow, no momentum."],
+  m:"Bending the elbows to cheat through the hard part."},
+e_strapy:{d:"Y raise on the straps — the shoulder work that stands in for lateral raises when there are no dumbbells.",
+  c:["Lean back, arms straight, thumbs pointing up.","Pull up and out into a wide Y overhead.","Step the feet back if it is too hard; almost upright is fine to start."],
+  m:"Shrugging the traps up instead of raising through the shoulders."},
 e_shldr:{d:"Strength at the edges of shoulder range — this is what keeps pressing pain-free.",
   c:["Slow raises or holds at the very top of your range.","Little or no load — think prone Y raises, wall slides, shoulder CARs.","Own the position before adding weight."],
   m:"Adding load before you actually own the range."}
@@ -628,6 +655,20 @@ function migrate(){
     const l=(S.locations||[]).find(x=>/apartment/i.test(x.label));
     if(l){l.eq=l.eq||[];["press","bar"].forEach(k=>{if(l.eq.indexOf(k)<0)l.eq.push(k)})}
     S.migApt=3;ch=true;
+  }
+  if(!S.migStrap){
+    const home=(S.locations||[]).find(x=>/home/i.test(x.label));
+    if(home){home.eq=home.eq||[];if(home.eq.indexOf("strap")<0)home.eq.push("strap")}
+    /* add the strap work to a home day already saved; never removes what is there */
+    const d6=(S.program||[]).find(x=>x.id==="d6");
+    if(d6){
+      const want=defaultProgram().find(x=>x.id==="d6");
+      (want?want.ex:[]).forEach(e=>{
+        if(String(e.id).indexOf("e_strap")===0&&!d6.ex.some(x=>x.id===e.id))
+          d6.ex.push(JSON.parse(JSON.stringify(e)));
+      });
+    }
+    S.migStrap=1;ch=true;
   }
   if(!S.migHome){                 /* one-time: offer the home day, but respect a later delete */
     if(!(S.program||[]).some(d=>d.id==="d6")){
@@ -866,7 +907,9 @@ e_gobsq:"goblet",e_split_bw:"split",e_rdl_db:"hinge",e_hinge_bw:"hinge",e_nordic
 e_pulldown:"pullup",e_row_db:"row",e_invrow:"row",e_chin:"pullup",e_glutebridge:"hipthrust",
 e_hollow:"hollow",e_sqhold_bw:"goblet",
 e_chestpress:"bench",e_bagsq:"goblet",e_bagrdl:"hinge",e_carry:"goblet",e_carry_db:"lateral",e_hip_db:"hipthrust",
-e_split_db:"split"};
+e_split_db:"split",
+e_straprow:"row",e_strapcurl:"curl",e_straptri:"pushdown",e_strapface:"facepull",
+e_strapreard:"reardelt",e_strapy:"shoulderY"};
 const watchUrl=n=>"https://www.youtube.com/results?search_query="+encodeURIComponent(n+" proper form");
 function demoHtml(exId){
   const A=ART[ARTMAP[exId]];
@@ -1008,7 +1051,8 @@ d6:{items:[
   {n:"Dead hang",d:"20–30 sec",c:"On the pull-up bar, before you pull on it."},
   {n:"Bodyweight squat",d:"10 reps",c:"Sit to depth, chest tall."},
   {n:"Push-up to down dog",d:"5 reps",c:"Preps shoulders, chest and hamstrings at once."},
-  {n:"Hip hinge with a broom",d:"10 reps",c:"Three points of contact — head, upper back, tailbone."}]}};
+  {n:"Hip hinge with a broom",d:"10 reps",c:"Three points of contact — head, upper back, tailbone."},
+  {n:"Light strap rows",d:"10 reps",c:"Stand tall so they are easy — wakes the back up before you pull hard."}]}};
 function warmFor(dayId){return WARMUP[dayId]||WARMGENERAL}
 function warmIsOpen(){try{return localStorage.getItem(WARMOPEN)!=="0"}catch(e){return true}}
 function setWarmOpen(v){try{localStorage.setItem(WARMOPEN,v?"1":"0")}catch(e){}}
