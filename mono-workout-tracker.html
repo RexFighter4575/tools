@@ -233,7 +233,7 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
     <div class="card soft-c"><h3>Estimated 1RM</h3><p class="small" style="margin-top:6px">Each lift's detail shows an estimated one-rep max using the Epley formula (<span style="font-family:var(--mono)">weight × (1 + reps/30)</span>). It's a rough comparison tool across different rep counts — not a number to go test.</p></div>
     <div class="card"><h3>Where you're training</h3><p class="small" style="margin-top:6px">Pick <b>Gym</b>, <b>Apartment</b> or <b>Home</b> at the top of the logger. Anything the place doesn't have gets swapped for the best alternative you can do there — a barbell bench becomes a DB press, then a push-up — and anything with no substitute is greyed out. Each implement keeps <b>its own weights and its own add-weight cue</b>, because 135 on a bar and 50s in your hands aren't the same number. Correct what each place has in Settings → Edit program.</p></div>
     <div class="card soft-c"><h3>The Home day</h3><p class="small" style="margin-top:6px">A pull-up bar and the floor is a real session: chin-ups, push-ups, inverted rows, bench dips, split squats, single-leg RDLs, a hollow hold. The best workout is the one that actually happens — a home day beats a skipped gym day every time.</p></div>
-    <div class="card soft-c"><h3>The warm-up</h3><p class="small" style="margin-top:6px">Each day opens with its own prep — shoulders and t-spine before pressing, ankles and hips before squatting, hinge rehearsal before deadlifts. It's deliberately <b>dynamic</b>: held stretches before lifting temporarily lower force output and don't reduce injury risk. What does protect you is warm tissue, joints moved through the range you're about to load, and ramping into your working weight. Save the long holds for after training, or a separate session. Collapse the card once you know the routine — it remembers.</p></div>
+    <div class="card soft-c"><h3>The stretches</h3><p class="small" style="margin-top:6px">Each day opens with stretches aimed at what it trains — chest, shoulders and triceps before pressing; quads, ankles and hips before squatting; hamstrings and glutes before hinging; lats and biceps before pulling. Hold each for <b>20–30 seconds</b>. Short holds like these don't blunt your strength, while long ones can, so save any lengthy stretching for after training. Each day finishes with <b>ramp-up sets</b>, which is the part that actually protects a heavy lift. Collapse the card once you know the routine — it remembers.</p></div>
     <div class="card soft-c"><h3>Rest days are the plan</h3><p class="small" style="margin-top:6px">Wednesday is cardio and joints; weekends are off. Nothing here tracks streaks or scolds you for a day away — recovery is when the work actually lands.</p></div>
     <div class="card soft-c"><h3>Tap an exercise name</h3><p class="small" style="margin-top:6px">The name of any exercise — in the logger or the Lifts tab — opens how to do it: a demo photo, a link to video demonstrations, setup and execution cues, and the mistake people most often make. Its history and chart are on the same card. Tapping the weight/reps fields never opens it, so it can't cover what you're typing.</p></div>
     <div class="card"><h3>Nothing you type is lost</h3><p class="small" style="margin-top:6px">Numbers you enter are kept the moment you type them — <b>per day</b>. Switch days, change tabs, close the app, or reload the page and they're still there; a dot on a day chip marks one holding unsaved work. They clear only when you tap <b>Save session</b> for that day, or deliberately discard them. Drafts live on this device only and are never synced.</p></div>
@@ -996,63 +996,53 @@ function ensureDraft(dayId){
 }
 
 /* ================= WARM-UPS =================
-   Dynamic prep, not held stretches. Static stretching before lifting
-   temporarily lowers force output and doesn't reduce injury risk; what does
-   is warm tissue, joints moved through the range you're about to load, and
-   ramping into the working weight. Save the long holds for after, or for a
-   separate session. */
+   Simple stretches aimed at whatever that day trains, held 20-30 seconds.
+   Short holds don't blunt strength the way long ones can, so these are safe
+   to do before lifting; save any long holds for afterwards. Each day ends
+   with ramp-up sets, which are the part that most protects the heavy lifts. */
 const WARMOPEN="mono-workout-warm";
 const WARMGENERAL={items:[
-  {n:"Easy cardio",d:"5 min",c:"Bike, incline walk or rower. Enough to break a light sweat — this is the highest-value minute here."},
-  {n:"Arm circles",d:"10 each way",c:"Start small, finish big."},
-  {n:"Bodyweight squat",d:"10 reps",c:"Sit to a comfortable depth, chest tall."},
-  {n:"Cat-cow",d:"10 reps",c:"Find the neutral spine you'll be holding under load."},
-  {n:"Ramp-up sets",d:"2–3 sets",c:"On the first big lift only: roughly half your working weight, then three-quarters. Logged warm-up sets don't affect the add-weight cue."}]};
+  {n:"Easy movement",d:"3 min",c:"Walk, bike or march on the spot until you're just warm."},
+  {n:"Shoulder rolls",d:"10 each way",c:"Big, slow circles."},
+  {n:"Deep squat hold",d:"30 sec",c:"Sink down and let the hips relax open."},
+  {n:"Standing hamstring stretch",d:"20 sec each",c:"Soft knee, hinge forward until you feel the back of the thigh."},
+  {n:"Ramp-up sets",d:"2-3 sets",c:"First big lift only: about half your working weight, then three-quarters."}]};
 const WARMUP={
 d1:{items:[
-  {n:"Easy cardio",d:"5 min",c:"Bike, incline walk or rower — light sweat, nothing more."},
-  {n:"Arm circles",d:"10 each way",c:"Small circles building to full range."},
-  {n:"Band or towel pull-apart",d:"15 reps",c:"Squeeze the shoulder blades together; keep the ribs down."},
-  {n:"Wall slides",d:"10 reps",c:"Back of the hands on the wall, slide overhead without arching the lower back."},
-  {n:"Open-book rotation",d:"8 each side",c:"Lie on your side, rotate the top arm open. Turn from the ribs, not the lower back."},
-  {n:"Push-up to down dog",d:"5 reps",c:"Takes the shoulders and chest through the range you're about to press in."},
-  {n:"Ramp-up sets",d:"2–3 sets",c:"On the bench or press: about half your working weight, then three-quarters."}]},
+  {n:"Doorway chest stretch",d:"30 sec each side",c:"Forearm flat on the frame, step through until the chest opens."},
+  {n:"Cross-body shoulder stretch",d:"20 sec each side",c:"Pull the arm across your chest with the other hand."},
+  {n:"Overhead triceps stretch",d:"20 sec each side",c:"Hand down between the shoulder blades, gently press the elbow back."},
+  {n:"Shoulder rolls",d:"10 each way",c:"Loosen up before the first press."},
+  {n:"Ramp-up sets",d:"2-3 sets",c:"On the bench or press: about half your working weight, then three-quarters."}]},
 d2:{items:[
-  {n:"Easy cardio",d:"5 min",c:"Legs moving, light sweat."},
-  {n:"Ankle rock at a wall",d:"10 each side",c:"Knee tracks over the toes, heel stays down. Tight ankles are the usual reason depth feels bad."},
-  {n:"90/90 hip switch",d:"8 each side",c:"Sit with both knees bent, rotate side to side without using the hands."},
-  {n:"Leg swings, front to back",d:"10 each side",c:"Relaxed and controlled — not a kick."},
-  {n:"Glute bridge",d:"15 reps",c:"Wake the glutes up before you ask them to squat."},
-  {n:"Paused bodyweight squat",d:"10 reps",c:"Two seconds at the bottom. This is your depth rehearsal."},
-  {n:"Ramp-up sets",d:"2–3 sets",c:"Empty bar or light, then about half and three-quarters of your working weight."}]},
+  {n:"Deep squat hold",d:"30 sec",c:"Sink to the bottom and let the hips settle. This is your depth rehearsal."},
+  {n:"Quad stretch",d:"20 sec each side",c:"Heel to glute, knees together, hips pushed slightly forward."},
+  {n:"Calf and ankle stretch",d:"20 sec each side",c:"Hands on a wall, back heel down. Tight ankles are why depth feels bad."},
+  {n:"Hip flexor lunge",d:"20 sec each side",c:"Half-kneeling, squeeze the back glute and lean gently forward."},
+  {n:"Ramp-up sets",d:"2-3 sets",c:"Empty bar or light, then about half and three-quarters of your working weight."}]},
 d3:{items:[
-  {n:"Start the cardio easy",d:"first 5 min",c:"This day is the warm-up. Ease into zone 2 rather than starting at pace."},
-  {n:"Ankle rock at a wall",d:"10 each side",c:"Do it before the holds, not after."},
-  {n:"Cat-cow",d:"10 reps",c:"Gentle, full range."}]},
+  {n:"Start the cardio easy",d:"first 5 min",c:"Ease into zone 2 rather than starting at pace."},
+  {n:"Standing hamstring stretch",d:"20 sec each side",c:"Soft knee, hinge forward from the hips."},
+  {n:"Calf stretch",d:"20 sec each side",c:"Hands on a wall, back heel pressed down."},
+  {n:"Doorway chest stretch",d:"20 sec each side",c:"Undoes a day of sitting before the shoulder work."}]},
 d4:{items:[
-  {n:"Easy cardio",d:"5 min",c:"Rower is ideal here — it preps the back and grip together."},
-  {n:"Dead hang",d:"20–30 sec",c:"Just hang. Decompresses the spine and preps grip and shoulders."},
-  {n:"Scapular pull-ups",d:"8 reps",c:"Arms stay straight; only the shoulder blades move. Teaches the start of every pull."},
-  {n:"Band pull-apart",d:"15 reps",c:"Balances out the pressing you did on Monday."},
-  {n:"Cat-cow",d:"10 reps",c:"Wakes up the spine before you load it in a row."},
-  {n:"Light band face pull",d:"15 reps",c:"Rear delts and rotator cuff, no load worth mentioning."},
-  {n:"Ramp-up sets",d:"2–3 sets",c:"On the first pull: bodyweight or light, then about three-quarters."}]},
+  {n:"Dead hang",d:"20-30 sec",c:"Hang from the bar and let the lats and shoulders lengthen."},
+  {n:"Doorway biceps stretch",d:"20 sec each side",c:"Arm back on the frame, palm forward, turn away from it."},
+  {n:"Child's pose with a side reach",d:"20 sec each side",c:"Walk the hands over to one side to find the lat."},
+  {n:"Cross-body shoulder stretch",d:"20 sec each side",c:"Preps the rear delts before face pulls."},
+  {n:"Ramp-up sets",d:"2-3 sets",c:"On the first pull: bodyweight or light, then about three-quarters."}]},
 d5:{items:[
-  {n:"Easy cardio",d:"5 min",c:"Get genuinely warm before deadlifting — this is the day it matters most."},
-  {n:"Cat-cow",d:"10 reps",c:"Find neutral, then hold it for everything that follows."},
-  {n:"Hip hinge with a broom",d:"10 reps",c:"Broom touching head, upper back and tailbone. If it lifts off, you've rounded."},
-  {n:"Bodyweight single-leg RDL",d:"8 each side",c:"Hips square to the floor. Balance work doubles as hamstring prep."},
-  {n:"Glute bridge",d:"15 reps",c:"So the glutes, not the lower back, run the lockout."},
-  {n:"Leg swings, side to side",d:"10 each side",c:"Opens the adductors before you spread the floor."},
-  {n:"Ramp-up sets",d:"3–4 sets",c:"Deadlift deserves the longest ramp: roughly 40%, 60%, 80% of your working weight."}]},
+  {n:"Standing hamstring stretch",d:"30 sec each side",c:"Soft knee, hinge from the hips with a flat back."},
+  {n:"Figure-4 glute stretch",d:"20 sec each side",c:"Ankle across the opposite knee, sit back into it."},
+  {n:"Cat-cow",d:"10 slow reps",c:"Find the neutral spine you'll hold under the bar."},
+  {n:"Hip flexor lunge",d:"20 sec each side",c:"Half-kneeling; squeeze the back glute so the stretch lands in the hip."},
+  {n:"Ramp-up sets",d:"3-4 sets",c:"Deadlift deserves the longest ramp: roughly 40%, 60%, then 80%."}]},
 d6:{items:[
-  {n:"Marching or a brisk walk",d:"3–5 min",c:"No equipment needed — just get warm."},
-  {n:"Arm circles",d:"10 each way",c:"Small to large."},
-  {n:"Dead hang",d:"20–30 sec",c:"On the pull-up bar, before you pull on it."},
-  {n:"Bodyweight squat",d:"10 reps",c:"Sit to depth, chest tall."},
-  {n:"Push-up to down dog",d:"5 reps",c:"Preps shoulders, chest and hamstrings at once."},
-  {n:"Hip hinge with a broom",d:"10 reps",c:"Three points of contact — head, upper back, tailbone."},
-  {n:"Light strap rows",d:"10 reps",c:"Stand tall so they are easy — wakes the back up before you pull hard."}]}};
+  {n:"Dead hang",d:"20-30 sec",c:"On the pull-up bar, before you pull on it."},
+  {n:"Doorway chest stretch",d:"20 sec each side",c:"Forearm on the frame, step through."},
+  {n:"Deep squat hold",d:"30 sec",c:"Sink down and relax into the bottom."},
+  {n:"Standing hamstring stretch",d:"20 sec each side",c:"Soft knee, hinge forward."},
+  {n:"Overhead triceps stretch",d:"20 sec each side",c:"Preps the arms for the strap work."}]}};
 function warmFor(dayId){return WARMUP[dayId]||WARMGENERAL}
 function warmIsOpen(){try{return localStorage.getItem(WARMOPEN)!=="0"}catch(e){return true}}
 function setWarmOpen(v){try{localStorage.setItem(WARMOPEN,v?"1":"0")}catch(e){}}
@@ -1060,12 +1050,12 @@ function rWarm(dayId){
   const w=warmFor(dayId),open=warmIsOpen();
   return '<div class="card soft-c warmcard">'+
     '<div class="rowline warmhead" data-warmtog="1">'+
-      '<div><h3>Warm-up first</h3><p class="small soft" style="margin-top:2px">'+w.items.length+' moves · about 6 minutes</p></div>'+
+      '<div><h3>Stretch first</h3><p class="small soft" style="margin-top:2px">'+w.items.length+' stretches for today - about 4 minutes</p></div>'+
       '<span class="chevron">'+(open?"▴":"▾")+'</span></div>'+
     (open?'<div style="margin-top:10px">'+w.items.map(i=>
       '<div class="wrow"><div class="rowline"><b class="small">'+esc(i.n)+'</b><span class="mono">'+esc(i.d)+'</span></div>'+
       '<p class="small soft" style="margin-top:3px">'+esc(i.c)+'</p></div>').join("")+
-      '<p class="mono" style="margin-top:10px">MOVEMENT, NOT HELD STRETCHES — SAVE THOSE FOR AFTERWARDS</p></div>':"")+
+      '<p class="mono" style="margin-top:10px">KEEP THE HOLDS SHORT - LONG ONES ARE BETTER AFTER TRAINING</p></div>':"")+
   '</div>';
 }
 
