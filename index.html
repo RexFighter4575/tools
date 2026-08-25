@@ -10,12 +10,19 @@
 <title>MONO — Tool Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-html,body{background:#FFFFFF}
+html,body{background:var(--wh)}
 :root{color-scheme:light;--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;--r:14px;
   --disp:"Familjen Grotesk",-apple-system,sans-serif;--body:"Spline Sans",-apple-system,sans-serif;
   --mono:"Spline Sans Mono",ui-monospace,Menlo,monospace}
+/* Deliberate dark theme, chosen in Settings. The palette simply inverts:
+   --bk is ink, --wh is paper, so swapping them flips the whole system and
+   every component follows without knowing about it. */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bk:#F2F2F2; --wh:#0A0A0A; --g1:#1B1B1B; --g2:#343434; --g3:#8F8F8F;
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:var(--body);background:#FFFFFF;color:#0A0A0A;min-height:100vh;min-height:100dvh;
+body{font-family:var(--body);background:var(--wh);color:var(--bk);min-height:100vh;min-height:100dvh;
   display:flex;align-items:center;justify-content:center;padding:20px}
 .mono{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g3)}
 .mono.dark{color:var(--bk)}
@@ -74,8 +81,17 @@ input[type=text],input[type=password]{width:100%;font-family:var(--body);font-si
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 #hub.show{display:block;animation:rise .4s ease both}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-/*WHITELOCK*/@media (prefers-color-scheme: dark){:root{--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;color-scheme:light}html,body{background:#FFFFFF !important;color:#0A0A0A !important}}
+/* the sync panel's scrim-free layout needs no extra work, but the modal-free
+   hub still wants a heavier ground in dark */
+:root[data-theme="dark"] .subtle{color:var(--g3)}
+/*WHITELOCK*/@media (prefers-color-scheme: dark){
+  html:not([data-theme="dark"]){--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;color-scheme:light;background:#FFFFFF !important;color:#0A0A0A !important}
+  html:not([data-theme="dark"]) body{background:#FFFFFF !important;color:#0A0A0A !important}
+}
 </style>
+<script>/* apply the saved theme before first paint so there's no white flash */
+try{if(localStorage.getItem("mono-theme")==="dark"){document.documentElement.setAttribute("data-theme","dark");
+var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute("content","#0A0A0A")}}catch(e){}</script>
 </head>
 <body>
 
@@ -127,7 +143,7 @@ input[type=text],input[type=password]{width:100%;font-family:var(--body);font-si
 
   <div class="hubfoot">
     <span class="mono" id="statLbl"></span>
-    <button class="linkbtn" id="replayBtn">replay puzzle</button>
+    <span><button class="linkbtn" id="themeBtn">black theme</button><button class="linkbtn" id="replayBtn">replay puzzle</button></span>
   </div>
 </div>
 
@@ -352,6 +368,22 @@ $("disconnectBtn").addEventListener("click",()=>{
   $("ghToken").value="";
   refreshSyncUI();
   syncMsg("DISCONNECTED — SHARED TOKEN CLEARED FROM THIS DEVICE.");
+});
+
+/* ---- theme: shared with every tool on this device ---- */
+const THEMEKEY="mono-theme";
+function themeNow(){try{return localStorage.getItem(THEMEKEY)==="dark"?"dark":"light"}catch(e){return"light"}}
+function applyTheme(t){
+  document.documentElement.setAttribute("data-theme",t);
+  const m=document.querySelector('meta[name="theme-color"]');
+  if(m)m.setAttribute("content",t==="dark"?"#0A0A0A":"#FFFFFF");
+  const b=$("themeBtn");if(b)b.textContent=t==="dark"?"white theme":"black theme";
+}
+applyTheme(themeNow());
+$("themeBtn").addEventListener("click",()=>{
+  const t=themeNow()==="dark"?"light":"dark";
+  try{localStorage.setItem(THEMEKEY,t)}catch(e){}
+  applyTheme(t);
 });
 
 /* ================= BOOT ================= */
