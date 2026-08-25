@@ -162,6 +162,16 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
    over a dark page. */
 :root[data-theme="dark"] .card.inv .mono{color:rgba(0,0,0,.55)}
 :root[data-theme="dark"] .popwrap{background:rgba(0,0,0,.7)}
+/* a real switch: pill plus a knob that slides. role="switch" + aria-checked
+   carries the state, so styling and screen readers read from one source. */
+.toggle{position:relative;width:48px;height:27px;flex:0 0 auto;padding:0;cursor:pointer;
+  border:1.5px solid var(--bk);border-radius:99px;background:var(--wh);
+  transition:background .18s ease}
+.toggle::after{content:"";position:absolute;top:2.5px;left:2.5px;width:19px;height:19px;
+  border-radius:50%;background:var(--bk);transition:transform .18s ease,background .18s ease}
+.toggle[aria-checked="true"]{background:var(--bk)}
+.toggle[aria-checked="true"]::after{transform:translateX(21px);background:var(--wh)}
+.toggle:active::after{width:23px}
 /*WHITELOCK*/@media (prefers-color-scheme: dark){
   html:not([data-theme="dark"]){--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;color-scheme:light;background:#FFFFFF !important;color:#0A0A0A !important}
   html:not([data-theme="dark"]) body{background:#FFFFFF !important;color:#0A0A0A !important}
@@ -288,7 +298,7 @@ var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute(
     <button class="btn wide ghost" id="openProgBtn">Edit program</button>
     <hr class="divider">
     <h3>Starting out</h3>
-    <div class="rowline" style="margin-top:10px"><span class="small">First-2-weeks reminder</span><button class="chip" id="rampChip">on</button></div>
+    <div class="rowline" style="margin-top:10px"><span class="small">First-2-weeks reminder</span><button class="toggle" id="rampChip" role="switch" aria-checked="true" aria-label="First-2-weeks reminder"></button></div>
     <p class="small soft" style="margin-top:6px">Shows a gentle banner for two weeks from your first logged session: start lighter than you can, let tendons catch up.</p>
     <hr class="divider">
     <h3>GitHub sync</h3>
@@ -305,7 +315,7 @@ var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute(
     <hr class="divider">
     <hr class="divider">
     <h3>Appearance</h3>
-    <div class="rowline" style="margin-top:10px"><span class="small">Black theme</span><button class="chip" id="themeChip">off</button></div>
+    <div class="rowline" style="margin-top:10px"><span class="small">Black theme</span><button class="toggle" id="themeChip" role="switch" aria-checked="false" aria-label="Black theme"></button></div>
     <p class="small soft" style="margin-top:6px">Inverts the palette to white-on-black. It's your choice rather than your phone's, and it applies to every Mono tool on this device.</p>
     <hr class="divider">
     <h3>Your data</h3>
@@ -1517,7 +1527,7 @@ document.addEventListener("click",e=>{
   else if(d.ex)popEx(d.ex);
   else if(d.habit){const t=dstr(new Date());const h=S.habits[t]=S.habits[t]||{};h[d.habit]=!h[d.habit];
     if(!h.cre&&!h.pro)delete S.habits[t];save();rBody()}
-  else if(d.rampoff){S.rampOn=false;save();rLog();$("rampChip").textContent="off";$("rampChip").classList.remove("on")}
+  else if(d.rampoff){S.rampOn=false;save();rLog();const rc=$("rampChip");if(rc)rc.setAttribute("aria-checked","false")}
   else if(d.exadd){const day=dayById(d.exadd);if(day){day.ex.push({id:"e_"+uid().slice(0,8),n:"New exercise",r:"8-12"});save();rProg();rLog()}}
   else if(d.exdel){const[di,ei]=d.exdel.split(":");const day=dayById(di);if(day){day.ex.splice(+ei,1);save();rProg();rLog()}}
   else if(d.exmove){const[di,ei,dir]=d.exmove.split(":");const day=dayById(di);
@@ -1547,7 +1557,7 @@ $("resetProgBtn").addEventListener("click",()=>{
   }
 });
 $("rampChip").addEventListener("click",()=>{S.rampOn=!S.rampOn;save();
-  $("rampChip").textContent=S.rampOn?"on":"off";$("rampChip").classList.toggle("on",S.rampOn);rLog()});
+  $("rampChip").setAttribute("aria-checked",S.rampOn?"true":"false");rLog()});
 /* ---- theme: a deliberate choice, shared by every tool on this device ---- */
 const THEMEKEY="mono-theme";
 function themeNow(){try{return localStorage.getItem(THEMEKEY)==="dark"?"dark":"light"}catch(e){return"light"}}
@@ -1558,8 +1568,7 @@ function applyTheme(t){
 }
 function paintThemeChip(){
   const c=$("themeChip");if(!c)return;
-  const on=themeNow()==="dark";
-  c.textContent=on?"on":"off";c.classList.toggle("on",on);
+  c.setAttribute("aria-checked",themeNow()==="dark"?"true":"false");
 }
 function initTheme(){
   applyTheme(themeNow());
@@ -1574,7 +1583,7 @@ $("gearBtn").addEventListener("click",()=>{
   $("ghRepo").value=S.gh.repo||"";$("ghToken").value=S.gh.token||"";
   $("ghAuto").textContent=S.gh.auto?"Auto-sync ✓ on":"Auto-sync off";
   $("ghAuto").classList.toggle("on",!!S.gh.auto);
-  $("rampChip").textContent=S.rampOn?"on":"off";$("rampChip").classList.toggle("on",!!S.rampOn);
+  $("rampChip").setAttribute("aria-checked",S.rampOn?"true":"false");
   ghMsg(S.gh.enabled?("CONNECTED"+(S.gh.lastSync?" · LAST SYNC "+new Date(S.gh.lastSync).toLocaleString():"")):"NOT CONNECTED");
   paintThemeChip();
   $("setSheet").classList.add("on");
