@@ -166,6 +166,16 @@ textarea{min-height:100px;font-family:var(--mono);font-size:.78rem}
    over a dark page. */
 :root[data-theme="dark"] .card.inv .mono{color:rgba(0,0,0,.55)}
 :root[data-theme="dark"] .popwrap{background:rgba(0,0,0,.7)}
+/* a real switch: pill plus a knob that slides. role="switch" + aria-checked
+   carries the state, so styling and screen readers read from one source. */
+.toggle{position:relative;width:48px;height:27px;flex:0 0 auto;padding:0;cursor:pointer;
+  border:1.5px solid var(--bk);border-radius:99px;background:var(--wh);
+  transition:background .18s ease}
+.toggle::after{content:"";position:absolute;top:2.5px;left:2.5px;width:19px;height:19px;
+  border-radius:50%;background:var(--bk);transition:transform .18s ease,background .18s ease}
+.toggle[aria-checked="true"]{background:var(--bk)}
+.toggle[aria-checked="true"]::after{transform:translateX(21px);background:var(--wh)}
+.toggle:active::after{width:23px}
 /*WHITELOCK*/@media (prefers-color-scheme: dark){
   html:not([data-theme="dark"]){--bk:#0A0A0A;--wh:#FFFFFF;--g1:#F4F4F4;--g2:#E2E2E2;--g3:#8A8A8A;color-scheme:light;background:#FFFFFF !important;color:#0A0A0A !important}
   html:not([data-theme="dark"]) body{background:#FFFFFF !important;color:#0A0A0A !important}
@@ -405,7 +415,7 @@ var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute(
     <hr class="divider">
     <hr class="divider">
     <h3>Appearance</h3>
-    <div class="rowline" style="margin-top:10px"><span class="small">Black theme</span><button class="chip" id="themeChip">off</button></div>
+    <div class="rowline" style="margin-top:10px"><span class="small">Black theme</span><button class="toggle" id="themeChip" role="switch" aria-checked="false" aria-label="Black theme"></button></div>
     <p class="small soft" style="margin-top:6px">Inverts the palette to white-on-black. It's your choice rather than your phone's, and it applies to every Mono tool on this device.</p>
     <hr class="divider">
     <h3>Your data</h3>
@@ -867,8 +877,7 @@ function applyTheme(t){
 }
 function paintThemeChip(){
   const c=$("themeChip");if(!c)return;
-  const on=themeNow()==="dark";
-  c.textContent=on?"on":"off";c.classList.toggle("on",on);
+  c.setAttribute("aria-checked",themeNow()==="dark"?"true":"false");
 }
 function initTheme(){
   applyTheme(themeNow());
